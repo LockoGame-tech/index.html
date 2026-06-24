@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
+    /* Все стили из предыдущей версии, без изменений */
     * { box-sizing: border-box; }
     :root {
       --bg1: #140e09; --bg2: #2b1c12; --bg3: #1a120b;
@@ -39,7 +40,7 @@
     .hero h1 { margin: 0 0 8px; font-size: 42px; color: var(--gold-soft); text-shadow: 0 2px 10px rgba(0,0,0,0.45); }
     .hero p { margin: 0; color: #e6d8b8; font-size: 18px; }
 
-    /* ===== СЕТЕВОЙ ЛЭЙАУТ: ПОЛЕ СЛЕВА, ПАНЕЛЬ СПРАВА ===== */
+    /* Сетевой лэйаут: поле слева, панель справа */
     .layout-network {
       display: grid;
       grid-template-columns: 1fr 380px;
@@ -1731,9 +1732,7 @@
     localGeneratePlayerInputs();
     localUpdateCurrentPlayerCard();
 
-    // ========== КОНЕЦ ЧАСТИ 1 ==========
-    // ДАЛЕЕ ИДЁТ ЧАСТЬ 2 (СЕТЕВАЯ ИГРА) — ВСТАВЬТЕ ЕЁ В КОНЕЦ ФАЙЛА
-        // ==================== СЕТЕВАЯ ИГРА ====================
+    // ==================== СЕТЕВАЯ ИГРА ====================
     let networkRole = null;
     let roomId = null;
     let myPlayerId = null;
@@ -2112,7 +2111,7 @@
         updateGameStateNetwork(data);
       });
 
-      // Обработчик броска кубика (ведущий может всегда, игрок – только в свой ход)
+      // Обработчик броска кубика
       document.getElementById('rollDiceBtnNetwork').addEventListener('click', function() {
         if (isRolling) return;
         roomRef.once('value').then(snapshot => {
@@ -2126,6 +2125,17 @@
           }
         });
       });
+
+      // Подписываемся на изменения вопроса (для ведущего)
+      if (isHost) {
+        roomRef.child('pendingQuestion').on('value', snapshot => {
+          const q = snapshot.val();
+          if (q && q.question && !localPendingQuestion) {
+            // Открываем вопрос у ведущего
+            localOpenQuestion(q, 'Вопрос для игрока ' + (players[q.playerId]?.name || ''), q.context);
+          }
+        });
+      }
     }
 
     // Отрисовка поля (сеть)
@@ -2230,7 +2240,7 @@
       const playersData = data.players || {};
       renderTokensNetwork(playersData);
 
-      // Обновляем список игроков (только содержимое)
+      // Обновляем список игроков
       const list = document.getElementById('playersListNetwork');
       if (list) {
         list.innerHTML = '';
@@ -2293,9 +2303,8 @@
       }
     }
 
-    // Обработка клетки в сетевой игре
+    // Обработка эффекта клетки в сети
     async function networkProcessCellEffect(playerId, player, position) {
-      // Проверяем тип клетки
       const pos = position;
       const playerData = player;
 
@@ -2329,6 +2338,8 @@
           const currentLog2 = (await roomRef.child('log').once('value')).val() || [];
           currentLog2.push(logEntry2);
           await roomRef.child('log').set(currentLog2);
+          // Переход хода, т.к. вопроса нет
+          await networkNextTurn();
         }
         return;
       }
@@ -2359,17 +2370,28 @@
           const currentLog = (await roomRef.child('log').once('value')).val() || [];
           currentLog.push(logEntry);
           await roomRef.child('log').set(currentLog);
+          // Переход хода, т.к. вопроса нет
+          await networkNextTurn();
         }
       }
     }
 
-    // Вспомогательные функции для вопросов в сети
+    // Переход хода в сети
+    async function networkNextTurn() {
+      const snapshot = await roomRef.once('value');
+      const data = snapshot.val();
+      if (!data) return;
+      const playersData = data.players || {};
+      const playerIds = Object.keys(playersData);
+      if (playerIds.length === 0) return;
+      const nextIndex = (data.currentPlayerIndex + 1) % playerIds.length;
+      await roomRef.child('currentPlayerIndex').set(nextIndex);
+      await roomRef.child('currentPlayerId').set(playerIds[nextIndex]);
+    }
+
+    // Получение вопроса (сеть)
     function networkGetRandomUnusedNormalQuestion() {
       if (!window.normalQuestions || window.normalQuestions.length === 0) return null;
-      // Используем глобальный пул, но в сети нужно хранить использованные вопросы в базе.
-      // Для простоты будем брать случайный вопрос и удалять его из копии.
-      // Но лучше хранить использованные ID в Firebase. Упростим: берём случайный и не удаляем (вопросы могут повторяться).
-      // Для демо – просто случайный.
       const idx = Math.floor(Math.random() * window.normalQuestions.length);
       return { ...window.normalQuestions[idx] };
     }
@@ -2387,7 +2409,6 @@
     }
 
     function networkGetUnusedFinalQuestion() {
-      // Аналогично, просто берём случайный вопрос с баллами = FINAL_QUESTION_POINTS
       const finals = window.normalQuestions.filter(q => Number(q.points) === FINAL_QUESTION_POINTS);
       if (finals.length) {
         const idx = Math.floor(Math.random() * finals.length);
@@ -2401,9 +2422,9 @@
       };
     }
 
-    // Открытие вопроса в сети (модальное окно)
+    // Открытие вопроса в сети
     async function networkOpenQuestion(questionObj, title, context, playerId) {
-      // Сохраняем вопрос в Firebase, чтобы все видели
+      // Сохраняем вопрос в Firebase для всех
       await roomRef.child('pendingQuestion').set({
         question: questionObj.question,
         answer: questionObj.answer,
@@ -2413,23 +2434,94 @@
         playerId: playerId,
         timestamp: Date.now()
       });
-      // Показываем модальное окно у всех (или только у ведущего)
-      // В данном случае пусть показывает у всех, но отвечает ведущий.
-      // Мы реализуем так: модальное окно открывается у того, кто нажал «Показать ответ» и т.д.
-      // Упростим: окно открывается у ведущего, а игроки видят только лог.
-      // Но так как ведущий может отвечать, сделаем так:
+      // Если ведущий, открываем модальное окно (через прослушиватель)
       if (networkRole === 'host') {
-        // Открыть модальное окно у ведущего
-        localOpenQuestion(questionObj, title, context);
-        // Ждём ответа от ведущего через кнопки
-        // После ответа – обновить игрока и перейти ход
+        // уже открыто через прослушиватель
       } else {
-        // Игроки увидят вопрос в логе? Можно показывать уведомление.
-        // Пока просто лог.
+        // Для игроков пишем в лог
         const logEntry = 'Вопрос для ' + (players[playerId]?.name || 'игрока') + ': ' + questionObj.question;
         const currentLog = (await roomRef.child('log').once('value')).val() || [];
         currentLog.push(logEntry);
         await roomRef.child('log').set(currentLog);
+      }
+    }
+
+    // Обработка ответа на вопрос (вызывается из модального окна ведущим)
+    async function networkAnswerQuestion(isCorrect) {
+      const snapshot = await roomRef.child('pendingQuestion').once('value');
+      const q = snapshot.val();
+      if (!q) return;
+      const playerId = q.playerId;
+      const context = q.context;
+      const points = Number(q.points) || 0;
+
+      // Обновляем данные игрока
+      const playerRef = roomRef.child('players/' + playerId);
+      const playerSnapshot = await playerRef.once('value');
+      const player = playerSnapshot.val();
+      if (!player) return;
+
+      player.asked = (player.asked || 0) + 1;
+      if (isCorrect) {
+        player.correct = (player.correct || 0) + 1;
+        player.totalCorrect = (player.totalCorrect || 0) + 1;
+        player.consecutiveCorrect = (player.consecutiveCorrect || 0) + 1;
+        player.points = (player.points || 0) + points;
+        if (context === 'final50') {
+          if (firstFinalWinnerId === null) {
+            firstFinalWinnerId = playerId;
+            player.points += FINAL_SUCCESS_BONUS;
+            await roomRef.child('firstFinalWinnerId').set(firstFinalWinnerId);
+          }
+          player.finished = true;
+          finishCounter++;
+          player.finishOrder = finishCounter;
+          await roomRef.child('finishCounter').set(finishCounter);
+        }
+        // Запись в лог
+        const logEntry = player.name + ' ответил правильно! +' + points + ' балл(ов).';
+        const currentLog = (await roomRef.child('log').once('value')).val() || [];
+        currentLog.push(logEntry);
+        await roomRef.child('log').set(currentLog);
+      } else {
+        player.totalIncorrect = (player.totalIncorrect || 0) + 1;
+        player.consecutiveCorrect = 0;
+        if (context === 'final50') {
+          player.position = FINAL_CELL;
+          const logEntry = player.name + ' ошибся в финальном вопросе. Остаётся на месте.';
+          const currentLog = (await roomRef.child('log').once('value')).val() || [];
+          currentLog.push(logEntry);
+          await roomRef.child('log').set(currentLog);
+        } else if (context === 'normal') {
+          const backTo = Math.max(0, player.position - 2);
+          player.position = backTo;
+          const logEntry = player.name + ' ответил неверно и отступает на 2 клетки.';
+          const currentLog = (await roomRef.child('log').once('value')).val() || [];
+          currentLog.push(logEntry);
+          await roomRef.child('log').set(currentLog);
+        } else {
+          const logEntry = player.name + ' получил 0 баллов за задание.';
+          const currentLog = (await roomRef.child('log').once('value')).val() || [];
+          currentLog.push(logEntry);
+          await roomRef.child('log').set(currentLog);
+        }
+      }
+
+      // Сохраняем обновлённые данные игрока
+      await playerRef.update(player);
+
+      // Удаляем вопрос из Firebase
+      await roomRef.child('pendingQuestion').remove();
+
+      // Проверяем, не завершили ли игру все игроки
+      const allPlayers = (await roomRef.child('players').once('value')).val();
+      const finishedAll = Object.values(allPlayers || {}).every(p => p.finished === true);
+      if (finishedAll) {
+        await roomRef.child('gameFinished').set(true);
+        // Здесь можно показать результаты
+      } else {
+        // Переход хода
+        await networkNextTurn();
       }
     }
 
@@ -2469,15 +2561,14 @@
       // Обработка эффекта клетки
       await networkProcessCellEffect(currentId, player, target);
 
-      // Переход хода (если не было вопроса, иначе ход перейдёт после ответа)
-      // Но если вопрос открыт, мы не переходим ход до ответа.
+      // Если вопроса нет (процесс уже сделал переход хода или оставил), то ничего не делаем
       // Проверим, есть ли pendingQuestion
       const pending = (await roomRef.child('pendingQuestion').once('value')).val();
       if (!pending) {
-        const playerIds = Object.keys(playersData);
-        const nextIndex = (data.currentPlayerIndex + 1) % playerIds.length;
-        await roomRef.child('currentPlayerIndex').set(nextIndex);
-        await roomRef.child('currentPlayerId').set(playerIds[nextIndex]);
+        // Если вопроса нет, переходим ход (если не было перехода внутри process)
+        // Но process мог уже перейти ход при ловушке или отсутствии вопросов, поэтому проверяем
+        // Лучше довериться process, но для безопасности проверим, не перешёл ли уже ход
+        // Можно просто не делать ничего, так как process сам решает.
       }
       isRolling = false;
     }
@@ -2582,6 +2673,23 @@
       document.getElementById('joinRoomId').value = roomParam;
       document.getElementById('joinConnectBtn').click();
     }
+
+    // Обработка ответов на вопросы (подключаем к кнопкам модального окна)
+    document.getElementById('answerCorrectBtn').addEventListener('click', function() {
+      if (networkRole === 'host') {
+        networkAnswerQuestion(true);
+        // Закрыть модальное окно
+        document.getElementById('questionModal').classList.remove('show');
+        localStopQuestionTimer();
+      }
+    });
+    document.getElementById('answerWrongBtn').addEventListener('click', function() {
+      if (networkRole === 'host') {
+        networkAnswerQuestion(false);
+        document.getElementById('questionModal').classList.remove('show');
+        localStopQuestionTimer();
+      }
+    });
 
     console.log('Игра готова!');
   </script>
