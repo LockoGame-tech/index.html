@@ -610,12 +610,136 @@
         `:''}
       `;
       buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
-      net.roomRef.on('value',sn=>{ let d=sn.val(); if(d) updateGameStateNetwork(d); });
-      document.getElementById('rollDiceBtnNetwork').addEventListener('click',function(){ if(net.isRolling)return; net.roomRef.once('value').then(s=>{ let d=s.val(); if(!d)return; let cur=d.currentPlayerId; if(net.role==='host'||net.myId===cur) hostRollDiceNetwork(); else console.log('Не ваш ход.'); }); });
-      if(isHost){
-        net.roomRef.child('pendingQuestion').on('value',sn=>{ let q=sn.val(); if(q&&q.question&&!document.getElementById('questionModal').classList.contains('show')) localOpenQuestion(q,'Вопрос для '+q.playerName,q.context); });
-        document.getElementById('addPointsBtnNetwork').addEventListener('click',function(){ let id=document.getElementById('addPointsPlayerSelectNetwork').value; if(!id)return; let pts=parseInt(document.getElementById('addPointsInputNetwork').value); if(isNaN(pts)||pts<1)return; net.roomRef.child('players/'+id+'/points').transaction(c=>(c||0)+pts); });
+
+      // ========== ИСПРАВЛЕНИЕ 1: Подписка на вопросы для всех клиентов ==========
+      net.roomRef.child('pendingQuestion').on('value', sn => {
+        let q = sn.val();
+        if (q && q.question) {
+          if (!document.getElementById('questionModal').classList.contains('show') || 
+               window._lastQuestionTimestamp !== q.timestamp) {
+            window._lastQuestionTimestamp = q.timestamp;
+            localOpenQuestion(q, 'Вопрос для ' + q.playerName, q.context);
+          }
+        } else {
+          // Вопрос удалён – закрываем модалку
+          document.getElementById('questionModal').classList.remove('show');
+          localStopTimer();
+        }
+      });
+
+      // Обработчики только для ведущего (добавление очков, завершение)
+      if (isHost) {
+        document.getElementById('addPointsBtnNetwork').addEventListener('click',function(){
+          let id=document.getElementById('addPointsPlayerSelectNetwork').value; if(!id)return;
+          let pts=parseInt(document.getElementById('addPointsInputNetwork').value); if(isNaN(pts)||pts<1)return;
+          net.roomRef.child('players/'+id+'/points').transaction(c=>(c||0)+pts);
+        });
         document.getElementById('forceFinishBtnNetwork').addEventListener('click',function(){ if(confirm('Завершить?')) net.roomRef.child('gameFinished').set(true); });
+      }
+
+      net.roomRef.on('value',sn=>{
+        let d=sn.val();
+        if(d) {
+          // Используем новую функцию обновления (ИСПРАВЛЕНИЕ 3)
+          updateGameStateNetwork(d);
+        }
+      });
+      document.getElementById('rollDiceBtnNetwork').addEventListener('click',function(){
+        if(net.isRolling)return;
+        net.roomRef.once('value').then(s=>{
+          let d=s.val(); if(!d)return;
+          let cur=d.currentPlayerId;
+          // Если ведущий или текущий игрок может бросать
+          if(net.role==='host' || net.myId===cur) hostRollDiceNetwork();
+          else console.log('Не ваш ход.');
+        });
+      });
+    }
+
+    // ========== ИСПРАВЛЕНИЕ 3: Оптимизированная функция обновления состояния ==========
+    function updateGameStateNetwork(data) {
+      let players = data.players || {};
+
+      // 1. Обновить токены (renderTokensNetwork уже оптимизирована частично, оставляем)
+      renderTokensNetwork(players);
+
+      // 2. Обновить список игроков – обновляем только строки, которые изменились
+      let list = document.getElementById('playersListNetwork');
+      if (!list) return;
+      let playerIds = Object.keys(players);
+      // Получаем текущие элементы списка
+      let existingRows = list.querySelectorAll('.player-row');
+      let existingMap = {};
+      existingRows.forEach(row => {
+        let id = row.dataset.playerId;
+        if (id) existingMap[id] = row;
+      });
+
+      // Проходим по всем игрокам
+      playerIds.forEach(id => {
+        let p = players[id];
+        let row = existingMap[id];
+        let html = `<div class="mini-avatar">${p.avatarIcon}</div>
+                    <div>
+                      <div><strong>${p.name}</strong></div>
+                      <div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
+                    </div>`;
+        if (row) {
+          // Если строка уже есть, обновляем её содержимое без пересоздания
+          row.innerHTML = html;
+          row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
+          row.dataset.playerId = id; // сохраняем ID
+        } else {
+          // Создаём новую строку
+          let newRow = document.createElement('div');
+          newRow.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
+          newRow.dataset.playerId = id;
+          newRow.innerHTML = html;
+          list.appendChild(newRow);
+        }
+      });
+
+      // Удаляем строки игроков, которых больше нет
+      existingRows.forEach(row => {
+        let id = row.dataset.playerId;
+        if (!playerIds.includes(id)) row.remove();
+      });
+
+      // 3. Обновить текущего игрока
+      let curId = data.currentPlayerId;
+      let cur = players[curId];
+      if (cur) {
+        document.getElementById('currentPlayerAvatarNetwork').textContent = cur.avatarIcon;
+        document.getElementById('currentPlayerNameNetwork').textContent = cur.name;
+        document.getElementById('currentPlayerMetaNetwork').textContent = 'Позиция: ' + cur.position + ' • Очки: ' + cur.points;
+      }
+
+      // 4. Обновить лог
+      let logDiv = document.getElementById('eventLogNetwork');
+      if (logDiv && data.log && Array.isArray(data.log)) {
+        logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
+      }
+
+      // 5. Обновить кнопку броска
+      let btn = document.getElementById('rollDiceBtnNetwork');
+      if (btn) {
+        if (net.role === 'host') btn.disabled = false;
+        else btn.disabled = (curId !== net.myId);
+      }
+
+      // 6. Обновить select для добавления очков (только для ведущего)
+      let sel = document.getElementById('addPointsPlayerSelectNetwork');
+      if (sel) {
+        let val = sel.value;
+        sel.innerHTML = '<option value="">-- выберите --</option>';
+        playerIds.forEach(id => {
+          let p = players[id];
+          let opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = `${p.avatarIcon} ${p.name} (${p.points} очков)`;
+          sel.appendChild(opt);
+        });
+        if (playerIds.includes(val)) sel.value = val;
       }
     }
 
@@ -633,16 +757,6 @@
     }
     function renderTokensNetwork(playersData){
       let layer=document.getElementById('tokensLayerNetwork'); layer.innerHTML=''; let ids=Object.keys(playersData); ids.forEach((id,idx)=>{ let p=playersData[id]; let pos=p.finished?FINAL_CELL:p.position; let c=net.cells[pos]; if(!c)return; let t=document.createElement('div'); t.className='token'; t.style.background=p.color||'#f4d03f'; let ox=(idx%3)*1.15-1.15, oy=Math.floor(idx/3)*1.1-0.3; t.style.left=(c.x+1.8+ox)+'%'; t.style.top=(c.y+1.8+oy)+'%'; t.textContent=p.avatarIcon; layer.appendChild(t); });
-    }
-
-    // Update network UI without full rebuild
-    function updateGameStateNetwork(data){
-      let players=data.players||{}; renderTokensNetwork(players);
-      let list=document.getElementById('playersListNetwork'); if(list){ list.innerHTML=''; let ids=Object.keys(players); ids.forEach(id=>{ let p=players[id]; let row=document.createElement('div'); row.className='player-row'+(id===data.currentPlayerId?' active':''); row.innerHTML=`<div class="mini-avatar">${p.avatarIcon}</div><div><div><strong>${p.name}</strong></div><div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div></div>`; list.appendChild(row); }); }
-      let curId=data.currentPlayerId; let cur=players[curId]; if(cur){ document.getElementById('currentPlayerAvatarNetwork').textContent=cur.avatarIcon; document.getElementById('currentPlayerNameNetwork').textContent=cur.name; document.getElementById('currentPlayerMetaNetwork').textContent='Позиция: '+cur.position+' • Очки: '+cur.points; }
-      let logDiv=document.getElementById('eventLogNetwork'); if(logDiv&&data.log&&Array.isArray(data.log)) logDiv.innerHTML=data.log.map(item=>`<div class="log-item">${item}</div>`).join('');
-      let btn=document.getElementById('rollDiceBtnNetwork'); if(btn){ if(net.role==='host') btn.disabled=false; else btn.disabled=(curId!==net.myId); }
-      let sel=document.getElementById('addPointsPlayerSelectNetwork'); if(sel){ let val=sel.value; sel.innerHTML='<option value="">-- выберите --</option>'; let ids=Object.keys(players); ids.forEach(id=>{ let p=players[id]; let o=document.createElement('option'); o.value=id; o.textContent=`${p.avatarIcon} ${p.name} (${p.points} очков)`; sel.appendChild(o); }); if(ids.includes(val)) sel.value=val; }
     }
 
     // Network cell processing
@@ -710,7 +824,7 @@
       await net.roomRef.child('players/'+cur+'/position').set(target);
       let log=d.log||[]; log.push(p.name+' бросает кость: выпало '+dice+'.'); await net.roomRef.child('log').set(log);
       await networkProcessCell(cur,p,target);
-      let pending=await net.roomRef.child('pendingQuestion').once('value'); if(!pending.val()){ /* already handled or will be handled */ }
+      let pending=await net.roomRef.child('pendingQuestion').once('value'); if(!pending.val()){ /* уже обработано */ }
       net.isRolling=false;
     }
 
@@ -740,9 +854,21 @@
     let urlParams=new URLSearchParams(window.location.search); let roomParam=urlParams.get('room');
     if(roomParam){ document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('gameLayoutNetwork').classList.remove('hidden'); showJoinSetup(); document.getElementById('joinRoomId').value=roomParam; document.getElementById('joinConnectBtn').click(); }
 
-    // Bind modal answer buttons for network host
-    document.getElementById('answerCorrectBtn').addEventListener('click',function(){ if(net.role==='host'){ networkAnswerQuestion(true); document.getElementById('questionModal').classList.remove('show'); localStopTimer(); } });
-    document.getElementById('answerWrongBtn').addEventListener('click',function(){ if(net.role==='host'){ networkAnswerQuestion(false); document.getElementById('questionModal').classList.remove('show'); localStopTimer(); } });
+    // ========== ИСПРАВЛЕНИЕ 2: Обработчики кнопок ответа (асинхронные) ==========
+    document.getElementById('answerCorrectBtn').addEventListener('click', async function(){
+      if(net.role==='host'){
+        await networkAnswerQuestion(true);
+        document.getElementById('questionModal').classList.remove('show');
+        localStopTimer();
+      }
+    });
+    document.getElementById('answerWrongBtn').addEventListener('click', async function(){
+      if(net.role==='host'){
+        await networkAnswerQuestion(false);
+        document.getElementById('questionModal').classList.remove('show');
+        localStopTimer();
+      }
+    });
 
     console.log('Игра готова!');
   </script>
