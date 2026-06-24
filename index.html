@@ -214,9 +214,6 @@
     .add-points-row input { width: 80px; margin: 0; padding: 8px 10px; font-size: 15px; text-align: center; }
     .add-points-row .btn { margin: 0; padding: 8px 16px; width: auto; font-size: 14px; }
 
-    .sandbox-mode .layout { display: block; }
-    .sandbox-mode .panel { max-width: 700px; margin: 0 auto; }
-
     .network-setup { text-align: center; }
     .network-setup input { width: 100%; max-width: 300px; margin: 10px auto; }
     .network-setup .btn { max-width: 300px; margin: 5px auto; }
@@ -252,7 +249,6 @@
           <button class="btn btn-primary" id="menuLocalBtn">🏠 Локальная игра</button>
           <button class="btn btn-success" id="menuHostBtn">👑 Создать игру (ведущий)</button>
           <button class="btn btn-secondary" id="menuJoinBtn">🔗 Присоединиться к игре</button>
-          <button class="btn btn-secondary" id="menuSandboxBtn">🧪 Режим тренировки</button>
         </div>
         <div class="message" id="menuMessage"></div>
       </div>
@@ -410,7 +406,7 @@
       </div>
     </div>
 
-    <!-- Экран сетевой игры (новый лэйаут) -->
+    <!-- Экран сетевой игры -->
     <div class="layout-network hidden" id="gameLayoutNetwork">
       <!-- Левая колонка: поле -->
       <div class="panel" style="grid-column: 1;">
@@ -443,7 +439,7 @@
       <div class="panel" style="grid-column: 2;">
         <div class="panel-inner">
           <div id="networkRightPanel">
-            <!-- Заполняется динамически в startGameNetwork -->
+            <!-- Заполняется динамически -->
           </div>
         </div>
       </div>
@@ -601,10 +597,1139 @@
       return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
     }
 
-    // ==================== ЛОКАЛЬНАЯ ИГРА (без изменений, только функции) ====================
-    // ... (полный код локальной игры опущен для краткости, но в финальном файле он присутствует)
-    // Здесь я вставлю только изменённые части сетевой игры.
-    // Полный локальный код можно взять из предыдущих версий.
+    // ==================== ЛОКАЛЬНАЯ ИГРА (полный код) ====================
+    let localPlayers = [];
+    let localCurrentPlayerIndex = 0;
+    let localIsRolling = false;
+    let localCells = [];
+    let localPendingQuestion = null;
+    let localQuestionTimerSeconds = 60;
+    let localQuestionTimerRemaining = 0;
+    let localQuestionTimerInterval = null;
+    let localTimerExpired = false;
+    let localNormalQuestions = [];
+    let localSpecialQuestions = [];
+    let localUnusedQuestions = [];
+    let localUnusedFinalQuestions = [];
+    let localGameFinished = false;
+    let localFirstFinalWinnerId = null;
+    let localFinishCounter = 0;
+
+    function localBuildCells() {
+      const rows = [
+        [0, 1, 2, 3, 4, 5, 6],
+        [13, 12, 11, 10, 9, 8, 7],
+        [14, 15, 16, 17, 18, 19, 20],
+        [27, 26, 25, 24, 23, 22, 21],
+        [28, 29, 30, 31, 32, 33, 34],
+        [41, 40, 39, 38, 37, 36, 35],
+        [42, 43, 44, 45, 46, 47, 48],
+        [49, 50]
+      ];
+      const customPositions = {
+        49: { x: 84.3, y: 84.1 },
+        50: { x: 71.5, y: 84.1 }
+      };
+      const startX = 7.5, startY = 8.5, gapX = 12.8, gapY = 10.8;
+      localCells = [];
+      rows.forEach((row, rowIndex) => {
+        row.forEach((cellIndex, colIndex) => {
+          if (customPositions[cellIndex]) {
+            localCells[cellIndex] = { index: cellIndex, x: customPositions[cellIndex].x, y: customPositions[cellIndex].y };
+          } else {
+            localCells[cellIndex] = { index: cellIndex, x: startX + colIndex * gapX, y: startY + rowIndex * gapY };
+          }
+        });
+      });
+    }
+
+    function localRenderOrnaments() {
+      const layer = document.getElementById('ornamentsLayerLocal');
+      layer.innerHTML = '';
+      const ornaments = [
+        { x: "2.5%", y: "2%", text: "✦" },
+        { x: "94%", y: "2%", text: "✦" },
+        { x: "3%", y: "92%", text: "✦" },
+        { x: "93%", y: "92%", text: "✦" },
+        { x: "47%", y: "44%", text: "⚔" },
+        { x: "51%", y: "44%", text: "🛡" },
+        { x: "10%", y: "10%", text: "◈" },
+        { x: "85%", y: "10%", text: "◈" },
+        { x: "10%", y: "85%", text: "◈" },
+        { x: "85%", y: "85%", text: "◈" },
+        { x: "25%", y: "5%", text: "⋆" },
+        { x: "70%", y: "5%", text: "⋆" },
+        { x: "25%", y: "90%", text: "⋆" },
+        { x: "70%", y: "90%", text: "⋆" },
+        { x: "35%", y: "50%", text: "☯" },
+        { x: "60%", y: "50%", text: "☯" },
+      ];
+      ornaments.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'ornament';
+        div.style.left = item.x;
+        div.style.top = item.y;
+        div.textContent = item.text;
+        layer.appendChild(div);
+      });
+    }
+
+    function localRenderCells() {
+      const layer = document.getElementById('cellsLayerLocal');
+      layer.innerHTML = '';
+      localCells.forEach(cell => {
+        if (!cell) return;
+        const type = getCellType(cell.index);
+        const text = getCellText(cell.index);
+        const div = document.createElement('div');
+        div.className = 'cell ' + type;
+        div.style.left = cell.x + '%';
+        div.style.top = cell.y + '%';
+        div.innerHTML = `<div class="cell-label">${text.main}${text.sub ? `<span class="sub">${text.sub}</span>` : ''}</div>`;
+        layer.appendChild(div);
+      });
+    }
+
+    function localRenderTokens() {
+      const layer = document.getElementById('tokensLayerLocal');
+      layer.innerHTML = '';
+      localPlayers.forEach((player, idx) => {
+        let drawPosition = player.finished ? FINAL_CELL : player.position;
+        const cell = localCells[drawPosition];
+        if (!cell) return;
+        const token = document.createElement('div');
+        token.className = 'token';
+        token.style.background = player.color;
+        const offsetX = (idx % 3) * 1.15 - 1.15;
+        const offsetY = Math.floor(idx / 3) * 1.1 - 0.3;
+        token.style.left = (cell.x + 1.8 + offsetX) + '%';
+        token.style.top = (cell.y + 1.8 + offsetY) + '%';
+        token.textContent = player.avatarIcon;
+        layer.appendChild(token);
+      });
+      localRenderCurrentCellHighlight();
+    }
+
+    function localRenderCurrentCellHighlight() {
+      const layer = document.getElementById('highlightLayerLocal');
+      layer.innerHTML = '';
+      if (!localPlayers.length || localGameFinished) return;
+      const player = localPlayers[localCurrentPlayerIndex];
+      if (!player || player.finished) return;
+      const cell = localCells[player.position];
+      if (!cell) return;
+      const div = document.createElement('div');
+      div.className = 'current-cell-highlight';
+      div.style.left = (cell.x - 0.5) + '%';
+      div.style.top = (cell.y - 0.5) + '%';
+      layer.appendChild(div);
+    }
+
+    function localRenderPlayersList() {
+      const list = document.getElementById('playersListLocal');
+      list.innerHTML = '';
+      localPlayers.forEach((player, index) => {
+        const row = document.createElement('div');
+        row.className = 'player-row' + (index === localCurrentPlayerIndex && !player.finished ? ' active' : '');
+        const achievementsIcons = localGetAchievementIcons(player);
+        row.innerHTML = `
+          <div class="mini-avatar">${player.avatarIcon}</div>
+          <div>
+            <div><strong>${player.name}${player.id === localFirstFinalWinnerId ? ' 👑' : ''}</strong></div>
+            <div style="color:#d7c39d;font-size:13px;">Позиция: ${localFormatPosition(player.position, player)} • Очки: ${player.points}</div>
+            <div style="font-size:12px; margin-top:4px;">${achievementsIcons}</div>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      localUpdateAddPointsSelect();
+    }
+
+    function localFormatPosition(position, player) {
+      if (player?.finished) return 'Завершил игру';
+      if (position === 0) return 'Старт';
+      if (position === FINAL_CELL) return 'Клетка 50';
+      return 'Клетка ' + position;
+    }
+
+    function localGetAchievementIcons(player) {
+      if (!player.achievements) return '';
+      const ids = Object.keys(player.achievements).filter(id => player.achievements[id]);
+      return ids.map(id => {
+        const def = ACHIEVEMENT_DEFS[id];
+        return `<span class="achievement-icon">${def.icon}<span class="tooltip-text">${def.desc}</span></span>`;
+      }).join(' ');
+    }
+
+    function localUpdateCurrentPlayerCard() {
+      if (!localPlayers.length) {
+        document.getElementById('currentPlayerAvatarLocal').textContent = '😀';
+        document.getElementById('currentPlayerNameLocal').textContent = 'Герой';
+        document.getElementById('currentPlayerMetaLocal').textContent = 'Позиция: Старт';
+        return;
+      }
+      const player = localPlayers[localCurrentPlayerIndex];
+      document.getElementById('currentPlayerAvatarLocal').textContent = player.avatarIcon;
+      document.getElementById('currentPlayerNameLocal').textContent = player.name;
+      document.getElementById('currentPlayerMetaLocal').textContent = 'Позиция: ' + localFormatPosition(player.position, player) + ' • Очки: ' + player.points;
+      localRenderPlayersList();
+    }
+
+    function localAddLog(text) {
+      const div = document.createElement('div');
+      div.className = 'log-item';
+      div.textContent = text;
+      document.getElementById('eventLogLocal').prepend(div);
+    }
+
+    function localWait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function localCheckAchievements(player) {
+      if (!player) return;
+      if (!player.achievements) player.achievements = {};
+      ACHIEVEMENT_IDS.forEach(id => {
+        if (player.achievements[id]) return;
+        let achieved = false;
+        switch (id) {
+          case 'erudite': achieved = player.consecutiveCorrect >= 10; break;
+          case 'mozg': achieved = player.totalCorrect >= 15; break;
+          case 'veZunchik': achieved = player.rollCounts[6] >= 6; break;
+          case 'neudachnik': achieved = player.rollCounts[1] >= 6; break;
+          case 'seven': achieved = player.rollCounts[4] >= 7; break;
+          case 'turtle': achieved = player.trapHits >= 5; break;
+          case 'luckyTicket': achieved = [13,21,34,47].every(cell => player.stoppedOnFibonacci.includes(cell)); break;
+          case 'krainiy': break;
+          default: break;
+        }
+        if (achieved) {
+          player.achievements[id] = true;
+          const def = ACHIEVEMENT_DEFS[id];
+          localAddLog(`🏆 ${player.name} получил достижение «${def.name}» ${def.icon}`);
+        }
+      });
+    }
+
+    async function localMovePlayerStepByStep(player, targetPosition) {
+      while (player.position < targetPosition) {
+        player.position++;
+        localRenderTokens();
+        localUpdateCurrentPlayerCard();
+        await localWait(280);
+      }
+    }
+
+    async function localMovePlayerBackwardStepByStep(player, targetPosition) {
+      while (player.position > targetPosition) {
+        player.position--;
+        localRenderTokens();
+        localUpdateCurrentPlayerCard();
+        await localWait(280);
+      }
+    }
+
+    function localOpenQuestion(questionObj, title, context) {
+      localPendingQuestion = { ...questionObj, context };
+      localTimerExpired = false;
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalQuestion').textContent = questionObj.question;
+      document.getElementById('modalAnswer').textContent = 'Правильный ответ: ' + questionObj.answer + ' • Баллы: ' + questionObj.points;
+      document.getElementById('modalAnswer').style.display = 'none';
+      if (questionObj.imageUrl) {
+        document.getElementById('modalImage').src = questionObj.imageUrl;
+        document.getElementById('modalImage').style.display = 'block';
+      } else {
+        document.getElementById('modalImage').style.display = 'none';
+      }
+      document.getElementById('exitSandboxBtn').classList.add('hidden');
+      document.getElementById('modalActions').classList.remove('sandbox');
+      document.getElementById('showAnswerBtn').disabled = false;
+      document.getElementById('answerCorrectBtn').disabled = true;
+      document.getElementById('answerWrongBtn').disabled = true;
+      document.getElementById('questionModal').classList.add('show');
+      localStartQuestionTimer();
+    }
+
+    function localStartQuestionTimer() {
+      localStopQuestionTimer();
+      localTimerExpired = false;
+      localQuestionTimerRemaining = localQuestionTimerSeconds;
+      localUpdateQuestionTimerUI();
+      localQuestionTimerInterval = setInterval(() => {
+        localQuestionTimerRemaining--;
+        if (localQuestionTimerRemaining < 0) localQuestionTimerRemaining = 0;
+        localUpdateQuestionTimerUI();
+        if (localQuestionTimerRemaining === 0) {
+          localStopQuestionTimer();
+          localTimerExpired = true;
+          document.getElementById('questionTimer').textContent = 'Время вышло';
+          document.getElementById('questionTimer').className = 'timer-box danger';
+          document.getElementById('modalAnswer').style.display = 'block';
+          document.getElementById('showAnswerBtn').disabled = true;
+          document.getElementById('answerCorrectBtn').disabled = false;
+          document.getElementById('answerWrongBtn').disabled = false;
+        }
+      }, 1000);
+    }
+
+    function localStopQuestionTimer() {
+      if (localQuestionTimerInterval) {
+        clearInterval(localQuestionTimerInterval);
+        localQuestionTimerInterval = null;
+      }
+    }
+
+    function localUpdateQuestionTimerUI() {
+      if (localTimerExpired) return;
+      document.getElementById('questionTimer').textContent = formatTime(localQuestionTimerRemaining);
+      document.getElementById('questionTimer').className = 'timer-box' + (localQuestionTimerRemaining <= 10 ? ' danger' : '');
+    }
+
+    async function localCloseQuestionAndApply(isCorrect, timedOut) {
+      localStopQuestionTimer();
+      const player = localPlayers[localCurrentPlayerIndex];
+      if (localPendingQuestion) {
+        player.asked += 1;
+        const avatar = document.getElementById('currentPlayerAvatarLocal');
+        avatar.classList.remove('correct', 'wrong');
+        if (localPendingQuestion.context === 'final50') {
+          if (isCorrect) {
+            player.correct += 1;
+            player.totalCorrect += 1;
+            player.consecutiveCorrect += 1;
+            player.points += Number(localPendingQuestion.points || 0);
+            if (localFirstFinalWinnerId === null) {
+              localFirstFinalWinnerId = player.id;
+              player.points += FINAL_SUCCESS_BONUS;
+            }
+            player.finished = true;
+            localFinishCounter++;
+            player.finishOrder = localFinishCounter;
+            localAddLog(player.name + ' завершает игру.');
+            localCheckAchievements(player);
+            avatar.classList.add('correct');
+          } else {
+            player.totalIncorrect += 1;
+            player.consecutiveCorrect = 0;
+            player.position = FINAL_CELL;
+            localAddLog(player.name + (timedOut ? ' не успел ответить на финальный вопрос.' : ' ошибся в финальном вопросе.') + ' Остаётся на месте.');
+            avatar.classList.add('wrong');
+          }
+        } else if (localPendingQuestion.context === 'special') {
+          if (isCorrect) {
+            player.correct += 1;
+            player.totalCorrect += 1;
+            player.consecutiveCorrect += 1;
+            player.points += Number(localPendingQuestion.points || 0);
+            localAddLog(player.name + ' получает ' + localPendingQuestion.points + ' балл(ов).');
+            localCheckAchievements(player);
+            avatar.classList.add('correct');
+          } else {
+            player.totalIncorrect += 1;
+            player.consecutiveCorrect = 0;
+            localAddLog(player.name + ' получает 0 баллов за уникальное задание.');
+            avatar.classList.add('wrong');
+          }
+        } else {
+          if (isCorrect) {
+            player.correct += 1;
+            player.totalCorrect += 1;
+            player.consecutiveCorrect += 1;
+            player.points += Number(localPendingQuestion.points || 0);
+            localAddLog(player.name + ' получает ' + localPendingQuestion.points + ' балл(ов).');
+            localCheckAchievements(player);
+            avatar.classList.add('correct');
+          } else {
+            player.totalIncorrect += 1;
+            player.consecutiveCorrect = 0;
+            const backTo = Math.max(0, player.position - 2);
+            localAddLog(player.name + (timedOut ? ' не успел ответить и отступает на 2 клетки.' : ' ответил неверно и отступает на 2 клетки.'));
+            await localMovePlayerBackwardStepByStep(player, backTo);
+            avatar.classList.add('wrong');
+          }
+        }
+      }
+      localPendingQuestion = null;
+      localTimerExpired = false;
+      document.getElementById('questionModal').classList.remove('show');
+      localRenderTokens();
+      localUpdateCurrentPlayerCard();
+      if (localPlayers.length && localPlayers.every(p => p.finished)) {
+        localFinishGame(false);
+        return;
+      }
+      localAdvanceTurn();
+    }
+
+    async function localProcessCellEffect(player) {
+      const pos = player.position;
+      if (FIBONACCI_CELLS.includes(pos) && !player.stoppedOnFibonacci.includes(pos)) {
+        player.stoppedOnFibonacci.push(pos);
+        localAddLog(player.name + ' остановился на счастливой клетке ' + pos + '!');
+        localCheckAchievements(player);
+      }
+      if (Object.prototype.hasOwnProperty.call(SPECIAL_BACK_CELLS, pos)) {
+        const backTo = SPECIAL_BACK_CELLS[pos];
+        player.trapHits += 1;
+        localAddLog(player.name + ' попал в ловушку и отступает на 2 клетки назад.');
+        localCheckAchievements(player);
+        await localWait(250);
+        await localMovePlayerBackwardStepByStep(player, backTo);
+        const q = localGetRandomUnusedNormalQuestion();
+        if (!q) {
+          localAddLog('Обычные вопросы закончились.');
+          localAdvanceTurn();
+          return;
+        }
+        localOpenQuestion(q, 'Случайный вопрос после ловушки', 'normal');
+        return;
+      }
+      if (SPECIAL_TASK_CELLS.includes(pos)) {
+        player.visitedSpecialCells.push(pos);
+        localCheckAchievements(player);
+        const task = localGetRandomSpecialQuestion();
+        localOpenQuestion(task, 'Уникальная клетка ' + pos, 'special');
+        return;
+      }
+      if (pos === FINAL_CELL) {
+        const finalQuestion = localGetUnusedFinalQuestion();
+        localOpenQuestion(finalQuestion, 'Финальный вопрос на 50-й клетке', 'final50');
+        return;
+      }
+      if (pos >= 1 && pos < FINAL_CELL) {
+        const q = localGetRandomUnusedNormalQuestion();
+        if (!q) {
+          localAddLog('Обычные вопросы закончились.');
+          localAdvanceTurn();
+          return;
+        }
+        localOpenQuestion(q, 'Случайный вопрос', 'normal');
+      }
+    }
+
+    async function localRollDice() {
+      if (!localPlayers.length || localIsRolling || localPendingQuestion || localGameFinished) return;
+      const player = localPlayers[localCurrentPlayerIndex];
+      if (player.finished) {
+        localAdvanceTurn();
+        return;
+      }
+      localIsRolling = true;
+      document.getElementById('rollDiceBtnLocal').disabled = true;
+      if (player.position === FINAL_CELL && !player.finished) {
+        const finalQuestion = localGetUnusedFinalQuestion();
+        localOpenQuestion(finalQuestion, 'Финальный вопрос на 50-й клетке', 'final50');
+        localIsRolling = false;
+        return;
+      }
+      const tokens = document.getElementById('tokensLayerLocal').querySelectorAll('.token');
+      if (tokens[localCurrentPlayerIndex]) {
+        tokens[localCurrentPlayerIndex].classList.add('jump');
+        setTimeout(() => {
+          tokens[localCurrentPlayerIndex].classList.remove('jump');
+        }, 500);
+      }
+      for (let i = 0; i < 10; i++) {
+        document.getElementById('diceResultLocal').textContent = String(Math.floor(Math.random() * 6) + 1);
+        await localWait(80);
+      }
+      const dice = Math.floor(Math.random() * 6) + 1;
+      document.getElementById('diceResultLocal').textContent = String(dice);
+      player.movesCount += 1;
+      if (dice === 1) {
+        player.rollCounts[1] = (player.rollCounts[1] || 0) + 1;
+        player.noOnes = false;
+      } else if (dice === 4) {
+        player.rollCounts[4] = (player.rollCounts[4] || 0) + 1;
+      } else if (dice === 6) {
+        player.rollCounts[6] = (player.rollCounts[6] || 0) + 1;
+      }
+      localCheckAchievements(player);
+      let target = player.position + dice;
+      if (target > MAX_POSITION) target = MAX_POSITION;
+      localAddLog(player.name + ' бросает кость: выпало ' + dice + '.');
+      await localMovePlayerStepByStep(player, target);
+      await localProcessCellEffect(player);
+      localIsRolling = false;
+      if (!localPendingQuestion && !localGameFinished) {
+        document.getElementById('rollDiceBtnLocal').disabled = false;
+      }
+    }
+
+    function localAdvanceTurn() {
+      if (localGameFinished) return;
+      const activePlayers = localPlayers.filter(p => !p.finished);
+      if (!activePlayers.length) {
+        localFinishGame(false);
+        return;
+      }
+      let nextIndex = localCurrentPlayerIndex;
+      let safety = 0;
+      do {
+        nextIndex = (nextIndex + 1) % localPlayers.length;
+        safety++;
+      } while (localPlayers[nextIndex].finished && safety < localPlayers.length + 2);
+      localCurrentPlayerIndex = nextIndex;
+      localUpdateCurrentPlayerCard();
+      localRenderCurrentCellHighlight();
+      document.getElementById('rollDiceBtnLocal').disabled = false;
+      localAddLog('Ход переходит к: ' + localPlayers[localCurrentPlayerIndex].name + '.');
+    }
+
+    function localGetRanking() {
+      return [...localPlayers].sort((a, b) => {
+        if (b.finished !== a.finished) return Number(b.finished) - Number(a.finished);
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.correct !== a.correct) return b.correct - a.correct;
+        return b.asked - a.asked;
+      });
+    }
+
+    function localBuildPodium() {
+      const ranking = localGetRanking();
+      const podiumWrap = document.getElementById('podiumWrapLocal');
+      podiumWrap.innerHTML = '';
+      const top3 = [ranking[1], ranking[0], ranking[2]].filter(Boolean);
+      const orderClasses = ['second', 'first', 'third'];
+      const orderNumbers = [2, 1, 3];
+      top3.forEach((player, idx) => {
+        const placeClass = orderClasses[idx];
+        const placeNumber = orderNumbers[idx];
+        const div = document.createElement('div');
+        div.className = `podium-place ${placeClass}`;
+        div.innerHTML = `
+          <div class="podium-card">
+            <div class="podium-avatar">
+              ${player.avatarIcon}
+              ${placeNumber === 1 ? '<div class="crown">👑</div>' : ''}
+            </div>
+            <div class="podium-name">${player.name}</div>
+            <div class="podium-score">Баллы: ${player.points}</div>
+          </div>
+          <div class="pedestal">${placeNumber}</div>
+        `;
+        podiumWrap.appendChild(div);
+      });
+      document.getElementById('podiumContainerLocal').classList.remove('hidden');
+    }
+
+    function localBuildResultsCards() {
+      const ranking = localGetRanking();
+      const resultsCards = document.getElementById('resultsCardsLocal');
+      resultsCards.innerHTML = '';
+      ranking.forEach((player, index) => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        const achIcons = localGetAchievementIcons(player);
+        card.innerHTML = `
+          <div class="result-card-top">
+            <div class="result-card-avatar">${player.avatarIcon}</div>
+            <div>
+              <div class="result-card-name">${player.name}${player.id === localFirstFinalWinnerId ? ' 👑' : ''}</div>
+              <div class="result-card-rank">Место: ${index + 1}</div>
+            </div>
+          </div>
+          <div class="result-stats">
+            <div>Баллы: ${player.points}</div>
+            <div>Правильных ответов: ${player.correct}</div>
+            <div>Задано вопросов: ${player.asked}</div>
+            <div>Статус: ${player.finished ? 'Завершил игру' : 'Не завершил'}</div>
+            <div>Достижения: ${achIcons || '—'}</div>
+          </div>
+        `;
+        resultsCards.appendChild(card);
+      });
+    }
+
+    function localLaunchConfetti() {
+      const layer = document.getElementById('confettiLayerLocal');
+      layer.innerHTML = '';
+      const colors = ['#f4d03f', '#e74c3c', '#5dade2', '#58d68d', '#af7ac5', '#f39c12', '#ffffff'];
+      for (let i = 0; i < 120; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (4 + Math.random() * 3) + 's';
+        piece.style.animationDelay = (Math.random() * 1.2) + 's';
+        layer.appendChild(piece);
+      }
+    }
+
+    function localLaunchFireworks() {
+      const layer = document.getElementById('fireworksLayerLocal');
+      layer.innerHTML = '';
+      const colors = ['#f4d03f', '#ff7675', '#74b9ff', '#55efc4', '#fd79a8', '#ffeaa7'];
+      for (let i = 0; i < 12; i++) {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        fw.style.left = (10 + Math.random() * 80) + '%';
+        fw.style.top = (10 + Math.random() * 50) + '%';
+        fw.style.color = colors[Math.floor(Math.random() * colors.length)];
+        fw.style.animationDelay = (Math.random() * 2) + 's';
+        layer.appendChild(fw);
+      }
+    }
+
+    function localFinishGame(isForced) {
+      localStopQuestionTimer();
+      localGameFinished = true;
+      document.getElementById('boardSectionLocal').classList.add('hidden');
+      document.getElementById('boardInfoSectionLocal').classList.add('hidden');
+      document.getElementById('resultsSectionLocal').classList.remove('hidden');
+      document.getElementById('questionModal').classList.remove('show');
+      document.getElementById('confirmFinishModal').classList.remove('show');
+      document.getElementById('rollDiceBtnLocal').disabled = true;
+      document.getElementById('forceFinishBtnLocal').classList.add('hidden');
+      localPlayers.forEach(player => {
+        localCheckAchievements(player);
+      });
+      const finishedPlayers = localPlayers.filter(p => p.finished);
+      if (finishedPlayers.length === localPlayers.length && localPlayers.length > 0) {
+        const lastFinisher = finishedPlayers.reduce((a, b) => a.finishOrder > b.finishOrder ? a : b);
+        const maxCorrect = Math.max(...localPlayers.map(p => p.correct));
+        if (lastFinisher.correct === maxCorrect) {
+          if (!lastFinisher.achievements.krainiy) {
+            lastFinisher.achievements.krainiy = true;
+            const def = ACHIEVEMENT_DEFS.krainiy;
+            localAddLog(`🏆 ${lastFinisher.name} получил достижение «${def.name}» ${def.icon}`);
+          }
+        }
+      }
+      const ranking = localGetRanking();
+      if (localFirstFinalWinnerId !== null) {
+        const winner = localPlayers.find(p => p.id === localFirstFinalWinnerId);
+        document.getElementById('winnerBannerLocal').textContent = `Первым игру завершил ${winner ? winner.name : 'Герой'} и получил дополнительные ${FINAL_SUCCESS_BONUS} баллов.`;
+        document.getElementById('winnerBannerLocal').classList.remove('hidden');
+      } else {
+        document.getElementById('winnerBannerLocal').classList.add('hidden');
+        document.getElementById('winnerBannerLocal').textContent = '';
+      }
+      const tbody = document.getElementById('resultsTableBodyLocal');
+      tbody.innerHTML = '';
+      ranking.forEach((player, index) => {
+        const achIcons = localGetAchievementIcons(player);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${player.avatarIcon} ${player.name}${player.id === localFirstFinalWinnerId ? ' 👑' : ''}</td>
+          <td>${player.asked}</td>
+          <td>${player.correct}</td>
+          <td>${player.points}</td>
+          <td>${achIcons || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      localBuildPodium();
+      localBuildResultsCards();
+      localLaunchConfetti();
+      localLaunchFireworks();
+    }
+
+    function localExportStats() {
+      const ranking = localGetRanking();
+      const eventRows = Array.from(document.getElementById('eventLogLocal').querySelectorAll('.log-item')).map(el => el.textContent.trim());
+      const now = new Date();
+      const rows = [
+        ['Дата выгрузки', now.toLocaleString('ru-RU')],
+        []
+      ];
+      if (localFirstFinalWinnerId !== null) {
+        const winner = localPlayers.find(p => p.id === localFirstFinalWinnerId);
+        rows.push(['Первым завершил игру', winner ? winner.name : '']);
+        rows.push(['Дополнительный бонус', FINAL_SUCCESS_BONUS]);
+        rows.push([]);
+      }
+      rows.push(['Итоги Героев']);
+      rows.push(['Место', 'Герой', 'Задано вопросов', 'Правильных ответов', 'Баллы', 'Статус', 'Первый финишировавший', 'Достижения']);
+      ranking.forEach((player, index) => {
+        const achList = Object.keys(player.achievements).filter(id => player.achievements[id]).map(id => ACHIEVEMENT_DEFS[id]?.name).join(', ');
+        rows.push([
+          index + 1,
+          player.name,
+          player.asked,
+          player.correct,
+          player.points,
+          player.finished ? 'Завершил игру' : 'Не завершил',
+          player.id === localFirstFinalWinnerId ? 'Да' : 'Нет',
+          achList || '—'
+        ]);
+      });
+      rows.push([]);
+      rows.push(['Летопись событий']);
+      rows.push(['№', 'Событие']);
+      eventRows.forEach((text, index) => {
+        rows.push([index + 1, text]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Статистика');
+      XLSX.writeFile(wb, 'khroniki-korolevstva-statistika.xlsx');
+    }
+
+    function localResetGame() {
+      localPlayers = [];
+      localCurrentPlayerIndex = 0;
+      localIsRolling = false;
+      localCells = [];
+      localPendingQuestion = null;
+      localQuestionTimerSeconds = Number(document.getElementById('questionTimeLocal').value || 60);
+      localQuestionTimerRemaining = 0;
+      localGameFinished = false;
+      localFirstFinalWinnerId = null;
+      localTimerExpired = false;
+      localFinishCounter = 0;
+      if (localNormalQuestions.length) {
+        localPrepareQuestionPool();
+      }
+      localClearBoardUI();
+      document.getElementById('questionModal').classList.remove('show');
+      document.getElementById('confirmFinishModal').classList.remove('show');
+      document.getElementById('boardSectionLocal').classList.add('hidden');
+      document.getElementById('resultsSectionLocal').classList.add('hidden');
+      document.getElementById('gameLayoutLocal').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('uploadSectionLocal').classList.add('hidden');
+      document.getElementById('setupSectionLocal').classList.add('hidden');
+      document.getElementById('boardInfoSectionLocal').classList.add('hidden');
+      document.getElementById('forceFinishBtnLocal').classList.add('hidden');
+      document.getElementById('rollDiceBtnLocal').disabled = true;
+      document.getElementById('setupMessageLocal').textContent = '';
+      localGeneratePlayerInputs();
+    }
+
+    function localClearBoardUI() {
+      localStopQuestionTimer();
+      localTimerExpired = false;
+      document.getElementById('eventLogLocal').innerHTML = '';
+      document.getElementById('playersListLocal').innerHTML = '';
+      document.getElementById('resultsTableBodyLocal').innerHTML = '';
+      document.getElementById('resultsCardsLocal').innerHTML = '';
+      document.getElementById('cellsLayerLocal').innerHTML = '';
+      document.getElementById('tokensLayerLocal').innerHTML = '';
+      document.getElementById('pathLayerLocal').innerHTML = '';
+      document.getElementById('ornamentsLayerLocal').innerHTML = '';
+      document.getElementById('highlightLayerLocal').innerHTML = '';
+      document.getElementById('podiumWrapLocal').innerHTML = '';
+      document.getElementById('podiumContainerLocal').classList.add('hidden');
+      document.getElementById('confettiLayerLocal').innerHTML = '';
+      document.getElementById('fireworksLayerLocal').innerHTML = '';
+      document.getElementById('winnerBannerLocal').classList.add('hidden');
+      document.getElementById('winnerBannerLocal').textContent = '';
+      document.getElementById('diceResultLocal').textContent = '-';
+      document.getElementById('modalAnswer').style.display = 'none';
+      document.getElementById('modalQuestion').textContent = '';
+      document.getElementById('modalTitle').textContent = 'Вопрос';
+      document.getElementById('modalImage').style.display = 'none';
+      document.getElementById('questionTimer').textContent = '00:00';
+      document.getElementById('questionTimer').className = 'timer-box';
+      document.getElementById('currentPlayerAvatarLocal').textContent = '😀';
+      document.getElementById('currentPlayerNameLocal').textContent = 'Герой';
+      document.getElementById('currentPlayerMetaLocal').textContent = 'Позиция: Старт';
+    }
+
+    function localUpdateAddPointsSelect() {
+      const select = document.getElementById('addPointsPlayerSelectLocal');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">-- выберите героя --</option>';
+      localPlayers.forEach(player => {
+        const option = document.createElement('option');
+        option.value = player.id;
+        option.textContent = `${player.avatarIcon} ${player.name} (${player.points} очков)`;
+        select.appendChild(option);
+      });
+      if (localPlayers.some(p => p.id == currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function localPrepareQuestionPool() {
+      const prepared = shuffleArray(localNormalQuestions).map((q, index) => ({
+        ...q,
+        uniqueId: index + '-' + q.question
+      }));
+      localUnusedQuestions = [...prepared];
+      localUnusedFinalQuestions = prepared.filter(q => Number(q.points) === FINAL_QUESTION_POINTS);
+    }
+
+    function localGetRandomUnusedNormalQuestion() {
+      if (!localUnusedQuestions.length) return null;
+      return localUnusedQuestions.shift();
+    }
+
+    function localGetRandomSpecialQuestion() {
+      if (localSpecialQuestions.length === 0) {
+        return {
+          question: 'Уникальное задание (нет загруженных заданий)',
+          answer: 'Ответ не загружен',
+          points: 1
+        };
+      }
+      const idx = Math.floor(Math.random() * localSpecialQuestions.length);
+      const q = localSpecialQuestions[idx];
+      localSpecialQuestions.splice(idx, 1);
+      return q;
+    }
+
+    function localGetUnusedFinalQuestion() {
+      if (localUnusedFinalQuestions.length) {
+        const question = localUnusedFinalQuestions.shift();
+        const idx = localUnusedQuestions.findIndex(q => q.uniqueId === question.uniqueId);
+        if (idx !== -1) localUnusedQuestions.splice(idx, 1);
+        return question;
+      }
+      return {
+        question: 'Финальный вопрос для 50-й клетки',
+        answer: 'Ответ не загружен',
+        points: FINAL_QUESTION_POINTS,
+        fallback: true
+      };
+    }
+
+    function localGeneratePlayerInputs() {
+      const count = Number(document.getElementById('playerCountLocal').value || 2);
+      const container = document.getElementById('playerNamesContainerLocal');
+      container.innerHTML = '';
+      for (let i = 1; i <= count; i++) {
+        const card = document.createElement('div');
+        card.className = 'player-setup-card';
+        const defaultAvatar = AVATARS[i - 1] || AVATARS[0];
+        const options = AVATARS.map(avatar => {
+          const selected = avatar.id === defaultAvatar.id ? 'selected' : '';
+          return `<option value="${avatar.id}" ${selected}>${avatar.icon} ${avatar.name}</option>`;
+        }).join('');
+        card.innerHTML = `
+          <div class="player-setup-header">Герой ${i}</div>
+          <div class="player-setup-row">
+            <div class="setup-avatar-preview">${defaultAvatar.icon}</div>
+            <div>
+              <label>Имя героя</label>
+              <input type="text" class="player-name-input" placeholder="Введите имя" value="Герой ${i}">
+            </div>
+            <div>
+              <label>Персонаж</label>
+              <select class="player-avatar-select">${options}</select>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+      document.querySelectorAll('.player-avatar-select').forEach(select => {
+        select.addEventListener('change', localRefreshAvatarOptions);
+      });
+      localRefreshAvatarOptions();
+    }
+
+    function localRefreshAvatarOptions() {
+      const selects = document.querySelectorAll('.player-avatar-select');
+      const used = [];
+      selects.forEach((select, index) => {
+        if (select.value) used.push(select.value);
+      });
+      selects.forEach((select, selectIndex) => {
+        const currentValue = select.value;
+        const usedByOthers = used.filter((id, idx) => idx !== selectIndex && id === currentValue);
+        Array.from(select.options).forEach(option => {
+          if (!option.value) return;
+          option.disabled = used.filter((id, idx) => idx !== selectIndex).includes(option.value) && option.value !== currentValue;
+        });
+        const preview = select.closest('.player-setup-row').querySelector('.setup-avatar-preview');
+        const avatar = getAvatarById(select.value);
+        preview.textContent = avatar.icon;
+      });
+    }
+
+    function localParseExcelFile(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          if (typeof XLSX === 'undefined') {
+            document.getElementById('uploadMessageLocal').textContent = 'Ошибка: библиотека XLSX не загружена. Проверьте интернет-соединение.';
+            console.error('XLSX is undefined');
+            return;
+          }
+
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          let questionsSheet = workbook.Sheets['Вопросы'] || workbook.Sheets['questions'] || workbook.Sheets[workbook.SheetNames[0]];
+          let tasksSheet = workbook.Sheets['Задания'] || workbook.Sheets['tasks'] || workbook.Sheets[workbook.SheetNames[1]];
+
+          if (!questionsSheet) {
+            document.getElementById('uploadMessageLocal').textContent = 'Не найден лист с вопросами. Убедитесь, что лист называется "Вопросы" или он первый в файле.';
+            console.warn('Questions sheet not found');
+            return;
+          }
+
+          const questionRows = XLSX.utils.sheet_to_json(questionsSheet, { header: 1 });
+          let parsedQuestions = questionRows
+            .filter(row => Array.isArray(row) && row.length >= 2)
+            .map(row => ({
+              question: String(row[0] ?? '').trim(),
+              answer: String(row[1] ?? '').trim(),
+              points: Number(row[2] ?? 0),
+              imageUrl: row[3] ? String(row[3]).trim() : null
+            }))
+            .filter(item => item.question && item.answer && item.points >= 0);
+
+          if (parsedQuestions.length > 0) {
+            const first = parsedQuestions[0];
+            const qLower = first.question.toLowerCase();
+            const aLower = first.answer.toLowerCase();
+            if (['вопрос', 'question', 'вопросы', 'questions'].includes(qLower) &&
+                ['ответ', 'answer', 'answers'].includes(aLower)) {
+              parsedQuestions = parsedQuestions.slice(1);
+              console.log('Удалена строка заголовков вопросов');
+            }
+          }
+
+          let parsedSpecialQuestions = [];
+          if (tasksSheet) {
+            const taskRows = XLSX.utils.sheet_to_json(tasksSheet, { header: 1 });
+            let tasks = taskRows
+              .filter(row => Array.isArray(row) && row.length >= 3)
+              .map(row => ({
+                question: String(row[0] ?? '').trim(),
+                answer: String(row[1] ?? '').trim(),
+                points: Number(row[2] ?? 0)
+              }))
+              .filter(item => item.question && item.answer);
+            if (tasks.length > 0) {
+              const firstTask = tasks[0];
+              const tLower = firstTask.question.toLowerCase();
+              if (['задание', 'task', 'вопрос', 'question'].includes(tLower)) {
+                tasks = tasks.slice(1);
+                console.log('Удалена строка заголовков заданий');
+              }
+            }
+            parsedSpecialQuestions = tasks;
+          }
+
+          if (!parsedQuestions.length) {
+            document.getElementById('uploadMessageLocal').textContent = 'Лист с вопросами пуст или заполнен неверно. Проверьте, что есть колонки: Вопрос, Ответ, Баллы.';
+            console.warn('No valid questions found');
+            return;
+          }
+
+          localNormalQuestions = parsedQuestions;
+          localSpecialQuestions = parsedSpecialQuestions;
+          localPrepareQuestionPool();
+          document.getElementById('uploadMessageLocal').textContent = `Excel загружен. Вопросов: ${localNormalQuestions.length}, заданий: ${localSpecialQuestions.length}.`;
+          console.log('Excel loaded successfully');
+          document.getElementById('mainMenu').classList.add('hidden');
+          document.getElementById('gameLayoutLocal').classList.remove('hidden');
+          document.getElementById('uploadSectionLocal').classList.add('hidden');
+          document.getElementById('setupSectionLocal').classList.remove('hidden');
+          document.getElementById('boardInfoSectionLocal').classList.remove('hidden');
+        } catch (error) {
+          console.error('Ошибка при чтении Excel:', error);
+          document.getElementById('uploadMessageLocal').textContent = 'Ошибка чтения Excel-файла: ' + (error.message || 'неизвестная ошибка');
+        }
+      };
+
+      reader.onerror = function() {
+        document.getElementById('uploadMessageLocal').textContent = 'Ошибка загрузки файла. Попробуйте другой браузер.';
+        console.error('FileReader error');
+      };
+
+      try {
+        reader.readAsArrayBuffer(file);
+      } catch (e) {
+        try {
+          reader.readAsBinaryString(file);
+          console.log('Using readAsBinaryString fallback');
+        } catch (e2) {
+          document.getElementById('uploadMessageLocal').textContent = 'Ваш браузер не поддерживает чтение файлов. Используйте Chrome или Firefox.';
+          console.error('Both reading methods failed', e2);
+        }
+      }
+    }
+
+    // Обработчики локальной игры
+    document.getElementById('menuLocalBtn').addEventListener('click', function() {
+      if (localNormalQuestions.length > 0) {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('gameLayoutLocal').classList.remove('hidden');
+        document.getElementById('uploadSectionLocal').classList.add('hidden');
+        document.getElementById('setupSectionLocal').classList.remove('hidden');
+        document.getElementById('boardInfoSectionLocal').classList.remove('hidden');
+        document.getElementById('setupMessageLocal').textContent = '';
+        localGeneratePlayerInputs();
+      } else {
+        document.getElementById('menuMessage').textContent = 'Сначала загрузите Excel-файл.';
+        document.getElementById('excelFileLocal').click();
+      }
+    });
+
+    document.getElementById('excelFileLocal').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) localParseExcelFile(file);
+    });
+
+    document.getElementById('loadExcelBtnLocal').addEventListener('click', function() {
+      const file = document.getElementById('excelFileLocal').files[0];
+      if (!file) {
+        document.getElementById('uploadMessageLocal').textContent = 'Выберите Excel-файл.';
+        return;
+      }
+      localParseExcelFile(file);
+    });
+
+    document.getElementById('playerCountLocal').addEventListener('change', localGeneratePlayerInputs);
+
+    document.getElementById('startGameBtnLocal').addEventListener('click', function() {
+      if (!localNormalQuestions.length) {
+        document.getElementById('setupMessageLocal').textContent = 'Сначала загрузите Excel-файл.';
+        return;
+      }
+      const count = Number(document.getElementById('playerCountLocal').value);
+      const timeValue = Number(document.getElementById('questionTimeLocal').value);
+      if (!timeValue || timeValue < 10 || timeValue > 600) {
+        document.getElementById('setupMessageLocal').textContent = 'Время на вопрос должно быть от 10 до 600 секунд.';
+        return;
+      }
+      const nameInputs = document.querySelectorAll('.player-name-input');
+      const avatarSelects = document.querySelectorAll('.player-avatar-select');
+      const chosenIds = new Set();
+      const newPlayers = [];
+      const palette = [
+        '#f4d03f', '#5dade2', '#58d68d', '#f1948a', '#af7ac5',
+        '#f5b041', '#76d7c4', '#ec7063', '#7fb3d5', '#82e0aa',
+        '#f7dc6f', '#bb8fce', '#73c6b6', '#f0b27a', '#85c1e9'
+      ];
+      for (let i = 0; i < count; i++) {
+        const name = (nameInputs[i]?.value || '').trim();
+        const avatarId = avatarSelects[i]?.value;
+        if (!name) {
+          document.getElementById('setupMessageLocal').textContent = 'Заполните имена всех Героев.';
+          return;
+        }
+        if (!avatarId) {
+          document.getElementById('setupMessageLocal').textContent = 'Выберите персонажа для каждого героя.';
+          return;
+        }
+        if (chosenIds.has(avatarId)) {
+          document.getElementById('setupMessageLocal').textContent = 'Персонажи не должны повторяться.';
+          return;
+        }
+        chosenIds.add(avatarId);
+        const avatar = getAvatarById(avatarId);
+        newPlayers.push({
+          id: i + 1,
+          name,
+          avatarId: avatar.id,
+          avatarIcon: avatar.icon,
+          color: palette[i % palette.length],
+          position: 0,
+          asked: 0,
+          correct: 0,
+          points: 0,
+          finished: false,
+          consecutiveCorrect: 0,
+          totalCorrect: 0,
+          totalIncorrect: 0,
+          rollCounts: { 1: 0, 4: 0, 6: 0 },
+          noOnes: true,
+          trapHits: 0,
+          visitedSpecialCells: [],
+          stoppedOnFibonacci: [],
+          movesCount: 0,
+          finishOrder: null,
+          achievements: {}
+        });
+      }
+      localPlayers = newPlayers;
+      localCurrentPlayerIndex = 0;
+      localQuestionTimerSeconds = timeValue;
+      localGameFinished = false;
+      localFirstFinalWinnerId = null;
+      localTimerExpired = false;
+      localFinishCounter = 0;
+      localPrepareQuestionPool();
+      document.getElementById('setupSectionLocal').classList.add('hidden');
+      document.getElementById('boardSectionLocal').classList.remove('hidden');
+      document.getElementById('forceFinishBtnLocal').classList.remove('hidden');
+      document.getElementById('rollDiceBtnLocal').disabled = false;
+      localClearBoardUI();
+      localBuildCells();
+      localRenderOrnaments();
+      localRenderCells();
+      localRenderTokens();
+      localRenderPlayersList();
+      localUpdateCurrentPlayerCard();
+      document.getElementById('setupMessageLocal').textContent = '';
+      localAddLog('Игра началась.');
+    });
+
+    document.getElementById('rollDiceBtnLocal').addEventListener('click', localRollDice);
+
+    document.getElementById('showAnswerBtn').addEventListener('click', function() {
+      localStopQuestionTimer();
+      document.getElementById('modalAnswer').style.display = 'block';
+      document.getElementById('showAnswerBtn').disabled = true;
+      document.getElementById('answerCorrectBtn').disabled = false;
+      document.getElementById('answerWrongBtn').disabled = false;
+      if (!localTimerExpired) {
+        document.getElementById('questionTimer').textContent = 'Таймер остановлен';
+        document.getElementById('questionTimer').className = 'timer-box';
+      }
+    });
+
+    document.getElementById('answerCorrectBtn').addEventListener('click', function() {
+      localCloseQuestionAndApply(true, localTimerExpired);
+    });
+    document.getElementById('answerWrongBtn').addEventListener('click', function() {
+      localCloseQuestionAndApply(false, localTimerExpired);
+    });
+
+    document.getElementById('exportStatsBtnLocal').addEventListener('click', localExportStats);
+    document.getElementById('newGameBtnLocal').addEventListener('click', localResetGame);
+
+    document.getElementById('forceFinishBtnLocal').addEventListener('click', function() {
+      document.getElementById('confirmFinishModal').classList.add('show');
+    });
+
+    document.getElementById('cancelFinishBtn').addEventListener('click', function() {
+      document.getElementById('confirmFinishModal').classList.remove('show');
+    });
+
+    document.getElementById('confirmFinishBtn').addEventListener('click', function() {
+      localFinishGame(true);
+    });
+
+    document.getElementById('addPointsBtnLocal').addEventListener('click', function() {
+      const selectedId = document.getElementById('addPointsPlayerSelectLocal').value;
+      if (!selectedId) {
+        alert('Выберите героя из списка.');
+        return;
+      }
+      const points = parseInt(document.getElementById('addPointsInputLocal').value);
+      if (isNaN(points) || points < 1) {
+        alert('Введите корректное количество очков.');
+        return;
+      }
+      const player = localPlayers.find(p => p.id == selectedId);
+      if (!player) {
+        alert('Герой не найден.');
+        return;
+      }
+      player.points += points;
+      localAddLog(`Ведущий добавил ${points} балл(ов) игроку ${player.name}.`);
+      localUpdateCurrentPlayerCard();
+      localRenderTokens();
+      localRenderPlayersList();
+    });
+
+    document.getElementById('playerCountLocal').innerHTML = '';
+    for (let i = 2; i <= 15; i++) {
+      const option = document.createElement('option');
+      option.value = String(i);
+      option.textContent = String(i);
+      document.getElementById('playerCountLocal').appendChild(option);
+    }
+    localGeneratePlayerInputs();
+    localUpdateCurrentPlayerCard();
 
     // ==================== СЕТЕВАЯ ИГРА ====================
     let networkRole = null;
@@ -614,7 +1739,6 @@
     let gameStarted = false;
     let gameFinished = false;
     let currentPlayerId = null;
-    let players = {};
     let normalQuestions = [];
     let specialQuestions = [];
     let unusedQuestions = [];
@@ -630,18 +1754,16 @@
     let cells = [];
     let roomRef = null;
 
-    // Создание комнаты (ведущий не считается игроком)
     function createRoom(hostName, questions, specials, timeSec) {
       roomId = generateRoomId();
       roomRef = db.ref('rooms/' + roomId);
-      // Ведущий не добавляется в список игроков, только хранится как hostId
       const roomData = {
         hostId: 'host',
-        players: {}, // только реальные игроки
+        players: {},
         questions: questions,
         specialQuestions: specials,
         currentPlayerIndex: 0,
-        currentPlayerId: null, // будет назначен при старте
+        currentPlayerId: null,
         gameStarted: false,
         gameFinished: false,
         firstFinalWinnerId: null,
@@ -656,7 +1778,6 @@
       return roomId;
     }
 
-    // Присоединение игрока
     function joinRoom(roomId, playerName, avatarId) {
       const roomRef = db.ref('rooms/' + roomId);
       const playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2,6);
@@ -689,7 +1810,6 @@
       return { playerId, playerData };
     }
 
-    // UI сетевой игры
     const networkSetupBox = document.getElementById('networkSetupBox');
     const networkSetupContent = document.getElementById('networkSetupContent');
     const networkGameBox = document.getElementById('networkGameBox');
@@ -781,7 +1901,6 @@
         if (!data) return;
         const playersObj = data.players || {};
         const playerIds = Object.keys(playersObj);
-        const readyPlayers = playerIds.filter(id => playersObj[id].ready === true);
         const list = document.getElementById('playersReadyList');
         list.innerHTML = '';
         playerIds.forEach(id => {
@@ -812,7 +1931,6 @@
           if (data) {
             const playerIds = Object.keys(data.players || {});
             if (playerIds.length > 0) {
-              // Назначаем первого игрока
               roomRef.child('currentPlayerId').set(playerIds[0]);
               roomRef.child('gameStarted').set(true);
             }
@@ -909,7 +2027,6 @@
       networkGameBox.classList.remove('hidden');
       const isHost = networkRole === 'host';
 
-      // Заполняем правую панель
       networkRightPanel.innerHTML = `
         <div class="box">
           <h3>Текущий игрок</h3>
@@ -980,36 +2097,30 @@
       renderOrnamentsNetwork();
       renderCellsNetwork();
 
-      // Подписка на изменения
       roomRef.on('value', snapshot => {
         const data = snapshot.val();
         if (!data) return;
         updateGameStateNetwork(data);
       });
 
-      // Бросок кубика
+      // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК БРОСКА КУБИКА
       document.getElementById('rollDiceBtnNetwork').addEventListener('click', function() {
         if (isRolling) return;
-        if (isHost) {
-          hostRollDiceNetwork();
-        } else {
-          // Если игрок – просто отправляем действие на сервер
-          // В упрощённой версии пусть тоже кидает, но ведущий может перехватить
-          // Но по условию ведущий может кидать за игрока, а игрок – только если его ход
-          // Здесь оставлю как есть, но можно добавить проверку
-          if (myPlayerId === data.currentPlayerId) {
-            // Игрок может кинуть сам
-            hostRollDiceNetwork(); // но это функция ведущего, нужно сделать отдельную
-            // Пока оставляем так, чтобы не усложнять
-            alert('В этой версии только ведущий может бросать кубик. Попросите ведущего.');
+        roomRef.once('value').then(snapshot => {
+          const data = snapshot.val();
+          if (!data) return;
+          const currentId = data.currentPlayerId;
+          // Ведущий может бросать всегда, игрок – только если его ход
+          if (networkRole === 'host' || myPlayerId === currentId) {
+            hostRollDiceNetwork();
           } else {
-            alert('Сейчас не ваш ход.');
+            console.log('Сейчас не ваш ход.');
+            // Можно показать тихое уведомление, но не alert
           }
-        }
+        });
       });
     }
 
-    // Сетевые функции для поля
     function buildCellsNetwork() {
       const rows = [
         [0, 1, 2, 3, 4, 5, 6],
@@ -1139,8 +2250,6 @@
         logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
       }
 
-      // Для ведущего кнопка всегда активна (он может бросать за любого)
-      // Для игроков – активна только если его ход
       const rollBtn = document.getElementById('rollDiceBtnNetwork');
       if (rollBtn) {
         if (networkRole === 'host') {
@@ -1149,7 +2258,7 @@
           rollBtn.disabled = (currentId !== myPlayerId);
         }
       }
-      // Обновляем select для добавления очков (ведущий)
+
       const select = document.getElementById('addPointsPlayerSelectNetwork');
       if (select) {
         const currentVal = select.value;
@@ -1194,7 +2303,6 @@
       const currentLog = data.log || [];
       currentLog.push(logEntry);
       await roomRef.child('log').set(currentLog);
-      // Переход хода
       const playerIds = Object.keys(playersData);
       const nextIndex = (data.currentPlayerIndex + 1) % playerIds.length;
       await roomRef.child('currentPlayerIndex').set(nextIndex);
@@ -1202,7 +2310,6 @@
       isRolling = false;
     }
 
-    // Парсинг Excel для сетевой игры
     function networkParseExcelFile(file) {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -1280,7 +2387,6 @@
       }
     }
 
-    // Обработчики меню
     document.getElementById('menuHostBtn').addEventListener('click', function() {
       document.getElementById('mainMenu').classList.add('hidden');
       document.getElementById('gameLayoutNetwork').classList.remove('hidden');
@@ -1302,21 +2408,6 @@
       document.getElementById('joinRoomId').value = roomParam;
       document.getElementById('joinConnectBtn').click();
     }
-
-    document.getElementById('menuSandboxBtn').addEventListener('click', function() {
-      alert('Режим тренировки пока не реализован в этой версии.');
-    });
-
-    // Инициализация локальной игры (кратко)
-    document.getElementById('playerCountLocal').innerHTML = '';
-    for (let i = 2; i <= 15; i++) {
-      const option = document.createElement('option');
-      option.value = String(i);
-      option.textContent = String(i);
-      document.getElementById('playerCountLocal').appendChild(option);
-    }
-    // ... остальной код локальной игры можно оставить как был.
-    // Для полноты я включил основные функции.
 
     console.log('Игра готова!');
   </script>
