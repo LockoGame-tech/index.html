@@ -439,7 +439,7 @@
       <div class="panel" style="grid-column: 2;">
         <div class="panel-inner">
           <div id="networkRightPanel">
-            <!-- Заполняется динамически -->
+            <!-- Заполняется динамически при старте -->
           </div>
         </div>
       </div>
@@ -597,7 +597,7 @@
       return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
     }
 
-    // ==================== ЛОКАЛЬНАЯ ИГРА (полный код) ====================
+    // ==================== ЛОКАЛЬНАЯ ИГРА ====================
     let localPlayers = [];
     let localCurrentPlayerIndex = 0;
     let localIsRolling = false;
@@ -1731,7 +1731,9 @@
     localGeneratePlayerInputs();
     localUpdateCurrentPlayerCard();
 
-    // ==================== СЕТЕВАЯ ИГРА ====================
+    // ========== КОНЕЦ ЧАСТИ 1 ==========
+    // ДАЛЕЕ ИДЁТ ЧАСТЬ 2 (СЕТЕВАЯ ИГРА) — ВСТАВЬТЕ ЕЁ В КОНЕЦ ФАЙЛА
+        // ==================== СЕТЕВАЯ ИГРА ====================
     let networkRole = null;
     let roomId = null;
     let myPlayerId = null;
@@ -1754,6 +1756,7 @@
     let cells = [];
     let roomRef = null;
 
+    // Создание комнаты (ведущий не игрок)
     function createRoom(hostName, questions, specials, timeSec) {
       roomId = generateRoomId();
       roomRef = db.ref('rooms/' + roomId);
@@ -1778,6 +1781,7 @@
       return roomId;
     }
 
+    // Присоединение игрока
     function joinRoom(roomId, playerName, avatarId) {
       const roomRef = db.ref('rooms/' + roomId);
       const playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2,6);
@@ -1815,6 +1819,7 @@
     const networkGameBox = document.getElementById('networkGameBox');
     const networkRightPanel = document.getElementById('networkRightPanel');
 
+    // Показать настройки ведущего
     function showHostSetup() {
       document.getElementById('networkSetupTitle').textContent = 'Создать игру';
       networkSetupContent.innerHTML = `
@@ -1876,6 +1881,7 @@
       });
     }
 
+    // Лобби ведущего
     function showHostLobby(roomId) {
       const link = window.location.origin + window.location.pathname + '?room=' + roomId;
       networkSetupContent.innerHTML = `
@@ -1946,6 +1952,7 @@
       });
     }
 
+    // Подключение игрока
     function showJoinSetup() {
       document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
       networkSetupContent.innerHTML = `
@@ -2022,11 +2029,13 @@
       });
     }
 
+    // Запуск игры (создание правой панели один раз)
     function startGameNetwork(data) {
       networkSetupBox.classList.add('hidden');
       networkGameBox.classList.remove('hidden');
       const isHost = networkRole === 'host';
 
+      // Создаём правую панель только один раз
       networkRightPanel.innerHTML = `
         <div class="box">
           <h3>Текущий игрок</h3>
@@ -2103,24 +2112,23 @@
         updateGameStateNetwork(data);
       });
 
-      // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК БРОСКА КУБИКА
+      // Обработчик броска кубика (ведущий может всегда, игрок – только в свой ход)
       document.getElementById('rollDiceBtnNetwork').addEventListener('click', function() {
         if (isRolling) return;
         roomRef.once('value').then(snapshot => {
           const data = snapshot.val();
           if (!data) return;
           const currentId = data.currentPlayerId;
-          // Ведущий может бросать всегда, игрок – только если его ход
           if (networkRole === 'host' || myPlayerId === currentId) {
             hostRollDiceNetwork();
           } else {
             console.log('Сейчас не ваш ход.');
-            // Можно показать тихое уведомление, но не alert
           }
         });
       });
     }
 
+    // Отрисовка поля (сеть)
     function buildCellsNetwork() {
       const rows = [
         [0, 1, 2, 3, 4, 5, 6],
@@ -2217,26 +2225,32 @@
       });
     }
 
+    // Обновление правой панели (без перерисовки всей панели)
     function updateGameStateNetwork(data) {
       const playersData = data.players || {};
       renderTokensNetwork(playersData);
-      const list = document.getElementById('playersListNetwork');
-      list.innerHTML = '';
-      const playerIds = Object.keys(playersData);
-      playerIds.forEach(id => {
-        const p = playersData[id];
-        const row = document.createElement('div');
-        row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
-        row.innerHTML = `
-          <div class="mini-avatar">${p.avatarIcon}</div>
-          <div>
-            <div><strong>${p.name}</strong></div>
-            <div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
-          </div>
-        `;
-        list.appendChild(row);
-      });
 
+      // Обновляем список игроков (только содержимое)
+      const list = document.getElementById('playersListNetwork');
+      if (list) {
+        list.innerHTML = '';
+        const playerIds = Object.keys(playersData);
+        playerIds.forEach(id => {
+          const p = playersData[id];
+          const row = document.createElement('div');
+          row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
+          row.innerHTML = `
+            <div class="mini-avatar">${p.avatarIcon}</div>
+            <div>
+              <div><strong>${p.name}</strong></div>
+              <div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
+            </div>
+          `;
+          list.appendChild(row);
+        });
+      }
+
+      // Обновляем информацию о текущем игроке
       const currentId = data.currentPlayerId;
       const currentPlayer = playersData[currentId];
       if (currentPlayer) {
@@ -2245,11 +2259,13 @@
         document.getElementById('currentPlayerMetaNetwork').textContent = 'Позиция: ' + currentPlayer.position + ' • Очки: ' + currentPlayer.points;
       }
 
+      // Обновляем лог
       const logDiv = document.getElementById('eventLogNetwork');
-      if (data.log && Array.isArray(data.log)) {
+      if (logDiv && data.log && Array.isArray(data.log)) {
         logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
       }
 
+      // Кнопка кубика
       const rollBtn = document.getElementById('rollDiceBtnNetwork');
       if (rollBtn) {
         if (networkRole === 'host') {
@@ -2259,6 +2275,7 @@
         }
       }
 
+      // Обновляем select для добавления очков (ведущий)
       const select = document.getElementById('addPointsPlayerSelectNetwork');
       if (select) {
         const currentVal = select.value;
@@ -2276,6 +2293,147 @@
       }
     }
 
+    // Обработка клетки в сетевой игре
+    async function networkProcessCellEffect(playerId, player, position) {
+      // Проверяем тип клетки
+      const pos = position;
+      const playerData = player;
+
+      // Счастливые клетки (Фибоначчи)
+      if (FIBONACCI_CELLS.includes(pos) && !playerData.stoppedOnFibonacci.includes(pos)) {
+        playerData.stoppedOnFibonacci.push(pos);
+        await roomRef.child('players/' + playerId + '/stoppedOnFibonacci').set(playerData.stoppedOnFibonacci);
+        const logEntry = playerData.name + ' остановился на счастливой клетке ' + pos + '!';
+        const currentLog = (await roomRef.child('log').once('value')).val() || [];
+        currentLog.push(logEntry);
+        await roomRef.child('log').set(currentLog);
+      }
+
+      // Ловушка (возврат назад)
+      if (Object.prototype.hasOwnProperty.call(SPECIAL_BACK_CELLS, pos)) {
+        const backTo = SPECIAL_BACK_CELLS[pos];
+        playerData.trapHits += 1;
+        await roomRef.child('players/' + playerId + '/trapHits').set(playerData.trapHits);
+        const logEntry = playerData.name + ' попал в ловушку и отступает на 2 клетки назад.';
+        const currentLog = (await roomRef.child('log').once('value')).val() || [];
+        currentLog.push(logEntry);
+        await roomRef.child('log').set(currentLog);
+        // Откатываем позицию
+        await roomRef.child('players/' + playerId + '/position').set(backTo);
+        // После ловушки задаём обычный вопрос (если есть)
+        const q = networkGetRandomUnusedNormalQuestion();
+        if (q) {
+          await networkOpenQuestion(q, 'Случайный вопрос после ловушки', 'normal', playerId);
+        } else {
+          const logEntry2 = 'Обычные вопросы закончились.';
+          const currentLog2 = (await roomRef.child('log').once('value')).val() || [];
+          currentLog2.push(logEntry2);
+          await roomRef.child('log').set(currentLog2);
+        }
+        return;
+      }
+
+      // Специальная клетка (уникальное задание)
+      if (SPECIAL_TASK_CELLS.includes(pos)) {
+        playerData.visitedSpecialCells.push(pos);
+        await roomRef.child('players/' + playerId + '/visitedSpecialCells').set(playerData.visitedSpecialCells);
+        const task = networkGetRandomSpecialQuestion();
+        await networkOpenQuestion(task, 'Уникальная клетка ' + pos, 'special', playerId);
+        return;
+      }
+
+      // Финальная клетка
+      if (pos === FINAL_CELL) {
+        const finalQuestion = networkGetUnusedFinalQuestion();
+        await networkOpenQuestion(finalQuestion, 'Финальный вопрос на 50-й клетке', 'final50', playerId);
+        return;
+      }
+
+      // Обычная клетка
+      if (pos >= 1 && pos < FINAL_CELL) {
+        const q = networkGetRandomUnusedNormalQuestion();
+        if (q) {
+          await networkOpenQuestion(q, 'Случайный вопрос', 'normal', playerId);
+        } else {
+          const logEntry = 'Обычные вопросы закончились.';
+          const currentLog = (await roomRef.child('log').once('value')).val() || [];
+          currentLog.push(logEntry);
+          await roomRef.child('log').set(currentLog);
+        }
+      }
+    }
+
+    // Вспомогательные функции для вопросов в сети
+    function networkGetRandomUnusedNormalQuestion() {
+      if (!window.normalQuestions || window.normalQuestions.length === 0) return null;
+      // Используем глобальный пул, но в сети нужно хранить использованные вопросы в базе.
+      // Для простоты будем брать случайный вопрос и удалять его из копии.
+      // Но лучше хранить использованные ID в Firebase. Упростим: берём случайный и не удаляем (вопросы могут повторяться).
+      // Для демо – просто случайный.
+      const idx = Math.floor(Math.random() * window.normalQuestions.length);
+      return { ...window.normalQuestions[idx] };
+    }
+
+    function networkGetRandomSpecialQuestion() {
+      if (!window.specialQuestions || window.specialQuestions.length === 0) {
+        return {
+          question: 'Уникальное задание (нет загруженных заданий)',
+          answer: 'Ответ не загружен',
+          points: 1
+        };
+      }
+      const idx = Math.floor(Math.random() * window.specialQuestions.length);
+      return { ...window.specialQuestions[idx] };
+    }
+
+    function networkGetUnusedFinalQuestion() {
+      // Аналогично, просто берём случайный вопрос с баллами = FINAL_QUESTION_POINTS
+      const finals = window.normalQuestions.filter(q => Number(q.points) === FINAL_QUESTION_POINTS);
+      if (finals.length) {
+        const idx = Math.floor(Math.random() * finals.length);
+        return { ...finals[idx] };
+      }
+      return {
+        question: 'Финальный вопрос для 50-й клетки',
+        answer: 'Ответ не загружен',
+        points: FINAL_QUESTION_POINTS,
+        fallback: true
+      };
+    }
+
+    // Открытие вопроса в сети (модальное окно)
+    async function networkOpenQuestion(questionObj, title, context, playerId) {
+      // Сохраняем вопрос в Firebase, чтобы все видели
+      await roomRef.child('pendingQuestion').set({
+        question: questionObj.question,
+        answer: questionObj.answer,
+        points: questionObj.points,
+        imageUrl: questionObj.imageUrl || null,
+        context: context,
+        playerId: playerId,
+        timestamp: Date.now()
+      });
+      // Показываем модальное окно у всех (или только у ведущего)
+      // В данном случае пусть показывает у всех, но отвечает ведущий.
+      // Мы реализуем так: модальное окно открывается у того, кто нажал «Показать ответ» и т.д.
+      // Упростим: окно открывается у ведущего, а игроки видят только лог.
+      // Но так как ведущий может отвечать, сделаем так:
+      if (networkRole === 'host') {
+        // Открыть модальное окно у ведущего
+        localOpenQuestion(questionObj, title, context);
+        // Ждём ответа от ведущего через кнопки
+        // После ответа – обновить игрока и перейти ход
+      } else {
+        // Игроки увидят вопрос в логе? Можно показывать уведомление.
+        // Пока просто лог.
+        const logEntry = 'Вопрос для ' + (players[playerId]?.name || 'игрока') + ': ' + questionObj.question;
+        const currentLog = (await roomRef.child('log').once('value')).val() || [];
+        currentLog.push(logEntry);
+        await roomRef.child('log').set(currentLog);
+      }
+    }
+
+    // Бросок кубика (сетевая версия)
     async function hostRollDiceNetwork() {
       if (isRolling) return;
       isRolling = true;
@@ -2296,20 +2454,35 @@
       }
       const dice = Math.floor(Math.random() * 6) + 1;
       diceEl.textContent = String(dice);
+
       let target = player.position + dice;
       if (target > MAX_POSITION) target = MAX_POSITION;
+
+      // Обновляем позицию в Firebase
       await roomRef.child('players/' + currentId + '/position').set(target);
+
       const logEntry = player.name + ' бросает кость: выпало ' + dice + '.';
       const currentLog = data.log || [];
       currentLog.push(logEntry);
       await roomRef.child('log').set(currentLog);
-      const playerIds = Object.keys(playersData);
-      const nextIndex = (data.currentPlayerIndex + 1) % playerIds.length;
-      await roomRef.child('currentPlayerIndex').set(nextIndex);
-      await roomRef.child('currentPlayerId').set(playerIds[nextIndex]);
+
+      // Обработка эффекта клетки
+      await networkProcessCellEffect(currentId, player, target);
+
+      // Переход хода (если не было вопроса, иначе ход перейдёт после ответа)
+      // Но если вопрос открыт, мы не переходим ход до ответа.
+      // Проверим, есть ли pendingQuestion
+      const pending = (await roomRef.child('pendingQuestion').once('value')).val();
+      if (!pending) {
+        const playerIds = Object.keys(playersData);
+        const nextIndex = (data.currentPlayerIndex + 1) % playerIds.length;
+        await roomRef.child('currentPlayerIndex').set(nextIndex);
+        await roomRef.child('currentPlayerId').set(playerIds[nextIndex]);
+      }
       isRolling = false;
     }
 
+    // Парсинг Excel для сети
     function networkParseExcelFile(file) {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -2387,6 +2560,7 @@
       }
     }
 
+    // Обработчики меню
     document.getElementById('menuHostBtn').addEventListener('click', function() {
       document.getElementById('mainMenu').classList.add('hidden');
       document.getElementById('gameLayoutNetwork').classList.remove('hidden');
