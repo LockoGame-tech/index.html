@@ -90,8 +90,6 @@
     @keyframes pulseGlow { 0%{transform:scale(1);opacity:0.95;} 50%{transform:scale(1.03);opacity:1;} 100%{transform:scale(1);opacity:0.95;} }
 
     .token { position:absolute; width:2.3%; aspect-ratio:1/1; min-width:22px; min-height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; font-size:clamp(10px,0.85vw,14px); box-shadow:0 6px 18px rgba(0,0,0,0.35), 0 0 12px rgba(255,255,255,0.12); transition:left 0.5s, top 0.5s; z-index:8; will-change:left,top; }
-    .token.jump { animation:tokenJump 0.5s ease; }
-    @keyframes tokenJump { 0%{transform:translateY(0);}30%{transform:translateY(-20px);}60%{transform:translateY(5px);}100%{transform:translateY(0);} }
 
     .current-player { display:flex; align-items:center; gap:14px; margin-top:10px; }
     .avatar { width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; background:linear-gradient(135deg, #8b6b42, #5d452e); border:2px solid rgba(242,214,128,0.28); }
@@ -154,11 +152,6 @@
     @media (max-width:1200px){ .layout-network { grid-template-columns:1fr; } }
     @media (max-width:900px){ .board { min-height:640px; } .modal-actions { grid-template-columns:1fr; } .btn { padding:16px 20px; font-size:18px; } input, select { font-size:18px; padding:16px; } .box h3 { font-size:20px; } .hero h1 { font-size:32px; } .dice-result { width:80px; height:80px; font-size:34px; } }
     @media (max-width:600px){ body{padding:10px;} .board{min-height:480px;} .panel-inner{padding:12px;} .box{padding:12px;} .btn{padding:14px 16px;font-size:16px;} input,select{font-size:16px;padding:12px;} .hero h1{font-size:28px;} .dice-result{width:64px;height:64px;font-size:28px;} .modal-box{padding:20px;} }
-
-    .achievement-icon { display:inline-block; position:relative; cursor:help; margin:0 2px; }
-    .achievement-icon .tooltip-text { visibility:hidden; width:200px; background-color:rgba(0,0,0,0.8); color:#fff; text-align:center; border-radius:6px; padding:6px 10px; position:absolute; z-index:10; bottom:125%; left:50%; transform:translateX(-50%); font-size:12px; line-height:1.3; white-space:normal; opacity:0; transition:opacity 0.3s; pointer-events:none; border:1px solid rgba(255,255,255,0.15); }
-    .achievement-icon .tooltip-text::after { content:""; position:absolute; top:100%; left:50%; margin-left:-5px; border-width:5px; border-style:solid; border-color:rgba(0,0,0,0.8) transparent transparent transparent; }
-    .achievement-icon:hover .tooltip-text { visibility:visible; opacity:1; }
 
     .main-menu { text-align:center; padding:40px 20px; }
     .main-menu h1 { font-size:56px; color:var(--gold-soft); text-shadow:0 4px 20px rgba(0,0,0,0.6); margin-bottom:10px; }
@@ -240,17 +233,19 @@
     if (typeof firebase!=='undefined'){ firebase.initializeApp(firebaseConfig); var db=firebase.database(); } else { var db=null; }
 
     // Constants
-    const ACHIEVEMENT_DEFS={
-      erudite:{name:'Эрудит',icon:'🧠',desc:'10 правильных подряд'},
-      mozg:{name:'Мозг',icon:'💡',desc:'15 правильных за игру'},
-      veZunchik:{name:'Везунчик',icon:'🍀',desc:'6 раз выбросить 6'},
-      neudachnik:{name:'Неудачник',icon:'😢',desc:'6 раз выбросить 1'},
-      seven:{name:'Семь раз отмерь',icon:'🎲',desc:'7 раз выбросить 4'},
-      turtle:{name:'Черепаха',icon:'🐢',desc:'5 раз в ловушку'},
-      luckyTicket:{name:'Счастливый билет',icon:'🎫',desc:'Остановиться на 13,21,34,47'},
-      krainiy:{name:'Крайний',icon:'🥇',desc:'Финишировать последним с макс. правильных'}
-    };
-    const ACHIEVEMENT_IDS=Object.keys(ACHIEVEMENT_DEFS);
+    const SPECIAL_BACK_CELLS={16:14,27:25,34:32,47:45};
+    const SPECIAL_TASK_CELLS=[8,19,30,41];
+    const FINAL_CELL=50, MAX_POSITION=50, FINAL_QUESTION_POINTS=3, FINAL_SUCCESS_BONUS=10, FIBONACCI_CELLS=[13,21,34,47];
+
+    // Helpers
+    function shuffle(a){ let c=[...a]; for(let i=c.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [c[i],c[j]]=[c[j],c[i]]; } return c; }
+    function getAvatarById(id){ return AVATARS.find(a=>a.id===id)||AVATARS[0]; }
+    function fmt(s){ let m=String(Math.floor(s/60)).padStart(2,'0'), sec=String(s%60).padStart(2,'0'); return m+':'+sec; }
+    function cellType(i){ if(i===0) return'start'; if(i===FINAL_CELL) return'finish'; if(SPECIAL_TASK_CELLS.includes(i)) return'special'; if(SPECIAL_BACK_CELLS[i]) return'back'; return'normal'; }
+    function cellText(i){ if(i===0) return{main:'Старт'}; if(i===FINAL_CELL) return{main:'50',sub:'Финал'}; if(SPECIAL_TASK_CELLS.includes(i)) return{main:'★',sub:String(i)}; if(SPECIAL_BACK_CELLS[i]) return{main:'↩',sub:String(i)}; return{main:String(i)}; }
+    function genRoom(){ return Math.random().toString(36).substring(2,10)+'-'+Date.now().toString(36); }
+
+    // AVATARS
     const AVATARS=[
       {id:"av1",icon:"😀",name:"Улыбка"},{id:"av2",icon:"😎",name:"Крутой"},{id:"av3",icon:"🤖",name:"Робот"},
       {id:"av4",icon:"🦊",name:"Лис"},{id:"av5",icon:"🐼",name:"Панда"},{id:"av6",icon:"🐯",name:"Тигр"},
@@ -263,17 +258,6 @@
       {id:"av25",icon:"🌟",name:"Звезда"},{id:"av26",icon:"🎯",name:"Цель"},{id:"av27",icon:"🎮",name:"Геймпад"},
       {id:"av28",icon:"🚀",name:"Ракета"},{id:"av29",icon:"🏆",name:"Кубок"},{id:"av30",icon:"👑",name:"Корона"}
     ];
-    const SPECIAL_BACK_CELLS={16:14,27:25,34:32,47:45};
-    const SPECIAL_TASK_CELLS=[8,19,30,41];
-    const FINAL_CELL=50, MAX_POSITION=50, FINAL_QUESTION_POINTS=3, FINAL_SUCCESS_BONUS=10, FIBONACCI_CELLS=[13,21,34,47];
-
-    // Helpers
-    function shuffle(a){ let c=[...a]; for(let i=c.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [c[i],c[j]]=[c[j],c[i]]; } return c; }
-    function getAvatarById(id){ return AVATARS.find(a=>a.id===id)||AVATARS[0]; }
-    function fmt(s){ let m=String(Math.floor(s/60)).padStart(2,'0'), sec=String(s%60).padStart(2,'0'); return m+':'+sec; }
-    function cellType(i){ if(i===0) return'start'; if(i===FINAL_CELL) return'finish'; if(SPECIAL_TASK_CELLS.includes(i)) return'special'; if(SPECIAL_BACK_CELLS[i]) return'back'; return'normal'; }
-    function cellText(i){ if(i===0) return{main:'Старт'}; if(i===FINAL_CELL) return{main:'50',sub:'Финал'}; if(SPECIAL_TASK_CELLS.includes(i)) return{main:'★',sub:String(i)}; if(SPECIAL_BACK_CELLS[i]) return{main:'↩',sub:String(i)}; return{main:String(i)}; }
-    function genRoom(){ return Math.random().toString(36).substring(2,10)+'-'+Date.now().toString(36); }
 
     // ========== ОБЩИЕ ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА (используются в сети) ==========
     let timerSec=60, timerRem=0, timerInterval=null, timerExpired=false, pendingQuestion=null;
@@ -310,12 +294,35 @@
     function updateTimerUI(){ if(timerExpired)return; document.getElementById('questionTimer').textContent=fmt(timerRem); document.getElementById('questionTimer').className='timer-box'+(timerRem<=10?' danger':''); }
 
     // ========== NETWORK GAME ==========
-    let net={role:null, roomId:null, myId:null, roomRef:null, isRolling:false, cells:[], normalQs:[], specialQs:[], firstFinalWinnerId:null, finishCounter:0};
-    function createRoom(hostName, qs, sp, time){ net.roomId=genRoom(); net.roomRef=db.ref('rooms/'+net.roomId); let data={hostId:'host',players:{},questions:qs,specialQuestions:sp,currentPlayerIndex:0,currentPlayerId:null,gameStarted:false,gameFinished:false,firstFinalWinnerId:null,finishCounter:0,questionTime:time,log:[]}; net.roomRef.set(data); return net.roomId; }
-    function joinRoom(rid,name,avId){ let r=db.ref('rooms/'+rid); let pid='player_'+Date.now()+'_'+Math.random().toString(36).substring(2,6); let av=getAvatarById(avId); let p={id:pid,name,avatarIcon:av.icon,avatarId:av.id,color:'#58d68d',position:0,asked:0,correct:0,points:0,finished:false,consecutiveCorrect:0,totalCorrect:0,totalIncorrect:0,rollCounts:{1:0,4:0,6:0},noOnes:true,trapHits:0,visitedSpecialCells:[],stoppedOnFibonacci:[],movesCount:0,finishOrder:null,achievements:{},ready:false}; r.child('players/'+pid).set(p); return{playerId:pid,playerData:p}; }
+    let net={role:null, roomId:null, myId:null, roomRef:null, isRolling:false, cells:[], normalQs:[], specialQs:[], finalPool:[], normalPool:[]};
+    function createRoom(hostName, qs, sp, time){
+      console.log('createRoom called', hostName, qs.length, sp.length, time);
+      if(!db){ console.error('Firebase not initialized'); return null; }
+      net.roomId=genRoom();
+      net.roomRef=db.ref('rooms/'+net.roomId);
+      let data={
+        hostId:'host',
+        players:{},
+        questions:qs,
+        specialQuestions:sp,
+        currentPlayerIndex:0,
+        currentPlayerId:null,
+        gameStarted:false,
+        gameFinished:false,
+        firstFinalWinnerId:null,
+        finishCounter:0,
+        questionTime:time,
+        log:[]
+      };
+      net.roomRef.set(data);
+      console.log('Room created, ID:', net.roomId);
+      return net.roomId;
+    }
+    function joinRoom(rid,name,avId){ let r=db.ref('rooms/'+rid); let pid='player_'+Date.now()+'_'+Math.random().toString(36).substring(2,6); let av=getAvatarById(avId); let p={id:pid,name,avatarIcon:av.icon,avatarId:av.id,color:'#58d68d',position:0,asked:0,correct:0,points:0,finished:false,consecutiveCorrect:0,totalCorrect:0,totalIncorrect:0,rollCounts:{1:0,4:0,6:0},noOnes:true,trapHits:0,visitedSpecialCells:[],stoppedOnFibonacci:[],movesCount:0,finishOrder:null,ready:false}; r.child('players/'+pid).set(p); return{playerId:pid,playerData:p}; }
 
     // Network UI helpers
     function showHostSetup(){
+      console.log('showHostSetup called');
       document.getElementById('networkSetupTitle').textContent='Создать игру';
       document.getElementById('networkSetupContent').innerHTML=`
         <div class="network-setup"><p>Вы — ведущий. Загрузите Excel с вопросами.</p>
@@ -325,17 +332,25 @@
         <label for="hostQuestionTime">Время на вопрос (сек)</label><input type="number" id="hostQuestionTime" min="10" max="600" value="60" />
         <button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button>
         <div class="message" id="hostCreateMessage"></div></div>`;
-      document.getElementById('hostExcelFile').addEventListener('change',function(e){ if(e.target.files[0]) networkParseExcel(e.target.files[0]); });
-      document.getElementById('hostCreateBtn').addEventListener('click',function(){
+      
+      const fileInput = document.getElementById('hostExcelFile');
+      fileInput.addEventListener('change',function(e){ if(e.target.files[0]) networkParseExcel(e.target.files[0]); });
+      
+      const createBtn = document.getElementById('hostCreateBtn');
+      createBtn.addEventListener('click',function(){
+        console.log('Create button clicked');
         let name=document.getElementById('hostName').value.trim(); if(!name){ document.getElementById('hostCreateMessage').textContent='Введите имя.'; return; }
         let time=parseInt(document.getElementById('hostQuestionTime').value); if(!time||time<10||time>600){ document.getElementById('hostCreateMessage').textContent='Время от 10 до 600.'; return; }
         if(!window.normalQuestions||!window.normalQuestions.length){ document.getElementById('hostCreateMessage').textContent='Сначала загрузите Excel.'; return; }
         if(!db){ document.getElementById('hostCreateMessage').textContent='Ошибка Firebase.'; return; }
-        net.roomId=createRoom(name,window.normalQuestions,window.specialQuestions,time); if(!net.roomId){ document.getElementById('hostCreateMessage').textContent='Ошибка создания комнаты.'; return; }
-        net.role='host'; net.myId='host'; showHostLobby(net.roomId);
+        let roomId=createRoom(name,window.normalQuestions,window.specialQuestions,time);
+        if(!roomId){ document.getElementById('hostCreateMessage').textContent='Ошибка создания комнаты.'; return; }
+        net.roomId=roomId; net.role='host'; net.myId='host';
+        showHostLobby(roomId);
       });
     }
     function showHostLobby(rid){
+      console.log('showHostLobby called', rid);
       let link=window.location.origin+window.location.pathname+'?room='+rid;
       document.getElementById('networkSetupContent').innerHTML=`
         <div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`;
@@ -388,6 +403,14 @@
         document.getElementById('rollDiceBtnNetwork').style.display = 'none';
       }
 
+      // Создаём пулы вопросов
+      net.normalPool = shuffle([...data.questions]);
+      net.finalPool = shuffle(net.normalPool.filter(q => Number(q.points) === FINAL_QUESTION_POINTS));
+      // Удаляем финальные вопросы из обычного пула, чтобы не повторялись
+      let finalIds = new Set(net.finalPool.map(q => q.question));
+      net.normalPool = net.normalPool.filter(q => !finalIds.has(q.question));
+      net.specialQs = shuffle([...data.specialQuestions]);
+
       buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
 
       // Подписка на вопросы для всех клиентов
@@ -427,6 +450,7 @@
         if(net.isRolling)return;
         let actionRef = net.roomRef.child('actions').push();
         actionRef.set({type:'roll', playerId: net.myId, timestamp: Date.now()});
+        console.log('Roll action sent by', net.myId);
       });
 
       // Если ведущий – подписываемся на действия
@@ -437,6 +461,7 @@
           // Удаляем обработанное действие (чтобы не обрабатывать повторно)
           snapshot.ref.remove();
 
+          console.log('Processing roll for player', action.playerId);
           // Выполняем бросок от имени игрока
           await hostPerformRoll(action.playerId);
         });
@@ -460,12 +485,6 @@
       let dice = Math.floor(Math.random()*6)+1;
       el.textContent = String(dice);
 
-      // Обновляем статистику бросков
-      if(dice===1) p.rollCounts[1]=(p.rollCounts[1]||0)+1;
-      else if(dice===4) p.rollCounts[4]=(p.rollCounts[4]||0)+1;
-      else if(dice===6) p.rollCounts[6]=(p.rollCounts[6]||0)+1;
-      await net.roomRef.child('players/'+playerId+'/rollCounts').set(p.rollCounts);
-
       let target = Math.min(p.position + dice, MAX_POSITION);
       await net.roomRef.child('players/'+playerId+'/position').set(target);
 
@@ -486,19 +505,22 @@
       net.isRolling = false;
     }
 
-    // Обработка клетки (выполняется ведущим) – логика взята из локальной игры
+    // Обработка клетки (выполняется ведущим)
     async function networkProcessCell(playerId, player, pos){
-      // Счастливые клетки (Фибоначчи) – для достижения
+      // Если игрок уже стоит на финальной клетке и не завершил, то вопрос уже был задан – не обрабатываем повторно
+      // (это обрабатывается в открытии вопроса)
+      
+      // Счастливые клетки Фибоначчи
       if(FIBONACCI_CELLS.includes(pos)&&!player.stoppedOnFibonacci.includes(pos)){
         player.stoppedOnFibonacci.push(pos);
         await net.roomRef.child('players/'+playerId+'/stoppedOnFibonacci').set(player.stoppedOnFibonacci);
         let log=(await net.roomRef.child('log').once('value')).val()||[];
         log.push(player.name+' остановился на счастливой клетке '+pos+'!');
         await net.roomRef.child('log').set(log);
-        await checkAchievements(playerId); // проверка достижений
+        // Достижение будет проверено позже, но здесь можно отметить
       }
 
-      // Ловушка: откат на 2 клетки, затем вопрос
+      // Ловушка
       if(SPECIAL_BACK_CELLS[pos]){
         let back=SPECIAL_BACK_CELLS[pos];
         player.trapHits++;
@@ -507,7 +529,7 @@
         log.push(player.name+' попал в ловушку, отступает на 2 клетки.');
         await net.roomRef.child('log').set(log);
         await net.roomRef.child('players/'+playerId+'/position').set(back);
-        // После отката задаётся обычный вопрос
+        // После отката задаём случайный обычный вопрос
         let q=getRandomNormalQuestion();
         if(q) await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
         else { let log2=(await net.roomRef.child('log').once('value')).val()||[]; log2.push('Обычные вопросы закончились.'); await net.roomRef.child('log').set(log2); await networkNextTurn(); }
@@ -519,14 +541,21 @@
         player.visitedSpecialCells.push(pos);
         await net.roomRef.child('players/'+playerId+'/visitedSpecialCells').set(player.visitedSpecialCells);
         let task=getRandomSpecialQuestion();
-        await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
+        if(task) await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
+        else {
+          // Если заданий нет, используем обычный вопрос
+          let q=getRandomNormalQuestion();
+          if(q) await networkOpenQuestion(q,'Уникальное задание (заменено на обычный вопрос)','normal',playerId);
+          else await networkNextTurn();
+        }
         return;
       }
 
-      // Финальная клетка 50: вопрос с 3 баллами, при ошибке игрок остаётся на месте и должен ответить снова (новый вопрос)
+      // Финальная клетка
       if(pos===FINAL_CELL){
-        let final=getRandomFinalQuestion(); // всегда новый вопрос (удаляется из пула)
-        await networkOpenQuestion(final,'Финальный вопрос (3 балла)','final50',playerId);
+        let final=getRandomFinalQuestion();
+        if(final) await networkOpenQuestion(final,'Финальный вопрос','final50',playerId);
+        else await networkNextTurn();
         return;
       }
 
@@ -538,28 +567,18 @@
       }
     }
 
-    // Вспомогательные функции для вопросов
-    let usedNormalQuestions = []; // чтобы не повторять вопросы в рамках игры (для обычных и ловушек)
-    let usedFinalQuestions = []; // для финальных
-
+    // Вспомогательные функции для вопросов с пулами
     function getRandomNormalQuestion(){
-      if(!window.normalQuestions||!window.normalQuestions.length)return null;
-      let available = window.normalQuestions.filter(q => !usedNormalQuestions.includes(q.question));
-      if(available.length===0) return null;
-      let idx=Math.floor(Math.random()*available.length);
-      let q=available[idx];
-      usedNormalQuestions.push(q.question);
-      return {...q};
+      if(!net.normalPool || net.normalPool.length===0) return null;
+      return net.normalPool.pop();
     }
     function getRandomSpecialQuestion(){
-      if(!window.specialQuestions||!window.specialQuestions.length)return {question:'Нет заданий',answer:'-',points:1};
-      let idx=Math.floor(Math.random()*window.specialQuestions.length);
-      return {...window.specialQuestions[idx]};
+      if(!net.specialQs || net.specialQs.length===0) return null;
+      return net.specialQs.pop();
     }
     function getRandomFinalQuestion(){
-      let finals=window.normalQuestions.filter(q=>Number(q.points)===FINAL_QUESTION_POINTS && !usedFinalQuestions.includes(q.question));
-      if(finals.length){ let idx=Math.floor(Math.random()*finals.length); let q=finals[idx]; usedFinalQuestions.push(q.question); return {...q}; }
-      return {question:'Финальный вопрос (запасной)',answer:'Ответ не загружен',points:FINAL_QUESTION_POINTS,fallback:true};
+      if(!net.finalPool || net.finalPool.length===0) return null;
+      return net.finalPool.pop();
     }
 
     async function networkOpenQuestion(q,title,context,playerId){
@@ -604,22 +623,21 @@
         let log=(await net.roomRef.child('log').once('value')).val()||[];
         log.push(p.name+' ответил правильно! +'+pts+' баллов.');
         await net.roomRef.child('log').set(log);
-        await checkAchievements(pid);
       }else{
         p.totalIncorrect=(p.totalIncorrect||0)+1;
         p.consecutiveCorrect=0;
         if(ctx==='final50'){
-          // Остаётся на месте, не финиширует
-          p.position=FINAL_CELL;
+          // На финальной клетке игрок остаётся на месте, ход не переходит
           let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' ошибся в финальном вопросе. Остаётся на месте и будет ждать нового вопроса.');
+          log.push(p.name+' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
           await net.roomRef.child('log').set(log);
-          // Сразу задаём новый финальный вопрос (но не переключаем ход)
-          let newFinal=getRandomFinalQuestion();
-          await networkOpenQuestion(newFinal,'Финальный вопрос (3 балла)','final50',pid);
+          // Не переходим ход, даём новый финальный вопрос
+          let final=getRandomFinalQuestion();
+          if(final) await networkOpenQuestion(final,'Финальный вопрос (новая попытка)','final50',pid);
+          else await net.roomRef.child('gameFinished').set(true);
           await pRef.update(p);
-          await net.roomRef.child('pendingQuestion').remove(); // удаляем старый вопрос, новый уже установлен выше
-          return; // не переключаем ход
+          await net.roomRef.child('pendingQuestion').remove();
+          return;
         }else if(ctx==='normal'){
           let back=Math.max(0,p.position-2);
           p.position=back;
@@ -628,20 +646,20 @@
           await net.roomRef.child('log').set(log);
         }else{
           let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' получил 0 баллов за уникальное задание.');
+          log.push(p.name+' получил 0 баллов за задание.');
           await net.roomRef.child('log').set(log);
         }
-        await checkAchievements(pid);
       }
       await pRef.update(p);
       await net.roomRef.child('pendingQuestion').remove();
-      // После обычных вопросов и спецзаданий переходим к следующему ходу
+      // После обычного вопроса или задания переходим к следующему ходу, если не финал
       if(ctx!=='final50' || correct){
         let all=(await net.roomRef.child('players').once('value')).val();
         let finishedAll=Object.values(all||{}).every(p=>p.finished===true);
         if(finishedAll) await net.roomRef.child('gameFinished').set(true);
         else await networkNextTurn();
       }
+      // Для финала с ошибкой мы уже дали новый вопрос и не переходим ход
     }
 
     async function networkNextTurn(){
@@ -668,37 +686,6 @@
       await net.roomRef.child('gameFinished').set(true);
     }
 
-    // Достижения (проверяются после каждого действия)
-    async function checkAchievements(playerId){
-      let snap=await net.roomRef.child('players/'+playerId).once('value');
-      let p=snap.val();
-      if(!p)return;
-      if(!p.achievements)p.achievements={};
-      let changed=false;
-      ACHIEVEMENT_IDS.forEach(id=>{
-        if(p.achievements[id])return;
-        let achieved=false;
-        switch(id){
-          case 'erudite': achieved=(p.consecutiveCorrect||0)>=10; break;
-          case 'mozg': achieved=(p.totalCorrect||0)>=15; break;
-          case 'veZunchik': achieved=(p.rollCounts[6]||0)>=6; break;
-          case 'neudachnik': achieved=(p.rollCounts[1]||0)>=6; break;
-          case 'seven': achieved=(p.rollCounts[4]||0)>=7; break;
-          case 'turtle': achieved=(p.trapHits||0)>=5; break;
-          case 'luckyTicket': achieved=[13,21,34,47].every(c=>p.stoppedOnFibonacci&&p.stoppedOnFibonacci.includes(c)); break;
-          case 'krainiy': break; // проверяется при завершении
-        }
-        if(achieved){
-          p.achievements[id]=true;
-          changed=true;
-          let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(`🏆 ${p.name} получил достижение «${ACHIEVEMENT_DEFS[id].name}» ${ACHIEVEMENT_DEFS[id].icon}`);
-          await net.roomRef.child('log').set(log);
-        }
-      });
-      if(changed) await net.roomRef.child('players/'+playerId+'/achievements').set(p.achievements);
-    }
-
     // Оптимизированная функция обновления состояния (без мигания)
     function updateGameStateNetwork(data) {
       let players = data.players || {};
@@ -720,12 +707,10 @@
       playerIds.forEach(id => {
         let p = players[id];
         let row = existingMap[id];
-        let achievementsIcons = getAchievementIcons(p);
         let html = `<div class="mini-avatar">${p.avatarIcon}</div>
                     <div>
-                      <div><strong>${p.name}${id===data.firstFinalWinnerId?' 👑':''}</strong></div>
+                      <div><strong>${p.name}</strong></div>
                       <div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
-                      <div style="font-size:12px;margin-top:4px;">${achievementsIcons}</div>
                     </div>`;
         if (row) {
           row.innerHTML = html;
@@ -786,15 +771,6 @@
         });
         if (playerIds.includes(val)) sel.value = val;
       }
-    }
-
-    function getAchievementIcons(player) {
-      if (!player.achievements) return '';
-      const ids = Object.keys(player.achievements).filter(id => player.achievements[id]);
-      return ids.map(id => {
-        const def = ACHIEVEMENT_DEFS[id];
-        return `<span class="achievement-icon">${def.icon}<span class="tooltip-text">${def.desc}</span></span>`;
-      }).join(' ');
     }
 
     // Network field rendering
