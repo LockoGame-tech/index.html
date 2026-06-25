@@ -430,7 +430,12 @@
       });
 
       // Подписка на результат броска кубика (для всех клиентов)
-      net.roomRef.child('diceRoll').on('value', async (sn) => {
+      // Используем уникальный идентификатор для каждого броска, чтобы не пропустить анимацию
+      let lastDiceKey = null;
+      net.roomRef.child('diceRolls').on('child_added', async (sn) => {
+        let key = sn.key;
+        if (key === lastDiceKey) return; // уже обработали этот бросок
+        lastDiceKey = key;
         let dice = sn.val();
         if (dice !== null && typeof dice === 'number') {
           // Запускаем анимацию кубика на всех клиентах
@@ -462,6 +467,11 @@
       // Обработчик нажатия кнопки броска: отправляем действие в Firebase
       document.getElementById('rollDiceBtnNetwork').addEventListener('click',function(){
         if(net.isRolling)return;
+        // Если есть открытый вопрос, не даём бросать
+        if (document.getElementById('questionModal').classList.contains('show')) {
+          console.warn('Cannot roll while question is open');
+          return;
+        }
         let actionRef = net.roomRef.child('actions').push();
         actionRef.set({type:'roll', playerId: net.myId, timestamp: Date.now()});
         console.log('Roll action sent by', net.myId);
@@ -488,36 +498,48 @@
     async function hostPerformRoll(playerId){
       if(net.isRolling) return;
       net.isRolling = true;
-      let snap = await net.roomRef.once('value');
-      let d = snap.val();
-      if(!d){ net.isRolling=false; return; }
-      let players = d.players || {};
-      let p = players[playerId];
-      if(!p || p.finished){ net.isRolling=false; return; }
+      try {
+        let snap = await net.roomRef.once('value');
+        let d = snap.val();
+        if(!d){ net.isRolling=false; return; }
+        let players = d.players || {};
+        let p = players[playerId];
+        if(!p || p.finished){ net.isRolling=false; return; }
 
-      // Генерируем результат броска
-      let dice = Math.floor(Math.random() * 6) + 1;
-      // Записываем результат в Firebase, чтобы все клиенты показали анимацию
-      await net.roomRef.child('diceRoll').set(dice);
+        // Генерируем результат броска
+        let dice = Math.floor(Math.random() * 6) + 1;
+        // Записываем результат в Firebase с уникальным ключом
+        let diceRef = net.roomRef.child('diceRolls').push();
+        await diceRef.set(dice);
 
-      let target = Math.min(p.position + dice, MAX_POSITION);
-      await net.roomRef.child('players/'+playerId+'/position').set(target);
+        // Обновляем позицию игрока через транзакцию для атомарности
+        let playerRef = net.roomRef.child('players/'+playerId+'/position');
+        await playerRef.transaction(current => {
+          let target = Math.min((current || 0) + dice, MAX_POSITION);
+          return target;
+        });
 
-      // Лог
-      let log = d.log || [];
-      log.push(p.name+' бросает кость: выпало '+dice+'.');
-      await net.roomRef.child('log').set(log);
+        // Лог
+        let log = d.log || [];
+        log.push(p.name+' бросает кость: выпало '+dice+'.');
+        await net.roomRef.child('log').set(log);
 
-      // Обработка клетки
-      await networkProcessCell(playerId, p, target);
+        // Обработка клетки (выполняется после обновления позиции)
+        let newPos = (await playerRef.once('value')).val();
+        if (newPos === null) newPos = 0;
+        await networkProcessCell(playerId, p, newPos);
 
-      // Проверка, не завершена ли игра
-      let all = (await net.roomRef.child('players').once('value')).val();
-      let finishedAll = Object.values(all||{}).every(p=>p.finished===true);
-      if(finishedAll) await net.roomRef.child('gameFinished').set(true);
-      else await networkNextTurn();
+        // Проверка, не завершена ли игра
+        let all = (await net.roomRef.child('players').once('value')).val();
+        let finishedAll = Object.values(all||{}).every(p=>p.finished===true);
+        if(finishedAll) await net.roomRef.child('gameFinished').set(true);
+        else await networkNextTurn();
 
-      net.isRolling = false;
+      } catch (error) {
+        console.error('Error in hostPerformRoll:', error);
+      } finally {
+        net.isRolling = false;
+      }
     }
 
     // Обработка клетки (выполняется ведущим)
@@ -532,7 +554,6 @@
         let log=(await net.roomRef.child('log').once('value')).val()||[];
         log.push(player.name+' остановился на счастливой клетке '+pos+'!');
         await net.roomRef.child('log').set(log);
-        // Достижение будет проверено позже, но здесь можно отметить
       }
 
       // Ловушка
@@ -612,93 +633,105 @@
     }
 
     async function networkAnswerQuestion(correct){
-      let snap=await net.roomRef.child('pendingQuestion').once('value');
-      let q=snap.val();
-      if(!q) return;
-      let pid=q.playerId, ctx=q.context, pts=Number(q.points)||0;
-      let pRef=net.roomRef.child('players/'+pid);
-      let pSnap=await pRef.once('value');
-      let p=pSnap.val();
-      if(!p) return;
+      try {
+        let snap=await net.roomRef.child('pendingQuestion').once('value');
+        let q=snap.val();
+        if(!q) return;
+        let pid=q.playerId, ctx=q.context, pts=Number(q.points)||0;
+        let pRef=net.roomRef.child('players/'+pid);
+        let pSnap=await pRef.once('value');
+        let p=pSnap.val();
+        if(!p) return;
 
-      p.asked=(p.asked||0)+1;
-      if(correct){
-        p.correct=(p.correct||0)+1;
-        p.totalCorrect=(p.totalCorrect||0)+1;
-        p.consecutiveCorrect=(p.consecutiveCorrect||0)+1;
-        p.points=(p.points||0)+pts;
-        if(ctx==='final50'){
-          let fw=(await net.roomRef.child('firstFinalWinnerId').once('value')).val();
-          if(!fw){ await net.roomRef.child('firstFinalWinnerId').set(pid); p.points+=FINAL_SUCCESS_BONUS; }
-          p.finished=true;
-          let fc=(await net.roomRef.child('finishCounter').once('value')).val()||0;
-          await net.roomRef.child('finishCounter').set(fc+1);
-          p.finishOrder=fc+1;
-        }
-        let log=(await net.roomRef.child('log').once('value')).val()||[];
-        log.push(p.name+' ответил правильно! +'+pts+' баллов.');
-        await net.roomRef.child('log').set(log);
-      }else{
-        p.totalIncorrect=(p.totalIncorrect||0)+1;
-        p.consecutiveCorrect=0;
-        if(ctx==='final50'){
-          // На финальной клетке игрок остаётся на месте, ход не переходит
+        p.asked=(p.asked||0)+1;
+
+        // Транзакция для обновления очков и завершения игры
+        if(correct){
+          p.correct=(p.correct||0)+1;
+          p.totalCorrect=(p.totalCorrect||0)+1;
+          p.consecutiveCorrect=(p.consecutiveCorrect||0)+1;
+          p.points=(p.points||0)+pts;
+          if(ctx==='final50'){
+            let fw=(await net.roomRef.child('firstFinalWinnerId').once('value')).val();
+            if(!fw){ await net.roomRef.child('firstFinalWinnerId').set(pid); p.points+=FINAL_SUCCESS_BONUS; }
+            p.finished=true;
+            let fc=(await net.roomRef.child('finishCounter').once('value')).val()||0;
+            await net.roomRef.child('finishCounter').set(fc+1);
+            p.finishOrder=fc+1;
+          }
           let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
-          await net.roomRef.child('log').set(log);
-          // Не переходим ход, даём новый финальный вопрос
-          let final=getRandomFinalQuestion();
-          if(final) await networkOpenQuestion(final,'Финальный вопрос (новая попытка)','final50',pid);
-          else await net.roomRef.child('gameFinished').set(true);
-          await pRef.update(p);
-          await net.roomRef.child('pendingQuestion').remove();
-          return;
-        }else if(ctx==='normal'){
-          let back=Math.max(0,p.position-2);
-          p.position=back;
-          let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' ответил неверно и отступает на 2 клетки.');
+          log.push(p.name+' ответил правильно! +'+pts+' баллов.');
           await net.roomRef.child('log').set(log);
         }else{
-          let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' получил 0 баллов за задание.');
-          await net.roomRef.child('log').set(log);
+          p.totalIncorrect=(p.totalIncorrect||0)+1;
+          p.consecutiveCorrect=0;
+          if(ctx==='final50'){
+            // На финальной клетке игрок остаётся на месте, ход не переходит
+            let log=(await net.roomRef.child('log').once('value')).val()||[];
+            log.push(p.name+' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
+            await net.roomRef.child('log').set(log);
+            // Не переходим ход, даём новый финальный вопрос
+            let final=getRandomFinalQuestion();
+            if(final) await networkOpenQuestion(final,'Финальный вопрос (новая попытка)','final50',pid);
+            else await net.roomRef.child('gameFinished').set(true);
+            await pRef.update(p);
+            await net.roomRef.child('pendingQuestion').remove();
+            return;
+          }else if(ctx==='normal'){
+            let back=Math.max(0,p.position-2);
+            p.position=back;
+            let log=(await net.roomRef.child('log').once('value')).val()||[];
+            log.push(p.name+' ответил неверно и отступает на 2 клетки.');
+            await net.roomRef.child('log').set(log);
+          }else{
+            let log=(await net.roomRef.child('log').once('value')).val()||[];
+            log.push(p.name+' получил 0 баллов за задание.');
+            await net.roomRef.child('log').set(log);
+          }
         }
+
+        await pRef.update(p);
+        await net.roomRef.child('pendingQuestion').remove();
+
+        // После обычного вопроса или задания переходим к следующему ходу, если не финал
+        if(ctx!=='final50' || correct){
+          let all=(await net.roomRef.child('players').once('value')).val();
+          let finishedAll=Object.values(all||{}).every(p=>p.finished===true);
+          if(finishedAll) await net.roomRef.child('gameFinished').set(true);
+          else await networkNextTurn();
+        }
+        // Для финала с ошибкой мы уже дали новый вопрос и не переходим ход
+      } catch (error) {
+        console.error('Error in networkAnswerQuestion:', error);
       }
-      await pRef.update(p);
-      await net.roomRef.child('pendingQuestion').remove();
-      // После обычного вопроса или задания переходим к следующему ходу, если не финал
-      if(ctx!=='final50' || correct){
-        let all=(await net.roomRef.child('players').once('value')).val();
-        let finishedAll=Object.values(all||{}).every(p=>p.finished===true);
-        if(finishedAll) await net.roomRef.child('gameFinished').set(true);
-        else await networkNextTurn();
-      }
-      // Для финала с ошибкой мы уже дали новый вопрос и не переходим ход
     }
 
     async function networkNextTurn(){
-      let snap=await net.roomRef.once('value');
-      let d=snap.val();
-      if(!d)return;
-      let players=d.players||{};
-      let ids=Object.keys(players).filter(id=>!players[id].finished);
-      if(!ids.length){ await net.roomRef.child('gameFinished').set(true); return; }
-      let total=Object.keys(players).length;
-      let cur=d.currentPlayerIndex||0;
-      let next=(cur+1)%total;
-      let safety=0;
-      while(safety<total+2){
-        let cand=Object.keys(players)[next];
-        if(!players[cand].finished){
-          await net.roomRef.child('currentPlayerIndex').set(next);
-          await net.roomRef.child('currentPlayerId').set(cand);
-          return;
+      try {
+        let snap=await net.roomRef.once('value');
+        let d=snap.val();
+        if(!d)return;
+        let players=d.players||{};
+        let ids=Object.keys(players).filter(id=>!players[id].finished);
+        if(!ids.length){ await net.roomRef.child('gameFinished').set(true); return; }
+        let total=Object.keys(players).length;
+        let cur=d.currentPlayerIndex||0;
+        let next=(cur+1)%total;
+        let safety=0;
+        while(safety<total+2){
+          let cand=Object.keys(players)[next];
+          if(!players[cand].finished){
+            await net.roomRef.child('currentPlayerIndex').set(next);
+            await net.roomRef.child('currentPlayerId').set(cand);
+            return;
+          }
+          next=(next+1)%total;
+          safety++;
         }
-        next=(next+1)%total;
-        safety++;
+        await net.roomRef.child('gameFinished').set(true);
+      } catch (error) {
+        console.error('Error in networkNextTurn:', error);
       }
-      await net.roomRef.child('gameFinished').set(true);
     }
 
     // Оптимизированная функция обновления состояния (без мигания)
@@ -768,7 +801,9 @@
           btn.style.display = 'none';
         } else {
           btn.style.display = 'block';
-          btn.disabled = (curId !== net.myId);
+          // Также блокируем, если есть открытый вопрос
+          let hasQuestion = document.getElementById('questionModal').classList.contains('show');
+          btn.disabled = (curId !== net.myId) || hasQuestion;
         }
       }
 
