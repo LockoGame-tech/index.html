@@ -527,13 +527,15 @@
         // Обработка клетки (выполняется после обновления позиции)
         let newPos = (await playerRef.once('value')).val();
         if (newPos === null) newPos = 0;
-        await networkProcessCell(playerId, p, newPos);
+        let questionOpened = await networkProcessCell(playerId, p, newPos);
 
-        // Проверка, не завершена ли игра
-        let all = (await net.roomRef.child('players').once('value')).val();
-        let finishedAll = Object.values(all||{}).every(p=>p.finished===true);
-        if(finishedAll) await net.roomRef.child('gameFinished').set(true);
-        else await networkNextTurn();
+        // Если вопрос не был открыт, переходим к следующему ходу сразу
+        if (!questionOpened) {
+          let all = (await net.roomRef.child('players').once('value')).val();
+          let finishedAll = Object.values(all||{}).every(p=>p.finished===true);
+          if(finishedAll) await net.roomRef.child('gameFinished').set(true);
+          else await networkNextTurn();
+        }
 
       } catch (error) {
         console.error('Error in hostPerformRoll:', error);
@@ -542,11 +544,8 @@
       }
     }
 
-    // Обработка клетки (выполняется ведущим)
+    // Обработка клетки (выполняется ведущим). Возвращает true, если был открыт вопрос, иначе false.
     async function networkProcessCell(playerId, player, pos){
-      // Если игрок уже стоит на финальной клетке и не завершил, то вопрос уже был задан – не обрабатываем повторно
-      // (это обрабатывается в открытии вопроса)
-      
       // Счастливые клетки Фибоначчи
       if(FIBONACCI_CELLS.includes(pos)&&!player.stoppedOnFibonacci.includes(pos)){
         player.stoppedOnFibonacci.push(pos);
@@ -567,9 +566,15 @@
         await net.roomRef.child('players/'+playerId+'/position').set(back);
         // После отката задаём случайный обычный вопрос
         let q=getRandomNormalQuestion();
-        if(q) await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
-        else { let log2=(await net.roomRef.child('log').once('value')).val()||[]; log2.push('Обычные вопросы закончились.'); await net.roomRef.child('log').set(log2); await networkNextTurn(); }
-        return;
+        if(q) {
+          await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
+          return true;
+        } else {
+          let log2=(await net.roomRef.child('log').once('value')).val()||[];
+          log2.push('Обычные вопросы закончились.');
+          await net.roomRef.child('log').set(log2);
+          return false;
+        }
       }
 
       // Уникальное задание (из листа Задания)
@@ -577,30 +582,46 @@
         player.visitedSpecialCells.push(pos);
         await net.roomRef.child('players/'+playerId+'/visitedSpecialCells').set(player.visitedSpecialCells);
         let task=getRandomSpecialQuestion();
-        if(task) await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
-        else {
+        if(task) {
+          await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
+          return true;
+        } else {
           // Если заданий нет, используем обычный вопрос
           let q=getRandomNormalQuestion();
-          if(q) await networkOpenQuestion(q,'Уникальное задание (заменено на обычный вопрос)','normal',playerId);
-          else await networkNextTurn();
+          if(q) {
+            await networkOpenQuestion(q,'Уникальное задание (заменено на обычный вопрос)','normal',playerId);
+            return true;
+          } else {
+            return false;
+          }
         }
-        return;
       }
 
       // Финальная клетка
       if(pos===FINAL_CELL){
         let final=getRandomFinalQuestion();
-        if(final) await networkOpenQuestion(final,'Финальный вопрос','final50',playerId);
-        else await networkNextTurn();
-        return;
+        if(final) {
+          await networkOpenQuestion(final,'Финальный вопрос','final50',playerId);
+          return true;
+        } else {
+          return false;
+        }
       }
 
       // Обычная клетка
       if(pos>=1&&pos<FINAL_CELL){
         let q=getRandomNormalQuestion();
-        if(q) await networkOpenQuestion(q,'Случайный вопрос','normal',playerId);
-        else { let log=(await net.roomRef.child('log').once('value')).val()||[]; log.push('Обычные вопросы закончились.'); await net.roomRef.child('log').set(log); await networkNextTurn(); }
+        if(q) {
+          await networkOpenQuestion(q,'Случайный вопрос','normal',playerId);
+          return true;
+        } else {
+          let log=(await net.roomRef.child('log').once('value')).val()||[];
+          log.push('Обычные вопросы закончились.');
+          await net.roomRef.child('log').set(log);
+          return false;
+        }
       }
+      return false;
     }
 
     // Вспомогательные функции для вопросов с пулами
@@ -707,34 +728,72 @@
 
     async function networkNextTurn(){
       try {
-        let snap=await net.roomRef.once('value');
-        let d=snap.val();
-        if(!d)return;
-        let players=d.players||{};
-        let ids=Object.keys(players).filter(id=>!players[id].finished);
-        if(!ids.length){ await net.roomRef.child('gameFinished').set(true); return; }
-        let total=Object.keys(players).length;
-        let cur=d.currentPlayerIndex||0;
-        // Гарантируем, что переходим к следующему активному игроку, не зацикливаясь на текущем
-        let start=cur;
-        let next=(start+1)%total;
-        let safety=0;
-        while(safety<total+2){
-          let cand=Object.keys(players)[next];
-          if(!players[cand].finished && cand !== Object.keys(players)[cur]){
-            // Если нашли активного игрока, который не равен текущему (для первого хода это будет следующий)
-            // Но если текущий игрок уже завершён, то мы должны перейти к первому активному
-            // В любом случае выбираем кандидата
-            await net.roomRef.child('currentPlayerIndex').set(next);
-            await net.roomRef.child('currentPlayerId').set(cand);
-            console.log('Turn passed to:', cand);
-            return;
-          }
-          next=(next+1)%total;
-          safety++;
+        let snap = await net.roomRef.once('value');
+        let d = snap.val();
+        if (!d) return;
+        let players = d.players || {};
+        let total = Object.keys(players).length;
+        if (total === 0) return;
+        let activeIds = Object.keys(players).filter(id => !players[id].finished);
+        if (activeIds.length === 0) {
+          await net.roomRef.child('gameFinished').set(true);
+          return;
         }
-        // Если не нашли никого (все завершены), завершаем игру
-        await net.roomRef.child('gameFinished').set(true);
+        // Используем транзакцию для атомарного обновления индекса
+        const indexRef = net.roomRef.child('currentPlayerIndex');
+        const result = await indexRef.transaction(current => {
+          if (current === null) current = 0;
+          let next = (current + 1) % total;
+          let safety = 0;
+          while (safety < total + 2) {
+            const candidateId = Object.keys(players)[next];
+            if (!players[candidateId].finished) {
+              return next;
+            }
+            next = (next + 1) % total;
+            safety++;
+          }
+          return current; // если не нашли, возвращаем текущий
+        });
+        // result.committed может быть false, если транзакция не удалась, но мы всё равно пробуем
+        if (result.committed === false) {
+          console.warn('Transaction for turn index was not committed, retrying...');
+          // Можно повторить, но для простоты выберем первого активного
+          const firstActive = activeIds[0];
+          const firstIndex = Object.keys(players).indexOf(firstActive);
+          await net.roomRef.update({
+            currentPlayerIndex: firstIndex,
+            currentPlayerId: firstActive
+          });
+          console.log('Turn passed to (fallback):', firstActive);
+          return;
+        }
+        const newIndex = result.snapshot.val();
+        if (newIndex === null) {
+          // если не получилось, берём первого активного
+          const firstActive = activeIds[0];
+          const firstIndex = Object.keys(players).indexOf(firstActive);
+          await net.roomRef.update({
+            currentPlayerIndex: firstIndex,
+            currentPlayerId: firstActive
+          });
+          console.log('Turn passed to (fallback 2):', firstActive);
+          return;
+        }
+        const newId = Object.keys(players)[newIndex];
+        if (newId && !players[newId].finished) {
+          await net.roomRef.child('currentPlayerId').set(newId);
+          console.log('Turn passed to:', newId);
+        } else {
+          // Если по какой-то причине новый ID невалиден, берём первого активного
+          const firstActive = activeIds[0];
+          const firstIndex = Object.keys(players).indexOf(firstActive);
+          await net.roomRef.update({
+            currentPlayerIndex: firstIndex,
+            currentPlayerId: firstActive
+          });
+          console.log('Turn passed to (fallback 3):', firstActive);
+        }
       } catch (error) {
         console.error('Error in networkNextTurn:', error);
       }
