@@ -404,11 +404,14 @@
       }
 
       // Создаём пулы вопросов
+      // Обычные вопросы (из первого листа) — все, кроме финальных (3 балла)
       net.normalPool = shuffle([...data.questions]);
+      // Финальные вопросы (с 3 баллами) — отдельный пул
       net.finalPool = shuffle(net.normalPool.filter(q => Number(q.points) === FINAL_QUESTION_POINTS));
       // Удаляем финальные вопросы из обычного пула, чтобы не повторялись
       let finalIds = new Set(net.finalPool.map(q => q.question));
       net.normalPool = net.normalPool.filter(q => !finalIds.has(q.question));
+      // Специальные задания (из второго листа)
       net.specialQs = shuffle([...data.specialQuestions]);
 
       buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
@@ -697,7 +700,8 @@
             await pRef.update(p);
             await net.roomRef.child('pendingQuestion').remove();
             return;
-          }else if(ctx==='normal'){
+          }else if(ctx==='normal' || ctx==='special'){
+            // Обычный вопрос или задание – откат на 2 клетки
             let back=Math.max(0,p.position-2);
             p.position=back;
             let log=(await net.roomRef.child('log').once('value')).val()||[];
