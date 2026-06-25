@@ -262,7 +262,32 @@
     // ========== ОБЩИЕ ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА (используются в сети) ==========
     let timerSec=60, timerRem=0, timerInterval=null, timerExpired=false, pendingQuestion=null;
     function openQuestion(q,title,context){
-      pendingQuestion={...q,context}; timerExpired=false; document.getElementById('modalTitle').textContent=title; document.getElementById('modalQuestion').textContent=q.question; document.getElementById('modalAnswer').textContent='Правильный ответ: '+q.answer+' • Баллы: '+q.points; document.getElementById('modalAnswer').style.display='none'; if(q.imageUrl){ document.getElementById('modalImage').src=q.imageUrl; document.getElementById('modalImage').style.display='block'; }else document.getElementById('modalImage').style.display='none'; document.getElementById('showAnswerBtn').disabled=false; document.getElementById('answerCorrectBtn').disabled=true; document.getElementById('answerWrongBtn').disabled=true; document.getElementById('questionModal').classList.add('show'); startTimer();
+      pendingQuestion={...q,context}; timerExpired=false; 
+      document.getElementById('modalTitle').textContent=title; 
+      document.getElementById('modalQuestion').textContent=q.question; 
+      document.getElementById('modalAnswer').textContent='Правильный ответ: '+q.answer+' • Баллы: '+q.points; 
+      document.getElementById('modalAnswer').style.display='none'; 
+      if(q.imageUrl){ document.getElementById('modalImage').src=q.imageUrl; document.getElementById('modalImage').style.display='block'; }else document.getElementById('modalImage').style.display='none'; 
+      
+      // Управление видимостью кнопок в зависимости от роли
+      const showBtn = document.getElementById('showAnswerBtn');
+      const correctBtn = document.getElementById('answerCorrectBtn');
+      const wrongBtn = document.getElementById('answerWrongBtn');
+      if (net.role === 'host') {
+        showBtn.style.display = 'block';
+        correctBtn.style.display = 'block';
+        wrongBtn.style.display = 'block';
+        showBtn.disabled = false;
+        correctBtn.disabled = true;
+        wrongBtn.disabled = true;
+      } else {
+        // Для игроков скрываем кнопки
+        showBtn.style.display = 'none';
+        correctBtn.style.display = 'none';
+        wrongBtn.style.display = 'none';
+      }
+      document.getElementById('questionModal').classList.add('show'); 
+      startTimer();
     }
     function startTimer(){ stopTimer(); timerExpired=false; timerRem=timerSec; updateTimerUI(); timerInterval=setInterval(()=>{ timerRem--; if(timerRem<0)timerRem=0; updateTimerUI(); if(timerRem===0){ stopTimer(); timerExpired=true; document.getElementById('questionTimer').textContent='Время вышло'; document.getElementById('questionTimer').className='timer-box danger'; document.getElementById('modalAnswer').style.display='block'; document.getElementById('showAnswerBtn').disabled=true; document.getElementById('answerCorrectBtn').disabled=false; document.getElementById('answerWrongBtn').disabled=false; } },1000); }
     function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } }
@@ -717,6 +742,19 @@
     if(roomParam){ document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('gameLayoutNetwork').classList.remove('hidden'); showJoinSetup(); document.getElementById('joinRoomId').value=roomParam; document.getElementById('joinConnectBtn').click(); }
 
     // Обработчики кнопок ответа (только ведущий)
+    document.getElementById('showAnswerBtn').addEventListener('click', function(){
+      if(net.role==='host'){
+        stopTimer();
+        document.getElementById('modalAnswer').style.display = 'block';
+        document.getElementById('showAnswerBtn').disabled = true;
+        document.getElementById('answerCorrectBtn').disabled = false;
+        document.getElementById('answerWrongBtn').disabled = false;
+        if (!timerExpired) {
+          document.getElementById('questionTimer').textContent = 'Таймер остановлен';
+          document.getElementById('questionTimer').className = 'timer-box';
+        }
+      }
+    });
     document.getElementById('answerCorrectBtn').addEventListener('click', async function(){
       if(net.role==='host'){
         await networkAnswerQuestion(true);
