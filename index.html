@@ -414,6 +414,12 @@
       // Специальные задания (из второго листа)
       net.specialQs = shuffle([...data.specialQuestions]);
 
+      console.log('Pools created:', {
+        normalPool: net.normalPool.length,
+        finalPool: net.finalPool.length,
+        specialQs: net.specialQs.length
+      });
+
       buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
 
       // Подписка на вопросы для всех клиентов
@@ -549,6 +555,7 @@
 
     // Обработка клетки (выполняется ведущим). Возвращает true, если был открыт вопрос, иначе false.
     async function networkProcessCell(playerId, player, pos){
+      console.log(`Processing cell ${pos} for player ${playerId}`);
       // Счастливые клетки Фибоначчи
       if(FIBONACCI_CELLS.includes(pos)&&!player.stoppedOnFibonacci.includes(pos)){
         player.stoppedOnFibonacci.push(pos);
@@ -558,8 +565,9 @@
         await net.roomRef.child('log').set(log);
       }
 
-      // Ловушка
+      // Ловушка (клетки 16, 27, 34, 47)
       if(SPECIAL_BACK_CELLS[pos]){
+        console.log('Trap cell!');
         let back=SPECIAL_BACK_CELLS[pos];
         player.trapHits++;
         await net.roomRef.child('players/'+playerId+'/trapHits').set(player.trapHits);
@@ -570,6 +578,7 @@
         // После отката задаём случайный обычный вопрос
         let q=getRandomNormalQuestion();
         if(q) {
+          console.log('Asking normal question after trap');
           await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
           return true;
         } else {
@@ -580,16 +589,19 @@
         }
       }
 
-      // Уникальное задание (из листа Задания)
+      // Уникальное задание (клетки 8, 19, 30, 41) — из второго листа
       if(SPECIAL_TASK_CELLS.includes(pos)){
+        console.log('Special task cell!');
         player.visitedSpecialCells.push(pos);
         await net.roomRef.child('players/'+playerId+'/visitedSpecialCells').set(player.visitedSpecialCells);
         let task=getRandomSpecialQuestion();
         if(task) {
+          console.log('Asking special question:', task.question);
           await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
           return true;
         } else {
           // Если заданий нет, используем обычный вопрос
+          console.log('No special questions left, fallback to normal');
           let q=getRandomNormalQuestion();
           if(q) {
             await networkOpenQuestion(q,'Уникальное задание (заменено на обычный вопрос)','normal',playerId);
@@ -602,6 +614,7 @@
 
       // Финальная клетка
       if(pos===FINAL_CELL){
+        console.log('Final cell!');
         let final=getRandomFinalQuestion();
         if(final) {
           await networkOpenQuestion(final,'Финальный вопрос','final50',playerId);
@@ -613,6 +626,7 @@
 
       // Обычная клетка
       if(pos>=1&&pos<FINAL_CELL){
+        console.log('Normal cell');
         let q=getRandomNormalQuestion();
         if(q) {
           await networkOpenQuestion(q,'Случайный вопрос','normal',playerId);
