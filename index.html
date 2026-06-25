@@ -645,7 +645,6 @@
 
         p.asked=(p.asked||0)+1;
 
-        // Транзакция для обновления очков и завершения игры
         if(correct){
           p.correct=(p.correct||0)+1;
           p.totalCorrect=(p.totalCorrect||0)+1;
@@ -716,18 +715,25 @@
         if(!ids.length){ await net.roomRef.child('gameFinished').set(true); return; }
         let total=Object.keys(players).length;
         let cur=d.currentPlayerIndex||0;
-        let next=(cur+1)%total;
+        // Гарантируем, что переходим к следующему активному игроку, не зацикливаясь на текущем
+        let start=cur;
+        let next=(start+1)%total;
         let safety=0;
         while(safety<total+2){
           let cand=Object.keys(players)[next];
-          if(!players[cand].finished){
+          if(!players[cand].finished && cand !== Object.keys(players)[cur]){
+            // Если нашли активного игрока, который не равен текущему (для первого хода это будет следующий)
+            // Но если текущий игрок уже завершён, то мы должны перейти к первому активному
+            // В любом случае выбираем кандидата
             await net.roomRef.child('currentPlayerIndex').set(next);
             await net.roomRef.child('currentPlayerId').set(cand);
+            console.log('Turn passed to:', cand);
             return;
           }
           next=(next+1)%total;
           safety++;
         }
+        // Если не нашли никого (все завершены), завершаем игру
         await net.roomRef.child('gameFinished').set(true);
       } catch (error) {
         console.error('Error in networkNextTurn:', error);
