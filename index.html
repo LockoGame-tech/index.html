@@ -429,6 +429,20 @@
         }
       });
 
+      // Подписка на результат броска кубика (для всех клиентов)
+      net.roomRef.child('diceRoll').on('value', async (sn) => {
+        let dice = sn.val();
+        if (dice !== null && typeof dice === 'number') {
+          // Запускаем анимацию кубика на всех клиентах
+          let el = document.getElementById('diceResultNetwork');
+          for (let i = 0; i < 10; i++) {
+            el.textContent = String(Math.floor(Math.random() * 6) + 1);
+            await new Promise(r => setTimeout(r, 80));
+          }
+          el.textContent = String(dice);
+        }
+      });
+
       // Обработчики только для ведущего
       if (isHost) {
         document.getElementById('addPointsBtnNetwork').addEventListener('click',function(){
@@ -451,6 +465,8 @@
         let actionRef = net.roomRef.child('actions').push();
         actionRef.set({type:'roll', playerId: net.myId, timestamp: Date.now()});
         console.log('Roll action sent by', net.myId);
+        // Блокируем кнопку, чтобы не нажимали повторно
+        document.getElementById('rollDiceBtnNetwork').disabled = true;
       });
 
       // Если ведущий – подписываемся на действия
@@ -479,11 +495,10 @@
       let p = players[playerId];
       if(!p || p.finished){ net.isRolling=false; return; }
 
-      // Анимация кубика (на всех клиентах, но выполняется только у ведущего)
-      let el = document.getElementById('diceResultNetwork');
-      for(let i=0;i<10;i++){ el.textContent=String(Math.floor(Math.random()*6)+1); await new Promise(r=>setTimeout(r,80)); }
-      let dice = Math.floor(Math.random()*6)+1;
-      el.textContent = String(dice);
+      // Генерируем результат броска
+      let dice = Math.floor(Math.random() * 6) + 1;
+      // Записываем результат в Firebase, чтобы все клиенты показали анимацию
+      await net.roomRef.child('diceRoll').set(dice);
 
       let target = Math.min(p.position + dice, MAX_POSITION);
       await net.roomRef.child('players/'+playerId+'/position').set(target);
