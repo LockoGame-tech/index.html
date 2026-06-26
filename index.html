@@ -75,6 +75,27 @@
     .btn-warning { color: #fff; background: linear-gradient(135deg, #F39C12, #E67E22); box-shadow: 0 4px 20px rgba(243,156,18,0.3); }
     .btn-warning:hover { box-shadow: 0 6px 30px rgba(243,156,18,0.5); }
 
+    /* Спиннер для кнопки */
+    .btn-loading {
+      color: transparent !important;
+      pointer-events: none;
+    }
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      top: 50%;
+      left: 50%;
+      margin-top: -12px;
+      margin-left: -12px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .message { margin-top: 10px; font-weight: 600; padding: 8px 12px; border-radius: 10px; background: rgba(0,0,0,0.3); }
     .message.success { color: #b9ffb9; }
     .message.error { color: #ffb3b3; }
@@ -128,11 +149,11 @@
     .legend-item { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 15px; }
     .legend-box { width: 20px; height: 20px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
 
-    .log { display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px; will-change: transform; }
+    .log { display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px; will-change: transform; contain: layout style; }
     .log::-webkit-scrollbar { width: 6px; }
     .log::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
     .log::-webkit-scrollbar-thumb { background: rgba(74,144,217,0.3); border-radius: 10px; }
-    .log-item { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 15px; line-height: 1.5; animation: fadeInUp 0.2s ease; }
+    .log-item { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 15px; line-height: 1.5; will-change: transform; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; animation: fadeIn 0.2s ease; }
     .modal.show { display: flex; }
@@ -1222,9 +1243,11 @@
               alert('Игра приостановлена. Дождитесь возобновления.');
               return;
             }
+            // Добавляем спиннер на кнопку
+            this.classList.add('btn-loading');
             let actionRef = net.roomRef.child('actions').push();
             actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
-            fixedBtn.disabled = true;
+            // Кнопка будет разблокирована после обработки действия (в слушателе или в updateGameStateNetwork)
           };
 
           if (isHost) {
@@ -1320,6 +1343,9 @@
             console.error('Error in hostPerformRoll:', error);
           } finally {
             net.isRolling = false;
+            // Убираем спиннер с кнопки, если она всё ещё видна
+            const btn = document.getElementById('fixedRollBtn');
+            if (btn) btn.classList.remove('btn-loading');
           }
         }
 
@@ -1620,6 +1646,10 @@
             let hasQuestion = document.getElementById('questionModal').classList.contains('show');
             let paused = data.paused === true;
             fixedBtn.disabled = (curId !== net.myId) || hasQuestion || paused;
+            // Если кнопка была в состоянии загрузки, убираем спиннер
+            if (!fixedBtn.disabled) {
+              fixedBtn.classList.remove('btn-loading');
+            }
           }
 
           let sel = document.getElementById('addPointsPlayerSelectNetwork');
@@ -1703,32 +1733,52 @@
         }
 
         function renderTokensNetwork(playersData) {
-          let layer = document.getElementById('tokensLayerNetwork');
+          const layer = document.getElementById('tokensLayerNetwork');
           if (!layer) return;
 
-          // Очищаем слой перед отрисовкой, чтобы удалить старые токены
-          layer.innerHTML = '';
+          // Собираем существующие токены в карту
+          const existingTokens = layer.querySelectorAll('.token');
+          const existingMap = {};
+          existingTokens.forEach(el => {
+            if (el.dataset.playerId) existingMap[el.dataset.playerId] = el;
+          });
 
-          let ids = Object.keys(playersData);
+          const ids = Object.keys(playersData);
+          // Обновляем или создаём токены
           ids.forEach((id, idx) => {
-            let p = playersData[id];
-            let pos = p.finished ? FINAL_CELL : p.position;
-            let c = net.cells[pos];
+            const p = playersData[id];
+            const pos = p.finished ? FINAL_CELL : p.position;
+            const c = net.cells[pos];
             if (!c) return;
 
-            let ox = (idx % 3) * 1.15 - 1.15;
-            let oy = Math.floor(idx / 3) * 1.1 - 0.3;
-            let left = (c.x + 1.8 + ox) + '%';
-            let top = (c.y + 1.8 + oy) + '%';
+            const ox = (idx % 3) * 1.15 - 1.15;
+            const oy = Math.floor(idx / 3) * 1.1 - 0.3;
+            const left = (c.x + 1.8 + ox) + '%';
+            const top = (c.y + 1.8 + oy) + '%';
 
-            let token = document.createElement('div');
-            token.className = 'token';
-            token.style.background = p.color || '#5DADE2';
-            token.style.left = left;
-            token.style.top = top;
-            token.textContent = p.avatarIcon;
-            layer.appendChild(token);
+            let token = existingMap[id];
+            if (token) {
+              // Обновляем позицию
+              token.style.left = left;
+              token.style.top = top;
+              // Если аватар изменился (редко) – обновляем
+              token.textContent = p.avatarIcon;
+              // Удаляем из карты, чтобы потом не удалить
+              delete existingMap[id];
+            } else {
+              token = document.createElement('div');
+              token.className = 'token';
+              token.dataset.playerId = id;
+              token.style.background = p.color || '#5DADE2';
+              token.style.left = left;
+              token.style.top = top;
+              token.textContent = p.avatarIcon;
+              layer.appendChild(token);
+            }
           });
+
+          // Удаляем токены, которых нет в новом списке
+          Object.values(existingMap).forEach(el => el.remove());
         }
 
         // ===================== ДОСТИЖЕНИЯ =====================
@@ -2180,7 +2230,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.7 (исправлена синхронизация показа ответа)');
+        console.log('Игра готова! Версия 3.8 (оптимизация анимаций и производительности)');
       }
 
       if (document.readyState === 'loading') {
