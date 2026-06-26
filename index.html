@@ -190,8 +190,26 @@
     .result-card-rank { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
     .result-stats { display: grid; gap: 8px; color: var(--text-secondary); font-size: 15px; }
 
-    .results-table-wrapper { max-height: 300px; overflow-y: auto; overflow-x: auto; border-radius: 12px; background: rgba(0,0,0,0.1); margin-top: 14px; }
+    .results-table-wrapper { max-height: 40vh; overflow-y: auto; overflow-x: auto; border-radius: 12px; background: rgba(0,0,0,0.1); margin-top: 14px; }
     .results-table-wrapper table { width: 100%; min-width: 500px; }
+
+    /* Улучшение таблицы результатов – фиксированные колонки, компактность */
+    .results-table-wrapper table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 15px;
+    }
+    .results-table-wrapper th,
+    .results-table-wrapper td {
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .results-table-wrapper th:nth-child(1) { width: 8%; }
+    .results-table-wrapper th:nth-child(2) { width: 28%; }
+    .results-table-wrapper th:nth-child(3) { width: 14%; }
+    .results-table-wrapper th:nth-child(4) { width: 14%; }
+    .results-table-wrapper th:nth-child(5) { width: 14%; }
+    .results-table-wrapper th:nth-child(6) { width: 22%; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 14px; }
     th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; font-size: 15px; }
@@ -252,8 +270,20 @@
       .dice-result { width: 64px; height: 64px; font-size: 28px; }
       .current-player .avatar { width: 44px; height: 44px; font-size: 22px; }
       .player-name { font-size: 18px; }
-      .modal-box { padding: 24px; }
+      .modal-box { padding: 16px; }
       .podium-place { width: 160px; }
+
+      /* Дополнительные оптимизации таблицы на мобильных */
+      .results-table-wrapper table {
+        font-size: 12px;
+      }
+      .results-table-wrapper th,
+      .results-table-wrapper td {
+        padding: 4px 6px;
+      }
+      .results-table-wrapper {
+        max-height: 35vh;
+      }
     }
 
     .pause-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 900; display: none; align-items: center; justify-content: center; flex-direction: column; color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 2px; }
@@ -2230,7 +2260,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.8 (оптимизация анимаций и производительности)');
+        console.log('Игра готова! Версия 3.9 (улучшенная таблица результатов)');
       }
 
       if (document.readyState === 'loading') {
