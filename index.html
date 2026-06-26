@@ -890,9 +890,9 @@
           }
         }
 
-        // ===================== UI ИГРОКА =====================
+        // ===================== UI ИГРОКА (исправленная) =====================
         function showJoinSetup() {
-          // Сбрасываем состояние
+          // Сбрасываем сообщения и скрываем форму игрока
           document.getElementById('joinMessage').textContent = '';
           document.getElementById('joinMessage').className = 'message';
           document.getElementById('joinPlayerSetup').classList.add('hidden');
@@ -900,7 +900,9 @@
           document.getElementById('showRoomsListBtn').disabled = false;
 
           document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
-          document.getElementById('networkSetupContent').innerHTML = `
+          // Создаём базовую структуру, если её нет (или перезаписываем)
+          const content = document.getElementById('networkSetupContent');
+          content.innerHTML = `
             <div class="network-setup">
               <p>Введите ID комнаты или выберите из списка.</p>
               <label for="joinRoomId">ID комнаты</label>
@@ -916,13 +918,27 @@
                 <button class="btn btn-success" id="joinReadyBtn">Готов к приключению</button>
                 <button class="btn btn-danger" id="leaveRoomBtn">Покинуть игру</button>
               </div>
-            </div>`;
+              <div id="roomsListBlock" class="hidden">
+                <h4>Доступные комнаты</h4>
+                <div id="roomsListContainer" class="rooms-list">Загрузка...</div>
+                <button class="btn btn-secondary" id="backToJoinOptionsBtn">Назад</button>
+              </div>
+            </div>
+          `;
 
+          // Назначаем обработчики (один раз)
           document.getElementById('showRoomsListBtn').addEventListener('click', showRoomsList);
-
           document.getElementById('joinConnectBtn').addEventListener('click', function() {
             const rid = document.getElementById('joinRoomId').value.trim();
             attemptJoinRoom(rid);
+          });
+          document.getElementById('backToJoinOptionsBtn').addEventListener('click', function() {
+            // Скрыть список, показать основную форму
+            document.getElementById('roomsListBlock').classList.add('hidden');
+            document.getElementById('joinConnectBtn').style.display = 'block';
+            document.getElementById('showRoomsListBtn').style.display = 'block';
+            document.getElementById('joinRoomId').style.display = 'block';
+            document.getElementById('joinMessage').style.display = 'block';
           });
 
           // Обработчик кнопки "Готов"
@@ -989,32 +1005,26 @@
           });
         }
 
-        // ===================== СПИСОК КОМНАТ =====================
+        // ===================== СПИСОК КОМНАТ (исправленный) =====================
         function showRoomsList() {
-          // Сбрасываем форму подключения
-          document.getElementById('joinMessage').textContent = '';
-          document.getElementById('joinMessage').className = 'message';
+          // Скрываем основную форму, показываем список
+          document.getElementById('roomsListBlock').classList.remove('hidden');
+          document.getElementById('joinConnectBtn').style.display = 'none';
+          document.getElementById('showRoomsListBtn').style.display = 'none';
+          document.getElementById('joinRoomId').style.display = 'none';
+          document.getElementById('joinMessage').style.display = 'none';
           document.getElementById('joinPlayerSetup').classList.add('hidden');
-          document.getElementById('joinConnectBtn').disabled = false;
-          document.getElementById('showRoomsListBtn').disabled = false;
 
-          document.getElementById('networkSetupContent').innerHTML = `
-            <div class="network-setup">
-              <h4>Доступные комнаты</h4>
-              <div id="roomsListContainer" class="rooms-list">Загрузка...</div>
-              <button class="btn btn-secondary" id="backToJoinOptionsBtn">Назад</button>
-            </div>`;
+          const container = document.getElementById('roomsListContainer');
+          container.innerHTML = 'Загрузка...';
 
-          // Загружаем список комнат, в которых игра ещё не началась
           db.ref('rooms').orderByChild('gameStarted').equalTo(false).once('value')
             .then(snap => {
               const rooms = snap.val();
-              const container = document.getElementById('roomsListContainer');
               if (!rooms) {
                 container.innerHTML = '<p style="color:var(--text-secondary);">Нет активных комнат.</p>';
                 return;
               }
-
               let html = '';
               Object.entries(rooms).forEach(([rid, room]) => {
                 const playerCount = Object.keys(room.players || {}).length;
@@ -1025,23 +1035,24 @@
                   </div>`;
               });
               container.innerHTML = html;
-
-              // Обработчики кликов на карточки комнат
               document.querySelectorAll('.room-card').forEach(card => {
                 card.addEventListener('click', function() {
                   const roomId = this.dataset.roomId;
                   document.getElementById('joinRoomId').value = roomId;
+                  // Скрыть список, показать форму ввода
+                  document.getElementById('roomsListBlock').classList.add('hidden');
+                  document.getElementById('joinConnectBtn').style.display = 'block';
+                  document.getElementById('showRoomsListBtn').style.display = 'block';
+                  document.getElementById('joinRoomId').style.display = 'block';
+                  document.getElementById('joinMessage').style.display = 'block';
                   attemptJoinRoom(roomId);
                 });
               });
             })
             .catch(err => {
-              console.error('Ошибка загрузки комнат:', err);
-              const container = document.getElementById('roomsListContainer');
-              container.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки списка комнат.</p>';
+              console.error(err);
+              container.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки.</p>';
             });
-
-          document.getElementById('backToJoinOptionsBtn').addEventListener('click', showJoinSetup);
         }
 
         // ===================== ЗАПУСК ИГРЫ =====================
@@ -2133,7 +2144,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.4 (окончательное исправление подключения)');
+        console.log('Игра готова! Версия 3.5 (полностью исправлена)');
       }
 
       if (document.readyState === 'loading') {
