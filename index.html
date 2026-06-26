@@ -128,11 +128,11 @@
     .legend-item { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 15px; }
     .legend-box { width: 20px; height: 20px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
 
-    .log { display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px; }
+    .log { display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px; will-change: transform; }
     .log::-webkit-scrollbar { width: 6px; }
     .log::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
     .log::-webkit-scrollbar-thumb { background: rgba(74,144,217,0.3); border-radius: 10px; }
-    .log-item { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 15px; line-height: 1.5; animation: fadeInUp 0.3s ease; }
+    .log-item { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 15px; line-height: 1.5; animation: fadeInUp 0.2s ease; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; animation: fadeIn 0.2s ease; }
     .modal.show { display: flex; }
@@ -491,21 +491,39 @@
           const correctBtn = document.getElementById('answerCorrectBtn');
           const wrongBtn = document.getElementById('answerWrongBtn');
 
-          if (net.role === 'host') {
-            showBtn.style.display = 'block';
-            correctBtn.style.display = 'block';
-            wrongBtn.style.display = 'block';
-            showBtn.disabled = false;
-            correctBtn.disabled = true;
-            wrongBtn.disabled = true;
+          // Если флаг showAnswer уже true (синхронизировано), то сразу показываем ответ
+          if (q.showAnswer === true) {
+            stopTimer();
+            document.getElementById('modalAnswer').style.display = 'block';
+            showBtn.disabled = true;
+            correctBtn.disabled = false;
+            wrongBtn.disabled = false;
+            document.getElementById('questionTimer').textContent = 'Ответ показан';
+            document.getElementById('questionTimer').className = 'timer-box';
+            // Убираем кнопку "Показать ответ" у ведущего, т.к. ответ уже показан
+            if (net.role === 'host') {
+              showBtn.style.display = 'block';
+            } else {
+              showBtn.style.display = 'none';
+            }
           } else {
-            showBtn.style.display = 'none';
-            correctBtn.style.display = 'none';
-            wrongBtn.style.display = 'none';
+            // Включаем таймер и кнопки
+            if (net.role === 'host') {
+              showBtn.style.display = 'block';
+              correctBtn.style.display = 'block';
+              wrongBtn.style.display = 'block';
+              showBtn.disabled = false;
+              correctBtn.disabled = true;
+              wrongBtn.disabled = true;
+            } else {
+              showBtn.style.display = 'none';
+              correctBtn.style.display = 'none';
+              wrongBtn.style.display = 'none';
+            }
+            startTimer();
           }
 
           document.getElementById('questionModal').classList.add('show');
-          startTimer();
         }
 
         function startTimer() {
@@ -526,6 +544,11 @@
               document.getElementById('showAnswerBtn').disabled = true;
               document.getElementById('answerCorrectBtn').disabled = false;
               document.getElementById('answerWrongBtn').disabled = false;
+              // Синхронизируем: если мы ведущий, то устанавливаем флаг showAnswer в Firebase
+              if (net.role === 'host') {
+                let pendingRef = net.roomRef.child('pendingQuestion');
+                pendingRef.update({ showAnswer: true });
+              }
             }
           }, 1000);
         }
@@ -822,7 +845,7 @@
           });
         }
 
-        // ===================== ФУНКЦИЯ ПОДКЛЮЧЕНИЯ (исправленная) =====================
+        // ===================== ФУНКЦИЯ ПОДКЛЮЧЕНИЯ =====================
         async function attemptJoinRoom(rid) {
           // Сбрасываем предыдущее состояние
           if (net.roomRef) {
@@ -890,7 +913,7 @@
           }
         }
 
-        // ===================== UI ИГРОКА (исправленная) =====================
+        // ===================== UI ИГРОКА =====================
         function showJoinSetup() {
           // Сначала вставляем HTML, чтобы элементы появились в DOM
           document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
@@ -1005,7 +1028,7 @@
           });
         }
 
-        // ===================== СПИСОК КОМНАТ (исправленный) =====================
+        // ===================== СПИСОК КОМНАТ =====================
         function showRoomsList() {
           // Скрываем основную форму, показываем список
           document.getElementById('roomsListBlock').classList.remove('hidden');
@@ -1128,6 +1151,17 @@
                   net.questionData?.timestamp !== q.timestamp) {
                 net.questionData = q;
                 openQuestion(q, 'Вопрос для ' + q.playerName, q.context);
+              } else {
+                // Если вопрос уже открыт, но изменился флаг showAnswer, обновляем UI
+                if (q.showAnswer && !document.getElementById('modalAnswer').style.display === 'block') {
+                  stopTimer();
+                  document.getElementById('modalAnswer').style.display = 'block';
+                  document.getElementById('showAnswerBtn').disabled = true;
+                  document.getElementById('answerCorrectBtn').disabled = false;
+                  document.getElementById('answerWrongBtn').disabled = false;
+                  document.getElementById('questionTimer').textContent = 'Ответ показан';
+                  document.getElementById('questionTimer').className = 'timer-box';
+                }
               }
             } else {
               document.getElementById('questionModal').classList.remove('show');
@@ -1370,7 +1404,8 @@
             context,
             playerId,
             playerName: pName,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            showAnswer: false // начальное состояние
           });
         }
 
@@ -1559,7 +1594,10 @@
             if (currentLength > net.lastLogLength) {
               const newEntries = data.log.slice(net.lastLogLength);
               newEntries.forEach(entry => {
-                logDiv.insertAdjacentHTML('beforeend', `<div class="log-item">${entry}</div>`);
+                const el = document.createElement('div');
+                el.className = 'log-item';
+                el.textContent = entry;
+                logDiv.appendChild(el);
               });
               net.lastLogLength = currentLength;
               logDiv.scrollTop = logDiv.scrollHeight;
@@ -1658,10 +1696,10 @@
           let layer = document.getElementById('tokensLayerNetwork');
           if (!layer) return;
 
-          let ids = Object.keys(playersData);
-          let existingTokens = net.tokenElements || {};
-          let newTokenElements = {};
+          // Очищаем слой перед отрисовкой, чтобы удалить старые токены
+          layer.innerHTML = '';
 
+          let ids = Object.keys(playersData);
           ids.forEach((id, idx) => {
             let p = playersData[id];
             let pos = p.finished ? FINAL_CELL : p.position;
@@ -1673,30 +1711,14 @@
             let left = (c.x + 1.8 + ox) + '%';
             let top = (c.y + 1.8 + oy) + '%';
 
-            let token = existingTokens[id];
-            if (token) {
-              token.style.left = left;
-              token.style.top = top;
-              token.textContent = p.avatarIcon;
-            } else {
-              token = document.createElement('div');
-              token.className = 'token';
-              token.style.background = p.color || '#5DADE2';
-              token.style.left = left;
-              token.style.top = top;
-              token.textContent = p.avatarIcon;
-              layer.appendChild(token);
-            }
-            newTokenElements[id] = token;
+            let token = document.createElement('div');
+            token.className = 'token';
+            token.style.background = p.color || '#5DADE2';
+            token.style.left = left;
+            token.style.top = top;
+            token.textContent = p.avatarIcon;
+            layer.appendChild(token);
           });
-
-          Object.keys(existingTokens).forEach(id => {
-            if (!newTokenElements[id]) {
-              existingTokens[id].remove();
-            }
-          });
-
-          net.tokenElements = newTokenElements;
         }
 
         // ===================== ДОСТИЖЕНИЯ =====================
@@ -2060,9 +2082,12 @@
             document.getElementById('answerCorrectBtn').disabled = false;
             document.getElementById('answerWrongBtn').disabled = false;
             if (!timerExpired) {
-              document.getElementById('questionTimer').textContent = 'Таймер остановлен';
+              document.getElementById('questionTimer').textContent = 'Ответ показан';
               document.getElementById('questionTimer').className = 'timer-box';
             }
+            // Синхронизируем с другими игроками
+            let pendingRef = net.roomRef.child('pendingQuestion');
+            pendingRef.update({ showAnswer: true });
           }
         });
 
@@ -2145,7 +2170,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.5 (полностью исправлена)');
+        console.log('Игра готова! Версия 3.6 (исправлены дублирование токенов, моргание лога, синхронизация показа ответа)');
       }
 
       if (document.readyState === 'loading') {
