@@ -449,10 +449,7 @@
         if (dice !== null && typeof dice === 'number') {
           // Запускаем анимацию кубика на всех клиентах
           let el = document.getElementById('diceResultNetwork');
-          for (let i = 0; i < 10; i++) {
-            el.textContent = String(Math.floor(Math.random() * 6) + 1);
-            await new Promise(r => setTimeout(r, 80));
-          }
+          // Анимация убрана – просто показываем число
           el.textContent = String(dice);
         }
       });
