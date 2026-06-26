@@ -31,8 +31,6 @@
                   linear-gradient(145deg, #0a0f14, #141c24, #0b1218);
       padding: 20px; overflow-x: hidden; position: relative; padding-bottom: 80px;
     }
-
-    /* Облака */
     .clouds-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .cloud { position: absolute; background: radial-gradient(ellipse, rgba(74,144,217,0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(40px); opacity: 0.5; animation: floatCloud linear infinite; }
     .cloud1 { width: 600px; height: 200px; top: 10%; left: -15%; animation-duration: 90s; }
@@ -41,7 +39,6 @@
     .cloud4 { width: 700px; height: 200px; top: 85%; left: -15%; animation-duration: 100s; animation-delay: 25s; }
     @keyframes floatCloud { 0% { transform: translateX(0) scale(1); } 50% { transform: translateX(40vw) scale(1.1); } 100% { transform: translateX(120vw) scale(1); } }
 
-    /* Сетка */
     .app { max-width: 1600px; margin: 0 auto; position: relative; z-index: 1; }
     .hero { text-align: center; margin-bottom: 30px; animation: fadeInDown 0.7s ease; }
     .hero h1 { margin: 0; font-size: 58px; font-weight: 700; letter-spacing: 4px; background: linear-gradient(135deg, #6DB3F2, #4A90D9, #2a6b9e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 40px rgba(74,144,217,0.4); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
@@ -49,7 +46,6 @@
     .layout-network { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
     @media (max-width: 1200px) { .layout-network { grid-template-columns: 1fr; } }
 
-    /* Панели и карточки */
     .panel { background: var(--bg-panel); backdrop-filter: blur(12px); border: 1px solid rgba(74,144,217,0.2); border-radius: var(--radius); box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.05); overflow: hidden; animation: fadeInUp 0.6s ease; transition: var(--transition); }
     .panel:hover { border-color: rgba(74,144,217,0.4); box-shadow: var(--shadow-card), var(--border-glow); }
     .panel-inner { padding: 24px; }
@@ -58,13 +54,11 @@
     .box h3 { margin: 0 0 12px; color: var(--blue-soft); font-size: 24px; font-weight: 600; letter-spacing: 1px; text-shadow: 0 0 20px rgba(74,144,217,0.2); }
     .hidden { display: none !important; }
 
-    /* Формы */
     input, select { width: 100%; border: none; outline: none; border-radius: 14px; padding: 14px 16px; margin: 6px 0 16px; font-size: 16px; color: #1f140e; background: rgba(240,248,255,0.9); backdrop-filter: blur(4px); font-family: inherit; transition: var(--transition); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
     input:focus, select:focus { background: #ffffff; box-shadow: 0 0 0 3px rgba(74,144,217,0.3); }
     label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); letter-spacing: 0.5px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-    /* Кнопки */
     .btn { width: 100%; border: none; border-radius: 16px; padding: 16px 20px; font-size: 17px; font-weight: 700; font-family: inherit; cursor: pointer; transition: var(--transition); margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; position: relative; overflow: hidden; }
     .btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 50%); pointer-events: none; }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
@@ -81,12 +75,10 @@
     .btn-warning { color: #fff; background: linear-gradient(135deg, #F39C12, #E67E22); box-shadow: 0 4px 20px rgba(243,156,18,0.3); }
     .btn-warning:hover { box-shadow: 0 6px 30px rgba(243,156,18,0.5); }
 
-    /* Сообщения */
     .message { margin-top: 10px; font-weight: 600; padding: 8px 12px; border-radius: 10px; background: rgba(0,0,0,0.3); }
     .message.success { color: #b9ffb9; }
     .message.error { color: #ffb3b3; }
 
-    /* Игровое поле */
     .board-shell { background: radial-gradient(circle at 30% 30%, rgba(74,144,217,0.05), transparent 60%), linear-gradient(145deg, #0d141c, #080c11); border-top: 1px solid rgba(255,255,255,0.04); padding: 20px; border-radius: var(--radius); }
     .board-wrap { width: 100%; overflow: hidden; border-radius: var(--radius); box-shadow: inset 0 0 40px rgba(0,0,0,0.5); }
     .board { position: relative; width: 100%; aspect-ratio: 11 / 9; min-height: 480px; margin: 0 auto; border-radius: 28px; overflow: hidden; background: radial-gradient(circle at 40% 50%, rgba(74,144,217,0.04), transparent 50%), linear-gradient(145deg, #0d141c, #1a2533, #0b1218); border: 2px solid rgba(74,144,217,0.2); box-shadow: inset 0 0 0 2px rgba(50,70,90,0.3), inset 0 0 80px rgba(0,0,0,0.6); }
@@ -116,38 +108,32 @@
     @keyframes pulseGlow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
     .token { position: absolute; width: 2.4%; aspect-ratio: 1/1; min-width: 24px; min-height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: clamp(10px,0.85vw,14px); box-shadow: 0 6px 24px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.1); transition: left 0.8s cubic-bezier(0.34,1.56,0.64,1), top 0.8s cubic-bezier(0.34,1.56,0.64,1); z-index: 8; will-change: left, top; }
 
-    /* Интерфейс игрока */
     .current-player { display: flex; align-items: center; gap: 16px; margin-top: 10px; padding: 12px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
     .avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; background: linear-gradient(135deg, #5DADE2, #2E86C1); border: 2px solid rgba(74,144,217,0.3); box-shadow: 0 0 20px rgba(74,144,217,0.15); }
     .player-name { font-size: 24px; font-weight: bold; color: var(--text-primary); }
     .player-meta { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
     .dice-result { width: 100px; height: 100px; margin: 12px auto 16px; border-radius: 28px; background: linear-gradient(145deg, #2C4A6A, #1A2A3A); border: 2px solid rgba(74,144,217,0.3); display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--text-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.05); }
 
-    /* Фиксированная кнопка броска */
     #fixedRollBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999; width: auto; padding: 12px 30px; font-size: 18px; border-radius: 50px; box-shadow: 0 4px 30px rgba(0,0,0,0.6); background: linear-gradient(135deg, #5DADE2, #4A90D9); color: #fff; border: 2px solid rgba(255,255,255,0.2); margin: 0; display: none; cursor: pointer; transition: var(--transition); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
     #fixedRollBtn:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 6px 40px rgba(74,144,217,0.5); }
     #fixedRollBtn:disabled { opacity: 0.6; transform: translateX(-50%); cursor: not-allowed; }
     @media (min-width: 1201px) { #fixedRollBtn { bottom: 30px; right: 30px; left: auto; transform: none; } #fixedRollBtn:hover { transform: translateY(-2px); } #fixedRollBtn:disabled { transform: none; } }
 
-    /* Список игроков */
     .players-list { display: grid; gap: 10px; margin-top: 8px; }
     .player-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); transition: var(--transition); }
     .player-row.active { background: rgba(74,144,217,0.12); border-color: rgba(74,144,217,0.3); box-shadow: 0 0 20px rgba(74,144,217,0.05); }
     .mini-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #5DADE2, #2E86C1); border: 1px solid rgba(74,144,217,0.2); font-size: 22px; flex-shrink: 0; }
 
-    /* Легенда */
     .legend { display: grid; gap: 10px; margin-top: 10px; }
     .legend-item { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 15px; }
     .legend-box { width: 20px; height: 20px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
 
-    /* Лог */
     .log { display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px; }
     .log::-webkit-scrollbar { width: 6px; }
     .log::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
     .log::-webkit-scrollbar-thumb { background: rgba(74,144,217,0.3); border-radius: 10px; }
     .log-item { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 15px; line-height: 1.5; animation: fadeInUp 0.3s ease; }
 
-    /* Модальные окна */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; animation: fadeIn 0.2s ease; }
     .modal.show { display: flex; }
     .modal-box { width: 100%; max-width: 740px; background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1), transparent 50%), linear-gradient(145deg, #d4e6f1, #a9cce3); border: 2px solid rgba(74,144,217,0.3); border-radius: 24px; padding: 32px 36px; color: #1a2a3a; box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 60px rgba(74,144,217,0.1); position: relative; animation: zoomIn 0.25s ease; }
@@ -161,7 +147,6 @@
     #showAnswerBtn { background: #1a3a5a; color: #fff; border: none; font-weight: bold; transition: var(--transition); }
     #showAnswerBtn:hover { background: #2a5a7a; transform: translateY(-2px); }
 
-    /* Результаты */
     .winner-banner { margin: 0 0 18px; padding: 14px 16px; border-radius: 16px; background: linear-gradient(180deg, rgba(247,223,149,0.25), rgba(212,175,55,0.12)); border: 2px solid rgba(242,214,128,0.35); color: #fff2c9; font-weight: bold; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.28); animation: fadeInDown 0.6s ease; }
     .results-title-fantasy { text-align: center; font-size: 40px; color: var(--blue-soft); margin-bottom: 10px; animation: fadeInDown 0.6s ease; text-shadow: 0 0 40px rgba(74,144,217,0.3); }
     .results-subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 28px; animation: fadeInUp 0.6s ease; }
@@ -184,52 +169,35 @@
     .result-card-rank { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
     .result-stats { display: grid; gap: 8px; color: var(--text-secondary); font-size: 15px; }
 
-    /* [ИЗМЕНЕНИЕ] Обёртка для таблицы с прокруткой */
-    .results-table-wrapper {
-      max-height: 300px;          /* ограничиваем высоту */
-      overflow-y: auto;           /* вертикальная прокрутка */
-      overflow-x: auto;           /* горизонтальная прокрутка */
-      border-radius: 12px;
-      background: rgba(0,0,0,0.1);
-      margin-top: 14px;
-    }
-    .results-table-wrapper table {
-      width: 100%;
-      min-width: 500px;           /* чтобы столбцы не сжимались слишком сильно */
-    }
+    .results-table-wrapper { max-height: 300px; overflow-y: auto; overflow-x: auto; border-radius: 12px; background: rgba(0,0,0,0.1); margin-top: 14px; }
+    .results-table-wrapper table { width: 100%; min-width: 500px; }
 
-    /* Таблица */
     table { width: 100%; border-collapse: collapse; margin-top: 14px; }
     th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; font-size: 15px; }
     th { background: rgba(255,255,255,0.06); color: var(--blue-soft); font-weight: 600; }
 
-    /* Добавление/вычитание очков */
     .add-points-row { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
     .add-points-row select { flex: 1; min-width: 120px; margin: 0; padding: 10px 12px; font-size: 15px; }
     .add-points-row input { width: 80px; margin: 0; padding: 10px 12px; font-size: 15px; text-align: center; }
     .add-points-row .btn { margin: 0; padding: 10px 20px; width: auto; font-size: 14px; }
 
-    /* Достижения */
     .achievement-icon { display: inline-block; position: relative; cursor: help; margin: 0 2px; }
     .achievement-icon .tooltip-text { visibility: hidden; width: 200px; background-color: rgba(0,0,0,0.8); color: #fff; text-align: center; border-radius: 6px; padding: 6px 10px; position: absolute; z-index: 10; bottom: 125%; left: 50%; transform: translateX(-50%); font-size: 12px; line-height: 1.3; white-space: normal; opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 1px solid rgba(255,255,255,0.15); }
     .achievement-icon .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0,0,0,0.8) transparent transparent transparent; }
     .achievement-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
 
-    /* Меню */
     .main-menu { text-align: center; padding: 50px 20px; }
     .main-menu h1 { font-size: 60px; color: var(--blue-soft); text-shadow: 0 4px 30px rgba(0,0,0,0.6), 0 0 60px rgba(74,144,217,0.1); margin-bottom: 12px; }
     .main-menu p { font-size: 22px; color: var(--text-secondary); margin-bottom: 36px; }
     .main-menu .menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 440px; margin: 0 auto; }
     .main-menu .menu-buttons .btn { font-size: 22px; padding: 20px 28px; }
 
-    /* История игр */
     #historyList { margin-top: 20px; text-align: left; }
     .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .history-item .date { font-size: 14px; color: var(--text-secondary); }
     .history-item .winner { font-weight: bold; color: var(--blue-soft); }
     .history-item .players-count { font-size: 14px; }
 
-    /* Анимации */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes zoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
@@ -238,7 +206,6 @@
     @keyframes crownBounce { 0% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } 100% { transform: translateX(-50%) translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Адаптивность */
     @media (max-width: 1200px) { .layout-network { grid-template-columns: 1fr; } }
     @media (max-width: 900px) {
       .board { min-height: 360px; }
@@ -268,12 +235,10 @@
       .podium-place { width: 160px; }
     }
 
-    /* Пауза */
     .pause-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 900; display: none; align-items: center; justify-content: center; flex-direction: column; color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 2px; }
     .pause-overlay.show { display: flex; }
     .pause-icon { font-size: 64px; margin-bottom: 20px; }
 
-    /* Список комнат */
     .rooms-list { display: grid; gap: 10px; margin: 15px 0; }
     .room-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px; cursor: pointer; transition: var(--transition); display: flex; justify-content: space-between; align-items: center; }
     .room-card:hover { background: rgba(74,144,217,0.1); border-color: rgba(74,144,217,0.3); }
@@ -285,7 +250,6 @@
     <div class="cloud cloud3"></div><div class="cloud cloud4"></div>
   </div>
 
-  <!-- Оверлей паузы -->
   <div class="pause-overlay" id="pauseOverlay">
     <div class="pause-icon">⏸️</div>
     <div>Игра приостановлена</div>
@@ -302,7 +266,6 @@
           <button class="btn btn-success" id="menuHostBtn">👑 Создать игру (ведущий)</button>
           <button class="btn btn-secondary" id="menuJoinBtn">🔗 Присоединиться к игре</button>
           <button class="btn btn-secondary" id="menuHistoryBtn">📜 История игр</button>
-          <!-- [ИЗМЕНЕНИЕ] Кнопка закрытия всех комнат -->
           <button class="btn btn-danger" id="closeAllRoomsBtn">🗑️ Закрыть все комнаты</button>
         </div>
         <div class="message" id="menuMessage"></div>
@@ -310,7 +273,6 @@
       </div>
     </div>
 
-    <!-- Сетевая игра -->
     <div class="layout-network hidden" id="gameLayoutNetwork">
       <div class="panel">
         <div class="panel-inner">
@@ -325,7 +287,6 @@
       </div>
     </div>
 
-    <!-- Фиксированная кнопка "Бросить кубик" -->
     <button id="fixedRollBtn" class="btn btn-primary" disabled>Бросить кубик</button>
   </div>
 
@@ -336,8 +297,6 @@
   <div class="modal" id="confirmFinishModal">
     <div class="modal-box"><h3>Подтверждение завершения</h3><div class="modal-text">Вы действительно хотите завершить игру досрочно? Будут показаны текущие итоги.</div><div class="modal-actions" style="grid-template-columns:1fr 1fr;"><button class="btn btn-secondary" id="cancelFinishBtn">Отмена</button><button class="btn btn-danger" id="confirmFinishBtn">Да, завершить</button></div></div>
   </div>
-
-  <!-- Модальное окно результатов -->
   <div class="modal results-modal" id="resultsModal">
     <div class="modal-box">
       <h3>🏆 Итоги приключения</h3>
@@ -863,32 +822,83 @@
           });
         }
 
-        // ===================== UI ИГРОКА =====================
-        // [ИЗМЕНЕНИЕ] Функция попытки подключения к комнате (вынесена)
+        // ===================== ФУНКЦИЯ ПОДКЛЮЧЕНИЯ (исправленная) =====================
         async function attemptJoinRoom(rid) {
-          if (!rid) {
-            document.getElementById('joinMessage').textContent = 'Введите ID.';
+          // Сбрасываем предыдущее состояние
+          if (net.roomRef) {
+            removeAllListeners();
+            net.roomRef = null;
+          }
+          net.roomId = null;
+          net.myId = null;
+          net.role = null;
+          net.isRolling = false;
+
+          // Очищаем сообщения
+          document.getElementById('joinMessage').textContent = '';
+          document.getElementById('joinMessage').className = 'message';
+
+          // Проверяем ввод
+          if (!rid || rid.trim() === '') {
+            document.getElementById('joinMessage').textContent = 'Введите ID комнаты.';
+            document.getElementById('joinMessage').className = 'message error';
             return;
           }
+
+          // Разблокируем кнопки (если были заблокированы)
+          document.getElementById('joinConnectBtn').disabled = false;
+          document.getElementById('showRoomsListBtn').disabled = false;
+
           try {
-            let s = await db.ref('rooms/' + rid).once('value');
-            let d = s.val();
-            if (!d) {
-              document.getElementById('joinMessage').textContent = 'Комната не найдена.';
+            // Проверяем существование комнаты
+            const roomSnap = await db.ref('rooms/' + rid.trim()).once('value');
+            const roomData = roomSnap.val();
+
+            if (!roomData) {
+              document.getElementById('joinMessage').textContent = 'Комната с таким ID не найдена.';
+              document.getElementById('joinMessage').className = 'message error';
               return;
             }
-            net.roomId = rid;
+
+            if (roomData.gameStarted === true) {
+              document.getElementById('joinMessage').textContent = 'Игра в этой комнате уже началась. Присоединиться нельзя.';
+              document.getElementById('joinMessage').className = 'message error';
+              return;
+            }
+
+            // Сохраняем состояние
+            net.roomId = rid.trim();
             net.role = 'player';
+            net.roomRef = db.ref('rooms/' + net.roomId);
+
+            // Показываем форму выбора имени и аватара
             document.getElementById('joinMessage').textContent = 'Подключено! Выберите имя и аватар.';
+            document.getElementById('joinMessage').className = 'message success';
             document.getElementById('joinPlayerSetup').classList.remove('hidden');
+
+            // Блокируем кнопки, чтобы избежать повторных подключений
             document.getElementById('joinConnectBtn').disabled = true;
             document.getElementById('showRoomsListBtn').disabled = true;
-          } catch (err) {
-            document.getElementById('joinMessage').textContent = 'Ошибка подключения.';
+
+          } catch (error) {
+            console.error('Ошибка при подключении к комнате:', error);
+            document.getElementById('joinMessage').textContent = 'Ошибка подключения: ' + error.message;
+            document.getElementById('joinMessage').className = 'message error';
+            // Разблокируем кнопки в случае ошибки
+            document.getElementById('joinConnectBtn').disabled = false;
+            document.getElementById('showRoomsListBtn').disabled = false;
           }
         }
 
+        // ===================== UI ИГРОКА =====================
         function showJoinSetup() {
+          // Сбрасываем состояние
+          document.getElementById('joinMessage').textContent = '';
+          document.getElementById('joinMessage').className = 'message';
+          document.getElementById('joinPlayerSetup').classList.add('hidden');
+          document.getElementById('joinConnectBtn').disabled = false;
+          document.getElementById('showRoomsListBtn').disabled = false;
+
           document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
           document.getElementById('networkSetupContent').innerHTML = `
             <div class="network-setup">
@@ -911,26 +921,29 @@
           document.getElementById('showRoomsListBtn').addEventListener('click', showRoomsList);
 
           document.getElementById('joinConnectBtn').addEventListener('click', function() {
-            let rid = document.getElementById('joinRoomId').value.trim();
+            const rid = document.getElementById('joinRoomId').value.trim();
             attemptJoinRoom(rid);
           });
 
+          // Обработчик кнопки "Готов"
           document.getElementById('joinReadyBtn').addEventListener('click', function() {
-            let name = document.getElementById('joinPlayerName').value.trim();
-            let avId = document.getElementById('joinAvatarSelect').value;
+            const name = document.getElementById('joinPlayerName').value.trim();
+            const avId = document.getElementById('joinAvatarSelect').value;
             if (!name) {
               document.getElementById('joinMessage').textContent = 'Введите имя.';
+              document.getElementById('joinMessage').className = 'message error';
               return;
             }
-            let res = joinRoom(net.roomId, name, avId);
+            // Вызываем joinRoom для добавления игрока
+            const res = joinRoom(net.roomId, name, avId);
             net.myId = res.playerId;
-            net.roomRef = db.ref('rooms/' + net.roomId);
-
+            // Подписываемся на изменения комнаты
             addListener(net.roomRef, 'value', s => {
-              let d = s.val();
+              const d = s.val();
               if (d && d.gameStarted) startGameNetwork(d);
             });
 
+            // Обновляем UI
             document.getElementById('networkSetupContent').innerHTML = `
               <div class="network-setup">
                 <h4>Вы готовы!</h4>
@@ -960,9 +973,11 @@
               document.getElementById('mainMenu').classList.remove('hidden');
             });
 
+            // Устанавливаем флаг готовности
             net.roomRef.child('players/' + net.myId + '/ready').set(true);
           });
 
+          // Кнопка "Покинуть игру" (если нажата до готовности)
           document.getElementById('leaveRoomBtn').addEventListener('click', function() {
             if (net.roomId && net.role === 'player') {
               db.ref('rooms/' + net.roomId + '/players/' + net.myId).remove();
@@ -976,6 +991,13 @@
 
         // ===================== СПИСОК КОМНАТ =====================
         function showRoomsList() {
+          // Сбрасываем форму подключения
+          document.getElementById('joinMessage').textContent = '';
+          document.getElementById('joinMessage').className = 'message';
+          document.getElementById('joinPlayerSetup').classList.add('hidden');
+          document.getElementById('joinConnectBtn').disabled = false;
+          document.getElementById('showRoomsListBtn').disabled = false;
+
           document.getElementById('networkSetupContent').innerHTML = `
             <div class="network-setup">
               <h4>Доступные комнаты</h4>
@@ -983,32 +1005,41 @@
               <button class="btn btn-secondary" id="backToJoinOptionsBtn">Назад</button>
             </div>`;
 
-          db.ref('rooms').orderByChild('gameStarted').equalTo(false).once('value').then(snap => {
-            const rooms = snap.val();
-            const container = document.getElementById('roomsListContainer');
-            if (!rooms) {
-              container.innerHTML = '<p>Нет активных комнат.</p>';
-              return;
-            }
-            let html = '';
-            Object.entries(rooms).forEach(([rid, room]) => {
-              const playerCount = Object.keys(room.players || {}).length;
-              html += `
-                <div class="room-card" data-room-id="${rid}">
-                  <span>Комната ${rid.slice(0,8)}...</span>
-                  <span>👥 ${playerCount}</span>
-                </div>`;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.room-card').forEach(card => {
-              card.addEventListener('click', function() {
-                const roomId = this.dataset.roomId;
-                document.getElementById('joinRoomId').value = roomId;
-                // [ИЗМЕНЕНИЕ] Вызываем функцию подключения напрямую
-                attemptJoinRoom(roomId);
+          // Загружаем список комнат, в которых игра ещё не началась
+          db.ref('rooms').orderByChild('gameStarted').equalTo(false).once('value')
+            .then(snap => {
+              const rooms = snap.val();
+              const container = document.getElementById('roomsListContainer');
+              if (!rooms) {
+                container.innerHTML = '<p style="color:var(--text-secondary);">Нет активных комнат.</p>';
+                return;
+              }
+
+              let html = '';
+              Object.entries(rooms).forEach(([rid, room]) => {
+                const playerCount = Object.keys(room.players || {}).length;
+                html += `
+                  <div class="room-card" data-room-id="${rid}">
+                    <span>Комната ${rid.slice(0,8)}...</span>
+                    <span>👥 ${playerCount}</span>
+                  </div>`;
               });
+              container.innerHTML = html;
+
+              // Обработчики кликов на карточки комнат
+              document.querySelectorAll('.room-card').forEach(card => {
+                card.addEventListener('click', function() {
+                  const roomId = this.dataset.roomId;
+                  document.getElementById('joinRoomId').value = roomId;
+                  attemptJoinRoom(roomId);
+                });
+              });
+            })
+            .catch(err => {
+              console.error('Ошибка загрузки комнат:', err);
+              const container = document.getElementById('roomsListContainer');
+              container.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки списка комнат.</p>';
             });
-          });
 
           document.getElementById('backToJoinOptionsBtn').addEventListener('click', showJoinSetup);
         }
@@ -1799,7 +1830,6 @@
           html += `</div>`;
 
           html += `<h3 style="margin-top:28px; color:var(--blue-soft);">Таблица итогов</h3>`;
-          // [ИЗМЕНЕНИЕ] Оборачиваем таблицу в прокручиваемый контейнер
           html += `<div class="results-table-wrapper">`;
           html += `<table>
             <thead>
@@ -1992,7 +2022,6 @@
 
         document.getElementById('menuHistoryBtn').addEventListener('click', showHistory);
 
-        // [ИЗМЕНЕНИЕ] Кнопка закрытия всех комнат
         document.getElementById('closeAllRoomsBtn').addEventListener('click', function() {
           if (!db) {
             alert('База данных недоступна.');
@@ -2002,7 +2031,6 @@
             db.ref('rooms').remove()
               .then(() => {
                 alert('Все комнаты закрыты.');
-                // Можно обновить интерфейс, если необходимо
               })
               .catch(err => {
                 console.error('Ошибка при удалении комнат:', err);
@@ -2105,7 +2133,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.3 (исправлены подключение, кнопка закрытия комнат, таблица)');
+        console.log('Игра готова! Версия 3.4 (окончательное исправление подключения)');
       }
 
       if (document.readyState === 'loading') {
