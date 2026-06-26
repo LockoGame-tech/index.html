@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    /* ===================== БАЗОВЫЕ СТИЛИ ===================== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg-deep: #0a0f14; --bg-panel: rgba(12,20,30,0.92); --blue: #4A90D9; --blue-soft: #6DB3F2;
@@ -193,25 +192,13 @@
 </div>
 <footer><br><p>@ Гынгазов Алексей Сергеевич, Фомин Иван Анатольевич</p></footer>
 <script>
-// Часть 2 начнётся здесь
-  (function() {
+(function() {
   'use strict';
-
   function startApp() {
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPfldaE2tz9Pw_Ievzc2a5dbIpHUfb_ck",
-      authDomain: "mygame-cd8fb.firebaseapp.com",
-      databaseURL: "https://mygame-cd8fb-default-rtdb.firebaseio.com",
-      projectId: "mygame-cd8fb",
-      storageBucket: "mygame-cd8fb.firebasestorage.app",
-      messagingSenderId: "934509725275",
-      appId: "1:934509725275:web:e533c68456b1f654fba17e"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyAPfldaE2tz9Pw_Ievzc2a5dbIpHUfb_ck", authDomain: "mygame-cd8fb.firebaseapp.com", databaseURL: "https://mygame-cd8fb-default-rtdb.firebaseio.com", projectId: "mygame-cd8fb", storageBucket: "mygame-cd8fb.firebasestorage.app", messagingSenderId: "934509725275", appId: "1:934509725275:web:e533c68456b1f654fba17e" };
     let db = null;
-    if (typeof firebase !== 'undefined') {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-    } else console.error('Firebase SDK не загружен');
+    if (typeof firebase !== 'undefined') { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
+    else console.error('Firebase SDK не загружен');
 
     const SPECIAL_BACK_CELLS = { 16:14, 27:25, 34:32, 47:45 };
     const SPECIAL_TASK_CELLS = [8,19,30,41];
@@ -252,11 +239,7 @@
       {id:"av28",icon:"🚀",name:"Ракета"},{id:"av29",icon:"🏆",name:"Кубок"},{id:"av30",icon:"👑",name:"Корона"}
     ];
 
-    let net = {
-      role:null, roomId:null, myId:null, roomRef:null, isRolling:false, cells:[],
-      normalQs:[], specialQs:[], finalPool:[], normalPool:[],
-      listeners:[], lastLogLength:0, tokenElements:{}, activityTimer:null
-    };
+    let net = { role:null, roomId:null, myId:null, roomRef:null, isRolling:false, cells:[], normalQs:[], specialQs:[], finalPool:[], normalPool:[], listeners:[], lastLogLength:0, tokenElements:{}, activityTimer:null };
 
     function addListener(ref,event,callback){ if(!ref)return; ref.on(event,callback); net.listeners.push({ref,event,callback}); }
     function removeAllListeners(){ net.listeners.forEach(({ref,event,callback})=>{ ref.off(event,callback); }); net.listeners=[]; }
@@ -268,210 +251,28 @@
           const playersSnap = await net.roomRef.child('players').once('value');
           const players = playersSnap.val() || {};
           const anyoneOnline = Object.values(players).some(p => p.online);
-          if (!anyoneOnline) {
-            await net.roomRef.child('gameFinished').set(true);
-          }
+          if (!anyoneOnline) { await net.roomRef.child('gameFinished').set(true); }
         }
       }, 300000); // 5 минут
     }
 
     let timerSec=60, timerRem=0, timerInterval=null, timerExpired=false;
 
-    function openQuestion(q,title,context){
-      timerExpired=false;
-      document.getElementById('modalTitle').textContent=title;
-      document.getElementById('modalQuestion').textContent=q.question;
-      document.getElementById('modalAnswer').textContent='Правильный ответ: '+q.answer+' • Баллы: '+q.points;
-      document.getElementById('modalAnswer').style.display='none';
-      if(q.imageUrl){ document.getElementById('modalImage').src=q.imageUrl; document.getElementById('modalImage').style.display='block'; }
-      else document.getElementById('modalImage').style.display='none';
-      const showBtn=document.getElementById('showAnswerBtn'), correctBtn=document.getElementById('answerCorrectBtn'), wrongBtn=document.getElementById('answerWrongBtn');
-      if(net.role==='host'){
-        showBtn.style.display='block'; correctBtn.style.display='block'; wrongBtn.style.display='block';
-        showBtn.disabled=false; correctBtn.disabled=true; wrongBtn.disabled=true;
-      } else {
-        showBtn.style.display='none'; correctBtn.style.display='none'; wrongBtn.style.display='none';
-      }
-      document.getElementById('questionModal').classList.add('show');
-      startTimer();
-    }
+    function openQuestion(q,title,context){ timerExpired=false; document.getElementById('modalTitle').textContent=title; document.getElementById('modalQuestion').textContent=q.question; document.getElementById('modalAnswer').textContent='Правильный ответ: '+q.answer+' • Баллы: '+q.points; document.getElementById('modalAnswer').style.display='none'; if(q.imageUrl){ document.getElementById('modalImage').src=q.imageUrl; document.getElementById('modalImage').style.display='block'; } else document.getElementById('modalImage').style.display='none'; const showBtn=document.getElementById('showAnswerBtn'), correctBtn=document.getElementById('answerCorrectBtn'), wrongBtn=document.getElementById('answerWrongBtn'); if(net.role==='host'){ showBtn.style.display='block'; correctBtn.style.display='block'; wrongBtn.style.display='block'; showBtn.disabled=false; correctBtn.disabled=true; wrongBtn.disabled=true; } else { showBtn.style.display='none'; correctBtn.style.display='none'; wrongBtn.style.display='none'; } document.getElementById('questionModal').classList.add('show'); startTimer(); }
     function startTimer(){ stopTimer(); timerExpired=false; timerRem=timerSec; updateTimerUI(); timerInterval=setInterval(()=>{ timerRem--; if(timerRem<0)timerRem=0; updateTimerUI(); if(timerRem===0){ stopTimer(); timerExpired=true; document.getElementById('questionTimer').textContent='Время вышло'; document.getElementById('questionTimer').className='timer-box danger'; document.getElementById('modalAnswer').style.display='block'; document.getElementById('showAnswerBtn').disabled=true; document.getElementById('answerCorrectBtn').disabled=false; document.getElementById('answerWrongBtn').disabled=false; } },1000); }
     function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } }
     function updateTimerUI(){ if(timerExpired)return; document.getElementById('questionTimer').textContent=fmt(timerRem); document.getElementById('questionTimer').className='timer-box'+(timerRem<=10?' danger':''); }
 
-    function showHistory(){
-      if(!db){ document.getElementById('menuMessage').textContent='База данных недоступна'; return; }
-      document.getElementById('menuMessage').textContent='';
-      const historyDiv=document.getElementById('historyList'); historyDiv.classList.remove('hidden');
-      db.ref('history').limitToLast(10).once('value').then(snap=>{
-        const data=snap.val();
-        if(!data){ historyDiv.innerHTML='<p style="color:var(--text-secondary);">История пуста.</p>'; return; }
-        let html='<h4>Последние 10 игр</h4><div style="max-height:400px;overflow:auto;">';
-        const keys=Object.keys(data).reverse();
-        keys.forEach(key=>{
-          const game=data[key];
-          const date=new Date(game.timestamp).toLocaleString('ru-RU');
-          html+=`<div class="history-item">
-            <span class="date">${date}</span>
-            <span class="winner">🏆 ${game.winner||'—'}</span>
-            <span class="players-count">👥 ${game.playerCount||0}</span>
-            <button class="btn btn-secondary export-log-btn" data-game-key="${key}" style="width:auto; padding:4px 8px; font-size:12px;">📜 Летопись</button>
-          </div>`;
-        });
-        html+='</div>';
-        html+='<button class="btn btn-secondary" id="exportHistoryBtn" style="margin-top:10px;">📤 Экспорт истории в Excel</button>';
-        historyDiv.innerHTML=html;
-        document.querySelectorAll('.export-log-btn').forEach(btn=>{
-          btn.addEventListener('click', function(e){
-            e.stopPropagation();
-            const gameKey = this.dataset.gameKey;
-            exportGameLog(gameKey);
-          });
-        });
-        document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistory);
-      }).catch(err=>{ console.error('Error loading history:',err); historyDiv.innerHTML='<p style="color:var(--text-secondary);">Ошибка загрузки истории.</p>'; });
-    }
-
-    async function exportGameLog(gameKey){
-      const snap = await db.ref('history/'+gameKey).once('value');
-      const game = snap.val();
-      if(!game || !game.log) { alert('Летопись отсутствует.'); return; }
-      const rows = [['Событие']];
-      game.log.forEach(entry => rows.push([entry]));
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Летопись');
-      XLSX.writeFile(wb, `chronicle_${gameKey}.xlsx`);
-    }
-
-    function exportHistory(){
-      if(!db) return;
-      db.ref('history').limitToLast(10).once('value').then(snap=>{
-        const data=snap.val();
-        if(!data){ alert('История пуста.'); return; }
-        const rows=[['Дата','Победитель','Кол-во игроков','Игроки (место, имя, очки, достижения)']];
-        const keys=Object.keys(data);
-        keys.forEach(key=>{
-          const game=data[key];
-          const date=new Date(game.timestamp).toLocaleString('ru-RU');
-          let playersStr='';
-          if(game.players) playersStr=game.players.map(p=>`${p.place}. ${p.name} (${p.points} очков) [${(p.achievements||[]).join(', ')}]`).join(' | ');
-          rows.push([date,game.winner||'—',game.playerCount||0,playersStr]);
-        });
-        const ws=XLSX.utils.aoa_to_sheet(rows);
-        const wb=XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb,ws,'История');
-        XLSX.writeFile(wb,'history.xlsx');
-      }).catch(err=>{ alert('Ошибка экспорта: '+err.message); });
-    }
-
-    function parseExcelQuestions(rows) {
-      let parsed = rows.filter(r=>Array.isArray(r)&&r.length>=2).map(r=>({question:String(r[0]??'').trim(),answer:String(r[1]??'').trim(),points:Number(r[2]??0),imageUrl:r[3]?String(r[3]).trim():null})).filter(r=>r.question&&r.answer&&r.points>=0);
-      if(parsed.length>0){ let first=parsed[0]; let ql=first.question.toLowerCase(), al=first.answer.toLowerCase(); if(['вопрос','question','вопросы','questions'].includes(ql)&&['ответ','answer','answers'].includes(al)) parsed=parsed.slice(1); }
-      return parsed;
-    }
-    function parseExcelTasks(rows) {
-      let tasks = rows.filter(r=>Array.isArray(r)&&r.length>=3).map(r=>({question:String(r[0]??'').trim(),answer:String(r[1]??'').trim(),points:Number(r[2]??0)})).filter(r=>r.question&&r.answer);
-      if(tasks.length>0){ let ft=tasks[0]; let tl=ft.question.toLowerCase(); if(['задание','task','вопрос','question'].includes(tl)) tasks=tasks.slice(1); }
-      return tasks;
-    }
-
-    function networkParseExcel(file) {
-      if(typeof XLSX==='undefined'){ document.getElementById('hostUploadMessage').textContent='XLSX не загружен.'; return; }
-      const reader=new FileReader();
-      reader.onload=function(e){
-        try{
-          let data=new Uint8Array(e.target.result); let wb=XLSX.read(data,{type:'array'});
-          let qs=wb.Sheets['Вопросы']||wb.Sheets['questions']||wb.Sheets[wb.SheetNames[0]];
-          let ts=wb.Sheets['Задания']||wb.Sheets['tasks']||wb.Sheets[wb.SheetNames[1]];
-          if(!qs){ document.getElementById('hostUploadMessage').textContent='Не найден лист с вопросами.'; return; }
-          let qRows=XLSX.utils.sheet_to_json(qs,{header:1}); let parsed=parseExcelQuestions(qRows);
-          let tasks=[]; if(ts){ let tRows=XLSX.utils.sheet_to_json(ts,{header:1}); tasks=parseExcelTasks(tRows); }
-          if(!parsed.length){ document.getElementById('hostUploadMessage').textContent='Лист с вопросами пуст.'; return; }
-          window.normalQuestions=parsed; window.specialQuestions=tasks;
-          document.getElementById('hostUploadMessage').textContent=`Загружено вопросов: ${parsed.length}, заданий: ${tasks.length}.`;
-        }catch(err){ document.getElementById('hostUploadMessage').textContent='Ошибка чтения: '+err.message; }
-      };
-      reader.onerror=function(){ document.getElementById('hostUploadMessage').textContent='Ошибка чтения файла.'; };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function createRoom(hostName,qs,sp,time){
-      if(!db){ console.error('Firebase not initialized'); return null; }
-      net.roomId=genRoom(); net.roomRef=db.ref('rooms/'+net.roomId);
-      let data={ hostId:'host', players:{}, questions:qs, specialQuestions:sp, currentPlayerIndex:0, currentPlayerId:null, gameStarted:false, gameFinished:false, paused:false, firstFinalWinnerId:null, finishCounter:0, questionTime:time, log:[] };
-      net.roomRef.set(data); net.myId='host'; net.role='host'; saveSession(net.roomId,net.myId,net.role);
-      return net.roomId;
-    }
-
-    function joinRoom(rid,name,avId){
-      let r=db.ref('rooms/'+rid); let pid='player_'+Date.now()+'_'+Math.random().toString(36).substring(2,6);
-      let av=getAvatarById(avId);
-      let p={ id:pid, name, avatarIcon:av.icon, avatarId:av.id, color:'#5DADE2', position:0, asked:0, correct:0, points:0, finished:false, consecutiveCorrect:0, totalCorrect:0, totalIncorrect:0, rollCounts:{1:0,4:0,6:0}, noOnes:true, trapHits:0, visitedSpecialCells:[], stoppedOnFibonacci:[], movesCount:0, finishOrder:null, ready:false, online:true };
-      r.child('players/'+pid).set(p);
-      r.child('players/'+pid+'/online').onDisconnect().set(false);
-      net.myId=pid; net.role='player'; saveSession(net.roomId,net.myId,net.role);
-      return {playerId:pid,playerData:p};
-    }
-
-    function showHostSetup(){
-      document.getElementById('networkSetupTitle').textContent='Создать игру';
-      document.getElementById('networkSetupContent').innerHTML=`
-        <div class="network-setup"><p>Вы — ведущий. Загрузите Excel с вопросами.</p>
-        <label for="hostExcelFile">Выберите Excel-файл</label><input type="file" id="hostExcelFile" accept=".xlsx,.xls" />
-        <div class="message" id="hostUploadMessage"></div>
-        <label for="hostName">Ваше имя</label><input type="text" id="hostName" placeholder="Введите имя" value="Ведущий" />
-        <label for="hostQuestionTime">Время на вопрос (сек)</label><input type="number" id="hostQuestionTime" min="10" max="600" value="60" />
-        <button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button>
-        <div class="message" id="hostCreateMessage"></div></div>`;
-      document.getElementById('hostExcelFile').addEventListener('change',function(e){ if(e.target.files[0]) networkParseExcel(e.target.files[0]); });
-      document.getElementById('hostCreateBtn').addEventListener('click',function(){
-        let name=document.getElementById('hostName').value.trim();
-        if(!name){ document.getElementById('hostCreateMessage').textContent='Введите имя.'; return; }
-        let time=parseInt(document.getElementById('hostQuestionTime').value);
-        if(!time||time<10||time>600){ document.getElementById('hostCreateMessage').textContent='Время от 10 до 600.'; return; }
-        if(!window.normalQuestions||!window.normalQuestions.length){ document.getElementById('hostCreateMessage').textContent='Сначала загрузите Excel.'; return; }
-        if(!db){ document.getElementById('hostCreateMessage').textContent='Ошибка Firebase.'; return; }
-        let roomId=createRoom(name,window.normalQuestions,window.specialQuestions,time);
-        if(!roomId){ document.getElementById('hostCreateMessage').textContent='Ошибка создания комнаты.'; return; }
-        showHostLobby(roomId);
-      });
-    }
-
-    function showHostLobby(rid){
-      let link=window.location.origin+window.location.pathname+'?room='+rid;
-      document.getElementById('networkSetupContent').innerHTML=`
-        <div class="network-setup"><h4>Комната создана!</h4>
-        <div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br>
-        <input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div>
-        <p>Ожидаем игроков...</p>
-        <div id="playersReadyList" class="player-ready-list"></div>
-        <div class="host-controls">
-          <button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button>
-          <button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button>
-        </div>
-        <div class="message" id="hostLobbyMessage"></div></div>`;
-      document.getElementById('networkRightPanelContainer').classList.add('hidden');
-      document.getElementById('fixedRollBtn').style.display='none';
-      net.roomRef=db.ref('rooms/'+rid);
-      addListener(net.roomRef,'value',snapshot=>{
-        let data=snapshot.val(); if(!data)return;
-        let players=data.players||{}; let ids=Object.keys(players);
-        let list=document.getElementById('playersReadyList'); if(!list)return; list.innerHTML='';
-        ids.forEach(id=>{ let p=players[id]; list.innerHTML+=`<div class="player-ready-item"><div class="avatar-mini">${p.avatarIcon}</div><span>${p.name}</span><span class="ready-badge">${p.ready?'✅ Готов':'⏳ Ожидает'}</span></div>`; });
-        let allReady=ids.length>0&&ids.every(id=>players[id].ready===true);
-        let btn=document.getElementById('hostStartGameBtn'); if(btn) btn.disabled=!allReady;
-        if(data.gameStarted) startGameNetwork(data);
-      });
-      document.getElementById('hostStartGameBtn').addEventListener('click',async function(){
-        let snap=await net.roomRef.once('value'); let d=snap.val();
-        if(d){ let ids=Object.keys(d.players||{}); if(ids.length>0){ net.roomRef.child('currentPlayerId').set(ids[0]); net.roomRef.child('gameStarted').set(true); } }
-      });
-      document.getElementById('hostCancelBtn').addEventListener('click',function(){
-        removeAllListeners(); net.roomRef.remove(); net.role=null; net.roomId=null; clearSession();
-        document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden');
-      });
-    }
+    function showHistory(){ if(!db){ document.getElementById('menuMessage').textContent='База данных недоступна'; return; } document.getElementById('menuMessage').textContent=''; const historyDiv=document.getElementById('historyList'); historyDiv.classList.remove('hidden'); db.ref('history').limitToLast(10).once('value').then(snap=>{ const data=snap.val(); if(!data){ historyDiv.innerHTML='<p style="color:var(--text-secondary);">История пуста.</p>'; return; } let html='<h4>Последние 10 игр</h4><div style="max-height:400px;overflow:auto;">'; const keys=Object.keys(data).reverse(); keys.forEach(key=>{ const game=data[key]; const date=new Date(game.timestamp).toLocaleString('ru-RU'); html+=`<div class="history-item"><span class="date">${date}</span><span class="winner">🏆 ${game.winner||'—'}</span><span class="players-count">👥 ${game.playerCount||0}</span><button class="btn btn-secondary export-log-btn" data-game-key="${key}" style="width:auto; padding:4px 8px; font-size:12px;">📜 Летопись</button></div>`; }); html+='</div>'; html+='<button class="btn btn-secondary" id="exportHistoryBtn" style="margin-top:10px;">📤 Экспорт истории в Excel</button>'; historyDiv.innerHTML=html; document.querySelectorAll('.export-log-btn').forEach(btn=>{ btn.addEventListener('click', function(e){ e.stopPropagation(); const gameKey = this.dataset.gameKey; exportGameLog(gameKey); }); }); document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistory); }).catch(err=>{ console.error('Error loading history:',err); historyDiv.innerHTML='<p style="color:var(--text-secondary);">Ошибка загрузки истории.</p>'; }); }
+    async function exportGameLog(gameKey){ const snap = await db.ref('history/'+gameKey).once('value'); const game = snap.val(); if(!game || !game.log) { alert('Летопись отсутствует.'); return; } const rows = [['Событие']]; game.log.forEach(entry => rows.push([entry])); const ws = XLSX.utils.aoa_to_sheet(rows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Летопись'); XLSX.writeFile(wb, `chronicle_${gameKey}.xlsx`); }
+    function exportHistory(){ if(!db) return; db.ref('history').limitToLast(10).once('value').then(snap=>{ const data=snap.val(); if(!data){ alert('История пуста.'); return; } const rows=[['Дата','Победитель','Кол-во игроков','Игроки (место, имя, очки, достижения)']]; const keys=Object.keys(data); keys.forEach(key=>{ const game=data[key]; const date=new Date(game.timestamp).toLocaleString('ru-RU'); let playersStr=''; if(game.players) playersStr=game.players.map(p=>`${p.place}. ${p.name} (${p.points} очков) [${(p.achievements||[]).join(', ')}]`).join(' | '); rows.push([date,game.winner||'—',game.playerCount||0,playersStr]); }); const ws=XLSX.utils.aoa_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'История'); XLSX.writeFile(wb,'history.xlsx'); }).catch(err=>{ alert('Ошибка экспорта: '+err.message); }); }
+    function parseExcelQuestions(rows) { let parsed = rows.filter(r=>Array.isArray(r)&&r.length>=2).map(r=>({question:String(r[0]??'').trim(),answer:String(r[1]??'').trim(),points:Number(r[2]??0),imageUrl:r[3]?String(r[3]).trim():null})).filter(r=>r.question&&r.answer&&r.points>=0); if(parsed.length>0){ let first=parsed[0]; let ql=first.question.toLowerCase(), al=first.answer.toLowerCase(); if(['вопрос','question','вопросы','questions'].includes(ql)&&['ответ','answer','answers'].includes(al)) parsed=parsed.slice(1); } return parsed; }
+    function parseExcelTasks(rows) { let tasks = rows.filter(r=>Array.isArray(r)&&r.length>=3).map(r=>({question:String(r[0]??'').trim(),answer:String(r[1]??'').trim(),points:Number(r[2]??0)})).filter(r=>r.question&&r.answer); if(tasks.length>0){ let ft=tasks[0]; let tl=ft.question.toLowerCase(); if(['задание','task','вопрос','question'].includes(tl)) tasks=tasks.slice(1); } return tasks; }
+    function networkParseExcel(file) { if(typeof XLSX==='undefined'){ document.getElementById('hostUploadMessage').textContent='XLSX не загружен.'; return; } const reader=new FileReader(); reader.onload=function(e){ try{ let data=new Uint8Array(e.target.result); let wb=XLSX.read(data,{type:'array'}); let qs=wb.Sheets['Вопросы']||wb.Sheets['questions']||wb.Sheets[wb.SheetNames[0]]; let ts=wb.Sheets['Задания']||wb.Sheets['tasks']||wb.Sheets[wb.SheetNames[1]]; if(!qs){ document.getElementById('hostUploadMessage').textContent='Не найден лист с вопросами.'; return; } let qRows=XLSX.utils.sheet_to_json(qs,{header:1}); let parsed=parseExcelQuestions(qRows); let tasks=[]; if(ts){ let tRows=XLSX.utils.sheet_to_json(ts,{header:1}); tasks=parseExcelTasks(tRows); } if(!parsed.length){ document.getElementById('hostUploadMessage').textContent='Лист с вопросами пуст.'; return; } window.normalQuestions=parsed; window.specialQuestions=tasks; document.getElementById('hostUploadMessage').textContent=`Загружено вопросов: ${parsed.length}, заданий: ${tasks.length}.`; }catch(err){ document.getElementById('hostUploadMessage').textContent='Ошибка чтения: '+err.message; } }; reader.onerror=function(){ document.getElementById('hostUploadMessage').textContent='Ошибка чтения файла.'; }; reader.readAsArrayBuffer(file); }
+    function createRoom(hostName,qs,sp,time){ if(!db){ console.error('Firebase not initialized'); return null; } net.roomId=genRoom(); net.roomRef=db.ref('rooms/'+net.roomId); let data={ hostId:'host', players:{}, questions:qs, specialQuestions:sp, currentPlayerIndex:0, currentPlayerId:null, gameStarted:false, gameFinished:false, paused:false, firstFinalWinnerId:null, finishCounter:0, questionTime:time, log:[] }; net.roomRef.set(data); net.myId='host'; net.role='host'; saveSession(net.roomId,net.myId,net.role); return net.roomId; }
+    function joinRoom(rid,name,avId){ let r=db.ref('rooms/'+rid); let pid='player_'+Date.now()+'_'+Math.random().toString(36).substring(2,6); let av=getAvatarById(avId); let p={ id:pid, name, avatarIcon:av.icon, avatarId:av.id, color:'#5DADE2', position:0, asked:0, correct:0, points:0, finished:false, consecutiveCorrect:0, totalCorrect:0, totalIncorrect:0, rollCounts:{1:0,4:0,6:0}, noOnes:true, trapHits:0, visitedSpecialCells:[], stoppedOnFibonacci:[], movesCount:0, finishOrder:null, ready:false, online:true }; r.child('players/'+pid).set(p); r.child('players/'+pid+'/online').onDisconnect().set(false); net.myId=pid; net.role='player'; saveSession(net.roomId,net.myId,net.role); return {playerId:pid,playerData:p}; }
+    function showHostSetup(){ document.getElementById('networkSetupTitle').textContent='Создать игру'; document.getElementById('networkSetupContent').innerHTML=`<div class="network-setup"><p>Вы — ведущий. Загрузите Excel с вопросами.</p><label for="hostExcelFile">Выберите Excel-файл</label><input type="file" id="hostExcelFile" accept=".xlsx,.xls" /><div class="message" id="hostUploadMessage"></div><label for="hostName">Ваше имя</label><input type="text" id="hostName" placeholder="Введите имя" value="Ведущий" /><label for="hostQuestionTime">Время на вопрос (сек)</label><input type="number" id="hostQuestionTime" min="10" max="600" value="60" /><button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button><div class="message" id="hostCreateMessage"></div></div>`; document.getElementById('hostExcelFile').addEventListener('change',function(e){ if(e.target.files[0]) networkParseExcel(e.target.files[0]); }); document.getElementById('hostCreateBtn').addEventListener('click',function(){ let name=document.getElementById('hostName').value.trim(); if(!name){ document.getElementById('hostCreateMessage').textContent='Введите имя.'; return; } let time=parseInt(document.getElementById('hostQuestionTime').value); if(!time||time<10||time>600){ document.getElementById('hostCreateMessage').textContent='Время от 10 до 600.'; return; } if(!window.normalQuestions||!window.normalQuestions.length){ document.getElementById('hostCreateMessage').textContent='Сначала загрузите Excel.'; return; } if(!db){ document.getElementById('hostCreateMessage').textContent='Ошибка Firebase.'; return; } let roomId=createRoom(name,window.normalQuestions,window.specialQuestions,time); if(!roomId){ document.getElementById('hostCreateMessage').textContent='Ошибка создания комнаты.'; return; } showHostLobby(roomId); }); }
+    function showHostLobby(rid){ let link=window.location.origin+window.location.pathname+'?room='+rid; document.getElementById('networkSetupContent').innerHTML=`<div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`; document.getElementById('networkRightPanelContainer').classList.add('hidden'); document.getElementById('fixedRollBtn').style.display='none'; net.roomRef=db.ref('rooms/'+rid); addListener(net.roomRef,'value',snapshot=>{ let data=snapshot.val(); if(!data)return; let players=data.players||{}; let ids=Object.keys(players); let list=document.getElementById('playersReadyList'); if(!list)return; list.innerHTML=''; ids.forEach(id=>{ let p=players[id]; list.innerHTML+=`<div class="player-ready-item"><div class="avatar-mini">${p.avatarIcon}</div><span>${p.name}</span><span class="ready-badge">${p.ready?'✅ Готов':'⏳ Ожидает'}</span></div>`; }); let allReady=ids.length>0&&ids.every(id=>players[id].ready===true); let btn=document.getElementById('hostStartGameBtn'); if(btn) btn.disabled=!allReady; if(data.gameStarted) startGameNetwork(data); }); document.getElementById('hostStartGameBtn').addEventListener('click',async function(){ let snap=await net.roomRef.once('value'); let d=snap.val(); if(d){ let ids=Object.keys(d.players||{}); if(ids.length>0){ net.roomRef.child('currentPlayerId').set(ids[0]); net.roomRef.child('gameStarted').set(true); } } }); document.getElementById('hostCancelBtn').addEventListener('click',function(){ removeAllListeners(); net.roomRef.remove(); net.role=null; net.roomId=null; clearSession(); document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); }); }
 
     function showRoomsList(){
       document.getElementById('networkSetupContent').innerHTML=`
@@ -739,10 +540,34 @@
       let sel=document.getElementById('addPointsPlayerSelectNetwork'); if(sel){ let val=sel.value; sel.innerHTML='<option value="">-- выберите --</option>'; playerIds.forEach(id=>{ let p=players[id]; let opt=document.createElement('option'); opt.value=id; opt.textContent=`${p.avatarIcon} ${p.name} (${p.points} очков)`; sel.appendChild(opt); }); if(playerIds.includes(val)) sel.value=val; }
     }
 
-    function buildCellsNetwork(){ /* как раньше */ }
-    function renderOrnamentsNetwork(){ /* как раньше */ }
-    function renderCellsNetwork(){ /* как раньше */ }
-    function renderTokensNetwork(playersData){ /* как раньше */ }
+    function buildCellsNetwork() {
+      let rows = [[0,1,2,3,4,5,6],[13,12,11,10,9,8,7],[14,15,16,17,18,19,20],[27,26,25,24,23,22,21],[28,29,30,31,32,33,34],[41,40,39,38,37,36,35],[42,43,44,45,46,47,48],[49,50]];
+      let custom = { 49: { x:84.3, y:84.1 }, 50: { x:71.5, y:84.1 } };
+      let sx=7.5, sy=8.5, gx=12.8, gy=10.8;
+      net.cells = [];
+      rows.forEach((r,ri) => r.forEach((ci,cix) => {
+        net.cells[ci] = custom[ci] ? { index:ci, x:custom[ci].x, y:custom[ci].y } : { index:ci, x:sx+cix*gx, y:sy+ri*gy };
+      }));
+    }
+
+    function renderOrnamentsNetwork() {
+      let layer = document.getElementById('ornamentsLayerNetwork'); if(!layer)return; layer.innerHTML = '';
+      let items = [{x:"2.5%",y:"2%",text:"✦"},{x:"94%",y:"2%",text:"✦"},{x:"3%",y:"92%",text:"✦"},{x:"93%",y:"92%",text:"✦"},{x:"47%",y:"44%",text:"⚔"},{x:"51%",y:"44%",text:"🛡"},{x:"10%",y:"10%",text:"◈"},{x:"85%",y:"10%",text:"◈"},{x:"10%",y:"85%",text:"◈"},{x:"85%",y:"85%",text:"◈"},{x:"25%",y:"5%",text:"⋆"},{x:"70%",y:"5%",text:"⋆"},{x:"25%",y:"90%",text:"⋆"},{x:"70%",y:"90%",text:"⋆"},{x:"35%",y:"50%",text:"☯"},{x:"60%",y:"50%",text:"☯"}];
+      items.forEach(it => { let d = document.createElement('div'); d.className='ornament'; d.style.left=it.x; d.style.top=it.y; d.textContent=it.text; layer.appendChild(d); });
+    }
+
+    function renderCellsNetwork() {
+      let layer = document.getElementById('cellsLayerNetwork'); if(!layer)return; layer.innerHTML = '';
+      net.cells.forEach(c => { if(!c)return; let t=cellType(c.index), txt=cellText(c.index); let d=document.createElement('div'); d.className='cell '+t; d.style.left=c.x+'%'; d.style.top=c.y+'%'; d.innerHTML=`<div class="cell-label">${txt.main}${txt.sub?`<span class="sub">${txt.sub}</span>`:''}</div>`; layer.appendChild(d); });
+    }
+
+    function renderTokensNetwork(playersData) {
+      let layer = document.getElementById('tokensLayerNetwork'); if(!layer)return;
+      let ids = Object.keys(playersData); let existingTokens = net.tokenElements||{}; let newTokenElements = {};
+      ids.forEach((id,idx) => { let p=playersData[id]; let pos=p.finished?FINAL_CELL:p.position; let c=net.cells[pos]; if(!c)return; let ox=(idx%3)*1.15-1.15, oy=Math.floor(idx/3)*1.1-0.3; let left=(c.x+1.8+ox)+'%', top=(c.y+1.8+oy)+'%'; let token=existingTokens[id]; if(token){ token.style.left=left; token.style.top=top; token.textContent=p.avatarIcon; } else { token=document.createElement('div'); token.className='token'; token.style.background=p.color||'#5DADE2'; token.style.left=left; token.style.top=top; token.textContent=p.avatarIcon; layer.appendChild(token); } newTokenElements[id]=token; });
+      Object.keys(existingTokens).forEach(id => { if(!newTokenElements[id]) existingTokens[id].remove(); });
+      net.tokenElements = newTokenElements;
+    }
 
     function showGameResults(data){
       removeAllListeners(); if(net.activityTimer) clearTimeout(net.activityTimer);
@@ -786,8 +611,6 @@
 
     let urlParams=new URLSearchParams(window.location.search); let roomParam=urlParams.get('room');
     if(roomParam){ document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('gameLayoutNetwork').classList.remove('hidden'); showJoinSetup(); setTimeout(()=>{ const joinInput=document.getElementById('joinRoomId'); if(joinInput)joinInput.value=roomParam; const joinBtn=document.getElementById('joinConnectBtn'); if(joinBtn)joinBtn.click(); },100); } else { restoreSession(); }
-
-    // Функции отрисовки доски (buildCellsNetwork, renderOrnamentsNetwork, renderCellsNetwork, renderTokensNetwork) должны быть вставлены полностью (как в предыдущих версиях).
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', startApp);
