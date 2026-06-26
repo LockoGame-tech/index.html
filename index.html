@@ -892,15 +892,8 @@
 
         // ===================== UI ИГРОКА (исправленная) =====================
         function showJoinSetup() {
-          // Сбрасываем сообщения и скрываем форму игрока
-          document.getElementById('joinMessage').textContent = '';
-          document.getElementById('joinMessage').className = 'message';
-          document.getElementById('joinPlayerSetup').classList.add('hidden');
-          document.getElementById('joinConnectBtn').disabled = false;
-          document.getElementById('showRoomsListBtn').disabled = false;
-
+          // Сначала вставляем HTML, чтобы элементы появились в DOM
           document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
-          // Создаём базовую структуру, если её нет (или перезаписываем)
           const content = document.getElementById('networkSetupContent');
           content.innerHTML = `
             <div class="network-setup">
@@ -926,7 +919,14 @@
             </div>
           `;
 
-          // Назначаем обработчики (один раз)
+          // Теперь все элементы существуют, можно ими управлять
+          document.getElementById('joinMessage').textContent = '';
+          document.getElementById('joinMessage').className = 'message';
+          document.getElementById('joinPlayerSetup').classList.add('hidden');
+          document.getElementById('joinConnectBtn').disabled = false;
+          document.getElementById('showRoomsListBtn').disabled = false;
+
+          // Назначаем обработчики
           document.getElementById('showRoomsListBtn').addEventListener('click', showRoomsList);
           document.getElementById('joinConnectBtn').addEventListener('click', function() {
             const rid = document.getElementById('joinRoomId').value.trim();
@@ -1045,7 +1045,8 @@
                   document.getElementById('showRoomsListBtn').style.display = 'block';
                   document.getElementById('joinRoomId').style.display = 'block';
                   document.getElementById('joinMessage').style.display = 'block';
-                  attemptJoinRoom(roomId);
+                  // Имитируем нажатие на кнопку "Подключиться"
+                  document.getElementById('joinConnectBtn').click();
                 });
               });
             })
