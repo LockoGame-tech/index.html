@@ -16,14 +16,14 @@
     }
 
     :root {
-      --bg-deep: #0a0604;
-      --bg-panel: rgba(18, 12, 8, 0.92);
-      --gold: #d4af37;
-      --gold-light: #f7e4a5;
-      --gold-glow: 0 0 30px rgba(212, 175, 55, 0.3);
-      --text-primary: #f5eed5;
-      --text-secondary: #c9b89a;
-      --border-glow: 0 0 15px rgba(212, 175, 55, 0.2);
+      --bg-deep: #0a0f14;
+      --bg-panel: rgba(12, 20, 30, 0.92);
+      --blue: #4A90D9;
+      --blue-soft: #6DB3F2;
+      --blue-glow: 0 0 30px rgba(74, 144, 217, 0.3);
+      --text-primary: #f0f6fc;
+      --text-secondary: #b0c7dd;
+      --border-glow: 0 0 15px rgba(74, 144, 217, 0.2);
       --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.7);
       --radius: 20px;
       --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -35,9 +35,9 @@
       color: var(--text-primary);
       min-height: 100vh;
       background:
-        radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-        linear-gradient(145deg, #0a0604, #1a100a, #0f0b07);
+        radial-gradient(ellipse at 20% 50%, rgba(74, 144, 217, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(74, 144, 217, 0.05) 0%, transparent 50%),
+        linear-gradient(145deg, #0a0f14, #141c24, #0b1218);
       padding: 20px;
       overflow-x: hidden;
       position: relative;
@@ -54,7 +54,7 @@
 
     .cloud {
       position: absolute;
-      background: radial-gradient(ellipse, rgba(255, 215, 140, 0.06) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(74, 144, 217, 0.06) 0%, transparent 70%);
       border-radius: 50%;
       filter: blur(40px);
       opacity: 0.5;
@@ -124,10 +124,10 @@
       font-size: 58px;
       font-weight: 700;
       letter-spacing: 4px;
-      background: linear-gradient(135deg, #f7e4a5, #d4af37, #b38c2a);
+      background: linear-gradient(135deg, #6DB3F2, #4A90D9, #2a6b9e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+      text-shadow: 0 0 40px rgba(74, 144, 217, 0.4);
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
     }
 
@@ -136,7 +136,7 @@
       color: var(--text-secondary);
       font-size: 22px;
       letter-spacing: 2px;
-      text-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.1);
     }
 
     .layout-network {
@@ -156,7 +156,7 @@
     .panel {
       background: var(--bg-panel);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      border: 1px solid rgba(74, 144, 217, 0.2);
       border-radius: var(--radius);
       box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       overflow: hidden;
@@ -165,7 +165,7 @@
     }
 
     .panel:hover {
-      border-color: rgba(212, 175, 55, 0.4);
+      border-color: rgba(74, 144, 217, 0.4);
       box-shadow: var(--shadow-card), var(--border-glow);
     }
 
@@ -174,9 +174,9 @@
     }
 
     .box {
-      background: rgba(26, 16, 10, 0.6);
+      background: rgba(18, 28, 40, 0.6);
       backdrop-filter: blur(6px);
-      border: 1px solid rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(74, 144, 217, 0.15);
       border-radius: var(--radius);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       padding: 20px;
@@ -185,17 +185,17 @@
     }
 
     .box:hover {
-      border-color: rgba(212, 175, 55, 0.3);
-      box-shadow: 0 4px 30px rgba(212, 175, 55, 0.1);
+      border-color: rgba(74, 144, 217, 0.3);
+      box-shadow: 0 4px 30px rgba(74, 144, 217, 0.1);
     }
 
     .box h3 {
       margin: 0 0 12px;
-      color: var(--gold-light);
+      color: var(--blue-soft);
       font-size: 24px;
       font-weight: 600;
       letter-spacing: 1px;
-      text-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.2);
     }
 
     .hidden {
@@ -213,7 +213,7 @@
       margin: 6px 0 16px;
       font-size: 16px;
       color: #1f140e;
-      background: rgba(255, 248, 235, 0.9);
+      background: rgba(240, 248, 255, 0.9);
       backdrop-filter: blur(4px);
       font-family: inherit;
       transition: var(--transition);
@@ -222,8 +222,8 @@
 
     input:focus,
     select:focus {
-      background: #fffcf5;
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.3);
     }
 
     label {
@@ -282,33 +282,33 @@
     }
 
     .btn-primary {
-      color: #2a1a0f;
-      background: linear-gradient(135deg, #f3d98b, #d4af37, #b38c2a);
-      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+      color: #ffffff;
+      background: linear-gradient(135deg, #5DADE2, #4A90D9, #2a6b9e);
+      box-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
     }
 
     .btn-primary:hover {
-      box-shadow: 0 6px 30px rgba(212, 175, 55, 0.5);
+      box-shadow: 0 6px 30px rgba(74, 144, 217, 0.5);
     }
 
     .btn-success {
-      color: #10210f;
-      background: linear-gradient(135deg, #a9dfbf, #52be80);
-      box-shadow: 0 4px 20px rgba(82, 190, 128, 0.3);
+      color: #ffffff;
+      background: linear-gradient(135deg, #48C9B0, #1ABC9C);
+      box-shadow: 0 4px 20px rgba(26, 188, 156, 0.3);
     }
 
     .btn-success:hover {
-      box-shadow: 0 6px 30px rgba(82, 190, 128, 0.5);
+      box-shadow: 0 6px 30px rgba(26, 188, 156, 0.5);
     }
 
     .btn-danger {
-      color: #fff3f0;
-      background: linear-gradient(135deg, #d98880, #a93226);
-      box-shadow: 0 4px 20px rgba(169, 50, 38, 0.3);
+      color: #ffffff;
+      background: linear-gradient(135deg, #E74C3C, #C0392B);
+      box-shadow: 0 4px 20px rgba(192, 57, 43, 0.3);
     }
 
     .btn-danger:hover {
-      box-shadow: 0 6px 30px rgba(169, 50, 38, 0.5);
+      box-shadow: 0 6px 30px rgba(192, 57, 43, 0.5);
     }
 
     .btn-secondary {
@@ -352,27 +352,27 @@
 
     .player-setup-card:hover {
       background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(212, 175, 55, 0.2);
+      border-color: rgba(74, 144, 217, 0.2);
     }
 
     .setup-avatar-preview {
       width: 70px;
       height: 70px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(212, 175, 55, 0.1));
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(74, 144, 217, 0.1));
+      border: 2px solid rgba(74, 144, 217, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 38px;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+      box-shadow: 0 0 20px rgba(74, 144, 217, 0.1);
     }
 
     /* ===================== ИГРОВОЕ ПОЛЕ ===================== */
     .board-shell {
       background:
-        radial-gradient(circle at 30% 30%, rgba(242, 214, 128, 0.05), transparent 60%),
-        linear-gradient(145deg, #1e140e, #0f0a06);
+        radial-gradient(circle at 30% 30%, rgba(74, 144, 217, 0.05), transparent 60%),
+        linear-gradient(145deg, #0d141c, #080c11);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       padding: 20px;
       border-radius: var(--radius);
@@ -383,22 +383,25 @@
       overflow: hidden;
       border-radius: var(--radius);
       box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+      /* Добавим возможность прокрутки для маленьких экранов */
+      overflow: auto;
+      max-height: 90vh;
     }
 
     .board {
       position: relative;
       width: 100%;
       aspect-ratio: 11 / 9;
-      min-height: 760px;
+      min-height: 480px;
       margin: 0 auto;
       border-radius: 28px;
       overflow: hidden;
       background:
-        radial-gradient(circle at 40% 50%, rgba(212, 175, 55, 0.04), transparent 50%),
-        linear-gradient(145deg, #1e140e, #2a1c12, #1a100a);
-      border: 2px solid rgba(212, 175, 55, 0.2);
+        radial-gradient(circle at 40% 50%, rgba(74, 144, 217, 0.04), transparent 50%),
+        linear-gradient(145deg, #0d141c, #1a2533, #0b1218);
+      border: 2px solid rgba(74, 144, 217, 0.2);
       box-shadow:
-        inset 0 0 0 2px rgba(50, 30, 20, 0.3),
+        inset 0 0 0 2px rgba(50, 70, 90, 0.3),
         inset 0 0 80px rgba(0, 0, 0, 0.6);
     }
 
@@ -407,8 +410,24 @@
       position: absolute;
       inset: 12px;
       border-radius: 22px;
-      border: 1px solid rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(74, 144, 217, 0.08);
       pointer-events: none;
+    }
+
+    /* Адаптивность поля */
+    @media (max-width: 900px) {
+      .board {
+        min-height: 360px;
+      }
+    }
+    @media (max-width: 600px) {
+      .board {
+        min-height: 280px;
+        aspect-ratio: 11 / 9;
+      }
+      .board-shell {
+        padding: 10px;
+      }
     }
 
     /* Слои */
@@ -441,11 +460,11 @@
     /* Орнаменты */
     .ornament {
       position: absolute;
-      color: rgba(212, 175, 55, 0.15);
+      color: rgba(74, 144, 217, 0.15);
       font-size: 3.2vw;
       pointer-events: none;
       user-select: none;
-      text-shadow: 0 0 20px rgba(212, 175, 55, 0.05);
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.05);
     }
 
     /* Клетки */
@@ -473,29 +492,29 @@
     }
 
     .cell.start {
-      background: linear-gradient(135deg, #c89b2b, #7a5a14);
-      border-color: rgba(212, 175, 55, 0.6);
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border-color: rgba(74, 144, 217, 0.6);
     }
     .cell.normal {
-      background: linear-gradient(135deg, #6e5b4a, #4d3b2e);
+      background: linear-gradient(135deg, #4A6B8A, #2C4A6A);
     }
     .cell.back {
-      background: linear-gradient(135deg, #8a3e1a, #5a2410);
-      border-color: rgba(255, 100, 50, 0.4);
+      background: linear-gradient(135deg, #8E44AD, #6C3483);
+      border-color: rgba(142, 68, 173, 0.4);
     }
     .cell.special {
-      background: linear-gradient(135deg, #6c3483, #3d1f54);
-      border-color: rgba(108, 52, 131, 0.5);
+      background: linear-gradient(135deg, #5DADE2, #3498DB);
+      border-color: rgba(52, 152, 219, 0.5);
     }
     .cell.finish {
-      background: linear-gradient(135deg, #1e8449, #0f4a2a);
-      border-color: rgba(30, 132, 73, 0.5);
+      background: linear-gradient(135deg, #1ABC9C, #148F77);
+      border-color: rgba(26, 188, 156, 0.5);
     }
 
     .cell-label {
       line-height: 1.05;
       font-size: clamp(10px, 1vw, 17px);
-      color: #fff6df;
+      color: #eaf2f8;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
     }
 
@@ -512,10 +531,10 @@
       width: 7.6%;
       aspect-ratio: 1 / 1;
       border-radius: 28px;
-      border: 3px solid rgba(255, 234, 166, 0.9);
+      border: 3px solid rgba(109, 179, 242, 0.9);
       box-shadow:
-        0 0 0 4px rgba(212, 175, 55, 0.15),
-        0 0 40px rgba(212, 175, 55, 0.5);
+        0 0 0 4px rgba(74, 144, 217, 0.15),
+        0 0 40px rgba(74, 144, 217, 0.5);
       pointer-events: none;
       animation: pulseGlow 1.8s infinite ease-in-out;
       z-index: 4;
@@ -578,9 +597,9 @@
       align-items: center;
       justify-content: center;
       font-size: 34px;
-      background: linear-gradient(135deg, #8b6b42, #4d3522);
-      border: 2px solid rgba(212, 175, 55, 0.3);
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border: 2px solid rgba(74, 144, 217, 0.3);
+      box-shadow: 0 0 20px rgba(74, 144, 217, 0.15);
     }
 
     .player-name {
@@ -600,8 +619,8 @@
       height: 100px;
       margin: 12px auto 16px;
       border-radius: 28px;
-      background: linear-gradient(145deg, #5a4232, #33251b);
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      background: linear-gradient(145deg, #2C4A6A, #1A2A3A);
+      border: 2px solid rgba(74, 144, 217, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -629,9 +648,9 @@
     }
 
     .player-row.active {
-      background: rgba(212, 175, 55, 0.12);
-      border-color: rgba(212, 175, 55, 0.3);
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.05);
+      background: rgba(74, 144, 217, 0.12);
+      border-color: rgba(74, 144, 217, 0.3);
+      box-shadow: 0 0 20px rgba(74, 144, 217, 0.05);
     }
 
     .mini-avatar {
@@ -641,8 +660,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #8b6b42, #4d3522);
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border: 1px solid rgba(74, 144, 217, 0.2);
       font-size: 22px;
       flex-shrink: 0;
     }
@@ -690,7 +709,7 @@
     }
 
     .log::-webkit-scrollbar-thumb {
-      background: rgba(212, 175, 55, 0.3);
+      background: rgba(74, 144, 217, 0.3);
       border-radius: 10px;
     }
 
@@ -727,20 +746,20 @@
       width: 100%;
       max-width: 740px;
       background:
-        radial-gradient(circle at 20% 20%, rgba(255, 248, 220, 0.1), transparent 50%),
-        linear-gradient(145deg, #d8c298, #b89a72);
-      border: 2px solid rgba(212, 175, 55, 0.3);
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1), transparent 50%),
+        linear-gradient(145deg, #d4e6f1, #a9cce3);
+      border: 2px solid rgba(74, 144, 217, 0.3);
       border-radius: 24px;
       padding: 32px 36px;
-      color: #2a1a0f;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 60px rgba(212, 175, 55, 0.1);
+      color: #1a2a3a;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 60px rgba(74, 144, 217, 0.1);
       position: relative;
       animation: zoomIn 0.25s ease;
     }
 
     .modal-box h3 {
       margin-top: 0;
-      color: #5a3317;
+      color: #1a3a5a;
       font-size: 30px;
       text-align: center;
       font-weight: 700;
@@ -748,7 +767,7 @@
     }
 
     .modal-text {
-      color: #3d2618;
+      color: #1a2a3a;
       line-height: 1.7;
       font-size: 19px;
       margin-bottom: 20px;
@@ -769,7 +788,7 @@
       margin: 12px 0;
       text-align: center;
       font-weight: bold;
-      color: #5a3317;
+      color: #1a3a5a;
       font-size: 20px;
       letter-spacing: 1px;
     }
@@ -784,10 +803,10 @@
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.5);
       backdrop-filter: blur(4px);
-      color: #3d2618;
+      color: #1a2a3a;
       font-weight: bold;
       display: none;
-      border: 1px solid rgba(91, 51, 23, 0.15);
+      border: 1px solid rgba(26, 42, 58, 0.15);
       font-size: 17px;
     }
 
@@ -807,10 +826,10 @@
     .results-title-fantasy {
       text-align: center;
       font-size: 40px;
-      color: var(--gold-light);
+      color: var(--blue-soft);
       margin-bottom: 10px;
       animation: fadeInDown 0.6s ease;
-      text-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+      text-shadow: 0 0 40px rgba(74, 144, 217, 0.3);
     }
 
     .results-subtitle {
@@ -844,10 +863,10 @@
       text-align: center;
       padding: 20px 18px;
       border-radius: 24px;
-      background: rgba(18, 12, 8, 0.9);
+      background: rgba(12, 20, 30, 0.9);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      box-shadow: var(--shadow-card), 0 0 30px rgba(212, 175, 55, 0.05);
+      border: 1px solid rgba(74, 144, 217, 0.2);
+      box-shadow: var(--shadow-card), 0 0 30px rgba(74, 144, 217, 0.05);
       animation: floatWinner 4s ease-in-out infinite;
     }
 
@@ -884,7 +903,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #1f140e;
+      color: #0a0f14;
       font-size: 28px;
       font-weight: bold;
       box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.1), 0 12px 30px rgba(0, 0, 0, 0.4);
@@ -892,7 +911,7 @@
 
     .podium-place.first .pedestal {
       height: 200px;
-      background: linear-gradient(180deg, #f7df95, #d4af37, #b38c2a);
+      background: linear-gradient(180deg, #5DADE2, #4A90D9, #2a6b9e);
     }
     .podium-place.second .pedestal {
       height: 155px;
@@ -913,7 +932,7 @@
     .result-card {
       border-radius: 22px;
       padding: 20px;
-      background: rgba(18, 12, 8, 0.9);
+      background: rgba(12, 20, 30, 0.9);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: var(--shadow-card);
@@ -935,8 +954,8 @@
       align-items: center;
       justify-content: center;
       font-size: 34px;
-      background: linear-gradient(135deg, #8b6b42, #4d3522);
-      border: 2px solid rgba(212, 175, 55, 0.2);
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border: 2px solid rgba(74, 144, 217, 0.2);
     }
 
     .result-card-name {
@@ -975,7 +994,7 @@
 
     th {
       background: rgba(255, 255, 255, 0.06);
-      color: var(--gold-light);
+      color: var(--blue-soft);
       font-weight: 600;
     }
 
@@ -1019,8 +1038,8 @@
 
     .main-menu h1 {
       font-size: 60px;
-      color: var(--gold-light);
-      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(212, 175, 55, 0.1);
+      color: var(--blue-soft);
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(74, 144, 217, 0.1);
       margin-bottom: 12px;
     }
 
@@ -1131,7 +1150,7 @@
 
     @media (max-width: 900px) {
       .board {
-        min-height: 640px;
+        min-height: 360px;
       }
       .modal-actions {
         grid-template-columns: 1fr;
@@ -1171,7 +1190,11 @@
         padding: 10px;
       }
       .board {
-        min-height: 480px;
+        min-height: 280px;
+        aspect-ratio: 11 / 9;
+      }
+      .board-shell {
+        padding: 10px;
       }
       .panel-inner {
         padding: 14px;
@@ -1308,12 +1331,12 @@
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      background: linear-gradient(135deg, #8b6b42, #4d3522);
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
     }
 
     .player-ready-item .ready-badge {
       margin-left: auto;
-      color: #52be80;
+      color: #1ABC9C;
       font-size: 15px;
       font-weight: 600;
     }
@@ -1366,7 +1389,12 @@
           <div class="box hidden" id="networkGameBox"><h3>Игровое поле</h3><div class="board-shell"><div class="board-wrap"><div class="board" id="boardNetwork"><svg class="path-layer" id="pathLayerNetwork" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="ornaments-layer" id="ornamentsLayerNetwork"></div><div class="cells-layer" id="cellsLayerNetwork"></div><div class="highlight-layer" id="highlightLayerNetwork"></div><div class="tokens-layer" id="tokensLayerNetwork"></div></div></div></div></div>
         </div>
       </div>
-      <div class="panel" style="grid-column:2;"><div class="panel-inner"><div id="networkRightPanel"></div></div></div>
+      <!-- Правая панель скрыта до старта игры -->
+      <div class="panel hidden" style="grid-column:2;" id="networkRightPanelContainer">
+        <div class="panel-inner">
+          <div id="networkRightPanel"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1393,7 +1421,7 @@
     if (typeof firebase !== 'undefined') { firebase.initializeApp(firebaseConfig); var db = firebase.database(); } else { var db = null; }
 
     // ===================== КОНСТАНТЫ =====================
-    const SPECIAL_BACK_CELLS = { 16: 14, 27: 25, 34: 32, 47: 45 }; // восстановлены 34 и 47
+    const SPECIAL_BACK_CELLS = { 16: 14, 27: 25, 34: 32, 47: 45 };
     const SPECIAL_TASK_CELLS = [8, 19, 30, 41];
     const FINAL_CELL = 50,
       MAX_POSITION = 50,
@@ -1545,7 +1573,7 @@
         name,
         avatarIcon: av.icon,
         avatarId: av.id,
-        color: '#58d68d',
+        color: '#5DADE2',
         position: 0,
         asked: 0,
         correct: 0,
@@ -1603,6 +1631,8 @@
       let link = window.location.origin + window.location.pathname + '?room=' + rid;
       document.getElementById('networkSetupContent').innerHTML = `
         <div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`;
+      // Скрываем правую панель, пока игра не началась
+      document.getElementById('networkRightPanelContainer').classList.add('hidden');
       net.roomRef = db.ref('rooms/' + rid);
       net.roomRef.on('value', snapshot => {
         let data = snapshot.val();
@@ -1685,6 +1715,8 @@
     function startGameNetwork(data) {
       document.getElementById('networkSetupBox').classList.add('hidden');
       document.getElementById('networkGameBox').classList.remove('hidden');
+      // Показываем правую панель
+      document.getElementById('networkRightPanelContainer').classList.remove('hidden');
       let isHost = net.role === 'host';
       document.getElementById('networkRightPanel').innerHTML = `
         <div class="box"><h3>Текущий игрок</h3><div class="current-player"><div class="avatar" id="currentPlayerAvatarNetwork">😀</div><div><div class="player-name" id="currentPlayerNameNetwork">Герой</div><div class="player-meta" id="currentPlayerMetaNetwork">Позиция: Старт</div></div></div></div>
@@ -1692,7 +1724,7 @@
           <button class="btn btn-primary" id="rollDiceBtnNetwork" ${isHost?'disabled':''}>Бросить кубик</button>
         </div>
         <div class="box"><h3>Отряд</h3><div class="players-list" id="playersListNetwork"></div></div>
-        <div class="box"><h3>Легенда поля</h3><div class="legend"><div class="legend-item"><span class="legend-box" style="background:#c89b2b;"></span>Старт</div><div class="legend-item"><span class="legend-box" style="background:#7c6957;"></span>Обычная</div><div class="legend-item"><span class="legend-box" style="background:#9a4d22;"></span>Ловушка</div><div class="legend-item"><span class="legend-box" style="background:#6c3483;"></span>Уникальное</div><div class="legend-item"><span class="legend-box" style="background:#1e8449;"></span>Финал</div></div></div>
+        <div class="box"><h3>Легенда поля</h3><div class="legend"><div class="legend-item"><span class="legend-box" style="background:#5DADE2;"></span>Старт</div><div class="legend-item"><span class="legend-box" style="background:#4A6B8A;"></span>Обычная</div><div class="legend-item"><span class="legend-box" style="background:#8E44AD;"></span>Ловушка</div><div class="legend-item"><span class="legend-box" style="background:#3498DB;"></span>Уникальное</div><div class="legend-item"><span class="legend-box" style="background:#1ABC9C;"></span>Финал</div></div></div>
         <div class="box"><h3>Летопись событий</h3><div class="log" id="eventLogNetwork"></div></div>
         ${isHost?`
           <div class="box"><h3>✏️ Добавить очки</h3><div class="add-points-row"><select id="addPointsPlayerSelectNetwork"><option value="">-- выберите --</option></select><input type="number" id="addPointsInputNetwork" value="1" min="1" max="100" /><button class="btn btn-success" id="addPointsBtnNetwork">Добавить</button></div></div>
@@ -2072,7 +2104,7 @@
           `<div class="mini-avatar">${p.avatarIcon}</div>
                     <div>
                       <div><strong>${p.name}</strong></div>
-                      <div style="color:#d7c39d;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
+                      <div style="color:#b0c7dd;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
                     </div>`;
         if (row) {
           row.innerHTML = html;
@@ -2206,7 +2238,7 @@
         if (!c) return;
         let t = document.createElement('div');
         t.className = 'token';
-        t.style.background = p.color || '#f4d03f';
+        t.style.background = p.color || '#5DADE2';
         let ox = (idx % 3) * 1.15 - 1.15,
           oy = Math.floor(idx / 3) * 1.1 - 0.3;
         t.style.left = (c.x + 1.8 + ox) + '%';
