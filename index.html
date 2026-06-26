@@ -4,19 +4,744 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Хроники Королевства — сетевая викторина</title>
-  <!-- Стили взяты из предыдущего полного ответа (без изменений) -->
   <style>
-    /* ... (весь CSS из предыдущего ответа) ... */
+    /* ===================== БАЗОВЫЕ СТИЛИ ===================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-deep: #0a0f14;
+      --bg-panel: rgba(12, 20, 30, 0.92);
+      --blue: #4A90D9;
+      --blue-soft: #6DB3F2;
+      --blue-glow: 0 0 30px rgba(74, 144, 217, 0.3);
+      --text-primary: #f0f6fc;
+      --text-secondary: #b0c7dd;
+      --border-glow: 0 0 15px rgba(74, 144, 217, 0.2);
+      --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.7);
+      --radius: 20px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: var(--text-primary);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(74, 144, 217, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(74, 144, 217, 0.05) 0%, transparent 50%),
+        linear-gradient(145deg, #0a0f14, #141c24, #0b1218);
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+      padding-bottom: 80px;
+    }
+
+    /* Декоративные облака */
+    .clouds-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      background: radial-gradient(ellipse, rgba(74, 144, 217, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.5;
+      animation: floatCloud linear infinite;
+    }
+
+    .cloud1 { width: 600px; height: 200px; top: 10%; left: -15%; animation-duration: 90s; }
+    .cloud2 { width: 800px; height: 250px; top: 40%; left: -20%; animation-duration: 120s; animation-delay: 15s; }
+    .cloud3 { width: 500px; height: 150px; top: 70%; left: -10%; animation-duration: 70s; animation-delay: 8s; }
+    .cloud4 { width: 700px; height: 200px; top: 85%; left: -15%; animation-duration: 100s; animation-delay: 25s; }
+
+    @keyframes floatCloud {
+      0% { transform: translateX(0) scale(1); }
+      50% { transform: translateX(40vw) scale(1.1); }
+      100% { transform: translateX(120vw) scale(1); }
+    }
+
+    /* ===================== СЕТКА И КОНТЕЙНЕРЫ ===================== */
+    .app {
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: fadeInDown 0.7s ease;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 58px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, #6DB3F2, #4A90D9, #2a6b9e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(74, 144, 217, 0.4);
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: var(--text-secondary);
+      font-size: 22px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.1);
+    }
+
+    .layout-network {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      .layout-network { grid-template-columns: 1fr; }
+    }
+
+    /* ===================== ПАНЕЛИ И КАРТОЧКИ ===================== */
+    .panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(74, 144, 217, 0.2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+      transition: var(--transition);
+    }
+
+    .panel:hover {
+      border-color: rgba(74, 144, 217, 0.4);
+      box-shadow: var(--shadow-card), var(--border-glow);
+    }
+
+    .panel-inner { padding: 24px; }
+    .box {
+      background: rgba(18, 28, 40, 0.6);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(74, 144, 217, 0.15);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .box:hover {
+      border-color: rgba(74, 144, 217, 0.3);
+      box-shadow: 0 4px 30px rgba(74, 144, 217, 0.1);
+    }
+
+    .box h3 {
+      margin: 0 0 12px;
+      color: var(--blue-soft);
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.2);
+    }
+
+    .hidden { display: none !important; }
+
+    /* ===================== ФОРМЫ ===================== */
+    input, select {
+      width: 100%;
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 6px 0 16px;
+      font-size: 16px;
+      color: #1f140e;
+      background: rgba(240, 248, 255, 0.9);
+      backdrop-filter: blur(4px);
+      font-family: inherit;
+      transition: var(--transition);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    input:focus, select:focus {
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.3);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* ===================== КНОПКИ ===================== */
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 20px;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent 50%);
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      color: #ffffff;
+      background: linear-gradient(135deg, #5DADE2, #4A90D9, #2a6b9e);
+      box-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 30px rgba(74, 144, 217, 0.5); }
+
+    .btn-success {
+      color: #ffffff;
+      background: linear-gradient(135deg, #48C9B0, #1ABC9C);
+      box-shadow: 0 4px 20px rgba(26, 188, 156, 0.3);
+    }
+    .btn-success:hover { box-shadow: 0 6px 30px rgba(26, 188, 156, 0.5); }
+
+    .btn-danger {
+      color: #ffffff;
+      background: linear-gradient(135deg, #E74C3C, #C0392B);
+      box-shadow: 0 4px 20px rgba(192, 57, 43, 0.3);
+    }
+    .btn-danger:hover { box-shadow: 0 6px 30px rgba(192, 57, 43, 0.5); }
+
+    .btn-secondary {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-warning {
+      color: #fff;
+      background: linear-gradient(135deg, #F39C12, #E67E22);
+      box-shadow: 0 4px 20px rgba(243, 156, 18, 0.3);
+    }
+    .btn-warning:hover { box-shadow: 0 6px 30px rgba(243, 156, 18, 0.5); }
+
+    /* ===================== СООБЩЕНИЯ ===================== */
+    .message {
+      margin-top: 10px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .message.success { color: #b9ffb9; }
+    .message.error { color: #ffb3b3; }
+
+    /* ===================== ИГРОВОЕ ПОЛЕ ===================== */
+    .board-shell {
+      background:
+        radial-gradient(circle at 30% 30%, rgba(74, 144, 217, 0.05), transparent 60%),
+        linear-gradient(145deg, #0d141c, #080c11);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 20px;
+      border-radius: var(--radius);
+    }
+
+    .board-wrap {
+      width: 100%;
+      overflow: hidden;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .board {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 11 / 9;
+      min-height: 480px;
+      margin: 0 auto;
+      border-radius: 28px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 40% 50%, rgba(74, 144, 217, 0.04), transparent 50%),
+        linear-gradient(145deg, #0d141c, #1a2533, #0b1218);
+      border: 2px solid rgba(74, 144, 217, 0.2);
+      box-shadow:
+        inset 0 0 0 2px rgba(50, 70, 90, 0.3),
+        inset 0 0 80px rgba(0, 0, 0, 0.6);
+    }
+
+    .board::before {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(74, 144, 217, 0.08);
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .board { min-height: 360px; }
+    }
+    @media (max-width: 600px) {
+      .board { min-height: 280px; aspect-ratio: 11 / 9; }
+      .board-shell { padding: 10px; }
+      .board-wrap { max-height: 50vh; overflow: auto; }
+    }
+
+    /* Слои */
+    .path-layer, .cells-layer, .tokens-layer, .highlight-layer, .ornaments-layer {
+      position: absolute; inset: 0;
+    }
+    .path-layer { z-index: 1; pointer-events: none; }
+    .ornaments-layer { z-index: 1; }
+    .cells-layer { z-index: 2; }
+    .highlight-layer { z-index: 3; }
+    .tokens-layer { z-index: 8; }
+
+    /* Орнаменты */
+    .ornament {
+      position: absolute;
+      color: rgba(74, 144, 217, 0.15);
+      font-size: 3.2vw;
+      pointer-events: none;
+      user-select: none;
+      text-shadow: 0 0 20px rgba(74, 144, 217, 0.05);
+    }
+
+    /* Клетки */
+    .cell {
+      position: absolute;
+      width: 6.2%;
+      aspect-ratio: 1 / 1;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      font-weight: bold;
+      user-select: none;
+      border: 2px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        inset 0 0 18px rgba(255, 255, 255, 0.02),
+        0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: var(--transition);
+    }
+
+    .cell:hover { transform: scale(1.04); z-index: 10; }
+
+    .cell.start { background: linear-gradient(135deg, #5DADE2, #2E86C1); border-color: rgba(74, 144, 217, 0.6); }
+    .cell.normal { background: linear-gradient(135deg, #4A6B8A, #2C4A6A); }
+    .cell.back { background: linear-gradient(135deg, #8E44AD, #6C3483); border-color: rgba(142, 68, 173, 0.4); }
+    .cell.special { background: linear-gradient(135deg, #5DADE2, #3498DB); border-color: rgba(52, 152, 219, 0.5); }
+    .cell.finish { background: linear-gradient(135deg, #1ABC9C, #148F77); border-color: rgba(26, 188, 156, 0.5); }
+
+    .cell-label {
+      line-height: 1.05;
+      font-size: clamp(10px, 1vw, 17px);
+      color: #eaf2f8;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+    .cell-label .sub { display: none; }
+    .cell.start .sub, .cell.normal .sub { display: block; font-size: clamp(8px, 0.7vw, 10px); margin-top: 3px; opacity: 0.7; }
+    .cell.finish .cell-label { font-size: clamp(14px, 1.4vw, 24px); }
+    .cell.finish .sub { display: none; }
+
+    /* Подсветка */
+    .current-cell-highlight {
+      position: absolute;
+      width: 7.6%;
+      aspect-ratio: 1 / 1;
+      border-radius: 28px;
+      border: 3px solid rgba(109, 179, 242, 0.9);
+      box-shadow:
+        0 0 0 4px rgba(74, 144, 217, 0.15),
+        0 0 40px rgba(74, 144, 217, 0.5);
+      pointer-events: none;
+      animation: pulseGlow 1.8s infinite ease-in-out;
+      z-index: 4;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    /* Фишки */
+    .token {
+      position: absolute;
+      width: 2.4%;
+      aspect-ratio: 1 / 1;
+      min-width: 24px;
+      min-height: 24px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(10px, 0.85vw, 14px);
+      box-shadow:
+        0 6px 24px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.1);
+      transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 8;
+      will-change: left, top;
+    }
+
+    /* ===================== ИНТЕРФЕЙС ИГРОКА ===================== */
+    .current-player {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px;
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border: 2px solid rgba(74, 144, 217, 0.3);
+      box-shadow: 0 0 20px rgba(74, 144, 217, 0.15);
+    }
+
+    .player-name { font-size: 24px; font-weight: bold; color: var(--text-primary); }
+    .player-meta { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+
+    .dice-result {
+      width: 100px; height: 100px;
+      margin: 12px auto 16px;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #2C4A6A, #1A2A3A);
+      border: 2px solid rgba(74, 144, 217, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; color: var(--text-primary);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05);
+    }
+
+    /* ===================== ФИКСИРОВАННАЯ КНОПКА "БРОСИТЬ КУБИК" ===================== */
+    #fixedRollBtn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      width: auto;
+      padding: 12px 30px;
+      font-size: 18px;
+      border-radius: 50px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(135deg, #5DADE2, #4A90D9);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      margin: 0;
+      display: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    #fixedRollBtn:hover {
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 6px 40px rgba(74, 144, 217, 0.5);
+    }
+
+    #fixedRollBtn:disabled {
+      opacity: 0.6;
+      transform: translateX(-50%);
+      cursor: not-allowed;
+    }
+
+    @media (min-width: 1201px) {
+      #fixedRollBtn {
+        bottom: 30px; right: 30px; left: auto; transform: none;
+      }
+      #fixedRollBtn:hover { transform: translateY(-2px); }
+      #fixedRollBtn:disabled { transform: none; }
+    }
+
+    /* ===================== СПИСОК ИГРОКОВ ===================== */
+    .players-list { display: grid; gap: 10px; margin-top: 8px; }
+    .player-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      border-radius: 16px; background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06); transition: var(--transition);
+    }
+    .player-row.active {
+      background: rgba(74, 144, 217, 0.12);
+      border-color: rgba(74, 144, 217, 0.3);
+      box-shadow: 0 0 20px rgba(74, 144, 217, 0.05);
+    }
+    .mini-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #5DADE2, #2E86C1);
+      border: 1px solid rgba(74, 144, 217, 0.2);
+      font-size: 22px; flex-shrink: 0;
+    }
+
+    /* ===================== ЛЕГЕНДА ===================== */
+    .legend { display: grid; gap: 10px; margin-top: 10px; }
+    .legend-item {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-secondary); font-size: 15px;
+    }
+    .legend-box { width: 20px; height: 20px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+    /* ===================== ЛОГ ===================== */
+    .log {
+      display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px;
+    }
+    .log::-webkit-scrollbar { width: 6px; }
+    .log::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    .log::-webkit-scrollbar-thumb { background: rgba(74, 144, 217, 0.3); border-radius: 10px; }
+    .log-item {
+      padding: 12px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-primary);
+      font-size: 15px; line-height: 1.5; animation: fadeInUp 0.3s ease;
+    }
+
+    /* ===================== МОДАЛЬНЫЕ ОКНА ===================== */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
+      padding: 20px; z-index: 1000; animation: fadeIn 0.2s ease;
+    }
+    .modal.show { display: flex; }
+
+    .modal-box {
+      width: 100%; max-width: 740px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1), transparent 50%),
+        linear-gradient(145deg, #d4e6f1, #a9cce3);
+      border: 2px solid rgba(74, 144, 217, 0.3);
+      border-radius: 24px; padding: 32px 36px; color: #1a2a3a;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 60px rgba(74, 144, 217, 0.1);
+      position: relative; animation: zoomIn 0.25s ease;
+    }
+
+    .modal-box h3 { margin-top: 0; color: #1a3a5a; font-size: 30px; text-align: center; font-weight: 700; letter-spacing: 1px; }
+    .modal-text { color: #1a2a3a; line-height: 1.7; font-size: 19px; margin-bottom: 20px; white-space: pre-line; text-align: center; }
+    .modal-image { max-width: 100%; max-height: 300px; display: block; margin: 10px auto; border-radius: 14px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
+    .timer-box { margin: 12px 0; text-align: center; font-weight: bold; color: #1a3a5a; font-size: 20px; letter-spacing: 1px; }
+    .timer-box.danger { color: #a93226; }
+    .answer-box {
+      margin: 14px 0 18px; padding: 14px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(4px);
+      color: #1a2a3a; font-weight: bold; display: none;
+      border: 1px solid rgba(26, 42, 58, 0.15); font-size: 17px;
+    }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    #showAnswerBtn { background: #1a3a5a; color: #fff; border: none; font-weight: bold; transition: var(--transition); }
+    #showAnswerBtn:hover { background: #2a5a7a; transform: translateY(-2px); }
+
+    /* ===================== РЕЗУЛЬТАТЫ ===================== */
+    .results-celebration { position: relative; overflow: hidden; min-height: 700px; }
+    .results-title-fantasy { text-align: center; font-size: 40px; color: var(--blue-soft); margin-bottom: 10px; animation: fadeInDown 0.6s ease; text-shadow: 0 0 40px rgba(74, 144, 217, 0.3); }
+    .results-subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 28px; animation: fadeInUp 0.6s ease; }
+
+    .podium-wrap { margin-top: 30px; display: flex; align-items: flex-end; justify-content: center; gap: 28px; min-height: 380px; flex-wrap: wrap; }
+    .podium-place { width: 220px; display: flex; flex-direction: column; align-items: center; gap: 16px; animation: riseUp 0.8s ease; }
+    .podium-card { width: 100%; text-align: center; padding: 20px 18px; border-radius: 24px; background: rgba(12, 20, 30, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(74, 144, 217, 0.2); box-shadow: var(--shadow-card), 0 0 30px rgba(74, 144, 217, 0.05); animation: floatWinner 4s ease-in-out infinite; }
+    .podium-avatar { font-size: 60px; margin-bottom: 10px; position: relative; }
+    .crown { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); font-size: 34px; animation: crownBounce 2s infinite ease-in-out; }
+    .podium-name { font-size: 26px; color: var(--text-primary); font-weight: bold; }
+    .podium-score { margin-top: 6px; color: var(--text-secondary); font-size: 16px; }
+    .pedestal { width: 100%; border-radius: 18px 18px 10px 10px; display: flex; align-items: center; justify-content: center; color: #0a0f14; font-size: 28px; font-weight: bold; box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.1), 0 12px 30px rgba(0, 0, 0, 0.4); }
+    .podium-place.first .pedestal { height: 200px; background: linear-gradient(180deg, #5DADE2, #4A90D9, #2a6b9e); }
+    .podium-place.second .pedestal { height: 155px; background: linear-gradient(180deg, #d8dde6, #9da8b8); }
+    .podium-place.third .pedestal { height: 120px; background: linear-gradient(180deg, #d9aa7c, #a96c3c); }
+
+    .results-cards { margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .result-card { border-radius: 22px; padding: 20px; background: rgba(12, 20, 30, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); box-shadow: var(--shadow-card); animation: fadeInUp 0.5s ease; }
+    .result-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .result-card-avatar { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; background: linear-gradient(135deg, #5DADE2, #2E86C1); border: 2px solid rgba(74, 144, 217, 0.2); }
+    .result-card-name { font-weight: bold; color: var(--text-primary); font-size: 20px; }
+    .result-card-rank { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+    .result-stats { display: grid; gap: 8px; color: var(--text-secondary); font-size: 15px; }
+
+    /* ===================== ТАБЛИЦА ===================== */
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); text-align: left; font-size: 15px; }
+    th { background: rgba(255, 255, 255, 0.06); color: var(--blue-soft); font-weight: 600; }
+
+    /* ===================== ДОБАВЛЕНИЕ/ВЫЧИТАНИЕ ОЧКОВ ===================== */
+    .add-points-row { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .add-points-row select { flex: 1; min-width: 120px; margin: 0; padding: 10px 12px; font-size: 15px; }
+    .add-points-row input { width: 80px; margin: 0; padding: 10px 12px; font-size: 15px; text-align: center; }
+    .add-points-row .btn { margin: 0; padding: 10px 20px; width: auto; font-size: 14px; }
+
+    /* ===================== МЕНЮ ===================== */
+    .main-menu { text-align: center; padding: 50px 20px; }
+    .main-menu h1 { font-size: 60px; color: var(--blue-soft); text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(74, 144, 217, 0.1); margin-bottom: 12px; }
+    .main-menu p { font-size: 22px; color: var(--text-secondary); margin-bottom: 36px; }
+    .main-menu .menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 440px; margin: 0 auto; }
+    .main-menu .menu-buttons .btn { font-size: 22px; padding: 20px 28px; }
+
+    /* ===================== ИСТОРИЯ ИГР ===================== */
+    #historyList { margin-top: 20px; text-align: left; }
+    .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .history-item .date { font-size: 14px; color: var(--text-secondary); }
+    .history-item .winner { font-weight: bold; color: var(--blue-soft); }
+    .history-item .players-count { font-size: 14px; }
+
+    /* ===================== АНИМАЦИИ ===================== */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @keyframes riseUp { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes floatWinner { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
+    @keyframes crownBounce { 0% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } 100% { transform: translateX(-50%) translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ===================== АДАПТИВНОСТЬ ===================== */
+    @media (max-width: 1200px) { .layout-network { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) {
+      .board { min-height: 360px; }
+      .modal-actions { grid-template-columns: 1fr; }
+      .btn { padding: 18px 22px; font-size: 18px; }
+      input, select { font-size: 18px; padding: 16px; }
+      .box h3 { font-size: 22px; }
+      .hero h1 { font-size: 34px; }
+      .dice-result { width: 80px; height: 80px; font-size: 34px; }
+      .current-player .avatar { width: 52px; height: 52px; font-size: 28px; }
+      .player-name { font-size: 20px; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .board { min-height: 280px; aspect-ratio: 11 / 9; }
+      .board-shell { padding: 10px; }
+      .board-wrap { max-height: 50vh; overflow: auto; }
+      .panel-inner { padding: 14px; }
+      .box { padding: 14px; }
+      .btn { padding: 14px 18px; font-size: 16px; }
+      input, select { font-size: 16px; padding: 12px; }
+      .hero h1 { font-size: 28px; }
+      .dice-result { width: 64px; height: 64px; font-size: 28px; }
+      .current-player .avatar { width: 44px; height: 44px; font-size: 22px; }
+      .player-name { font-size: 18px; }
+      .modal-box { padding: 24px; }
+      .podium-place { width: 160px; }
+    }
+
+    /* ===================== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===================== */
+    .network-setup { text-align: center; }
+    .network-setup input { width: 100%; max-width: 320px; margin: 10px auto; }
+    .network-setup .btn { max-width: 320px; margin: 6px auto; }
+    .room-info { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(4px); padding: 14px; border-radius: 14px; margin: 12px 0; word-break: break-all; border: 1px solid rgba(255, 255, 255, 0.06); }
+    .player-ready-list { display: grid; gap: 10px; margin: 12px 0; }
+    .player-ready-item { display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.06); }
+    .player-ready-item .avatar-mini { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: linear-gradient(135deg, #5DADE2, #2E86C1); }
+    .player-ready-item .ready-badge { margin-left: auto; color: #1ABC9C; font-size: 15px; font-weight: 600; }
+    .host-controls { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .host-controls .btn { max-width: 320px; margin: 0 auto; }
   </style>
 </head>
 <body>
-  <!-- ... (вся структура HTML из предыдущего ответа) ... -->
+  <div class="clouds-layer">
+    <div class="cloud cloud1"></div><div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div><div class="cloud cloud4"></div>
+  </div>
+  <div class="app">
+    <div class="hero"><h1>Хроники Королевства</h1><p>Викторина разработанная амбассадорами Локо</p></div>
+
+    <div class="main-menu panel" id="mainMenu">
+      <div class="panel-inner">
+        <h1 style="font-size:48px;margin:0 0 10px;">Добро пожаловать!</h1>
+        <p>Выберите режим игры.</p>
+        <div class="menu-buttons">
+          <button class="btn btn-success" id="menuHostBtn">👑 Создать игру (ведущий)</button>
+          <button class="btn btn-secondary" id="menuJoinBtn">🔗 Присоединиться к игре</button>
+          <button class="btn btn-secondary" id="menuHistoryBtn">📜 История игр</button>
+        </div>
+        <div class="message" id="menuMessage"></div>
+        <div id="historyList" class="hidden"></div>
+      </div>
+    </div>
+
+    <!-- Сетевая игра -->
+    <div class="layout-network hidden" id="gameLayoutNetwork">
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="box" id="networkSetupBox"><h3 id="networkSetupTitle">Настройка сетевой игры</h3><div id="networkSetupContent"></div></div>
+          <div class="box hidden" id="networkGameBox"><h3>Игровое поле</h3><div class="board-shell"><div class="board-wrap"><div class="board" id="boardNetwork"><svg class="path-layer" id="pathLayerNetwork" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="ornaments-layer" id="ornamentsLayerNetwork"></div><div class="cells-layer" id="cellsLayerNetwork"></div><div class="highlight-layer" id="highlightLayerNetwork"></div><div class="tokens-layer" id="tokensLayerNetwork"></div></div></div></div></div>
+        </div>
+      </div>
+      <div class="panel hidden" id="networkRightPanelContainer">
+        <div class="panel-inner">
+          <div id="networkRightPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Фиксированная кнопка "Бросить кубик" -->
+    <button id="fixedRollBtn" class="btn btn-primary" disabled>Бросить кубик</button>
+  </div>
+
+  <!-- Модальные окна -->
+  <div class="modal" id="questionModal">
+    <div class="modal-box"><h3 id="modalTitle">Вопрос</h3><div class="timer-box" id="questionTimer">00:00</div><img id="modalImage" class="modal-image" style="display:none;" alt="Изображение" /><div class="modal-text" id="modalQuestion"></div><div class="answer-box" id="modalAnswer"></div><div class="modal-actions" id="modalActions"><button class="btn btn-secondary" id="showAnswerBtn">Показать ответ</button><button class="btn btn-success" id="answerCorrectBtn" disabled>Правильно</button><button class="btn btn-danger" id="answerWrongBtn" disabled>Неправильно</button></div></div>
+  </div>
+  <div class="modal" id="confirmFinishModal">
+    <div class="modal-box"><h3>Подтверждение завершения</h3><div class="modal-text">Вы действительно хотите завершить игру досрочно? Будут показаны текущие итоги.</div><div class="modal-actions" style="grid-template-columns:1fr 1fr;"><button class="btn btn-secondary" id="cancelFinishBtn">Отмена</button><button class="btn btn-danger" id="confirmFinishBtn">Да, завершить</button></div></div>
+  </div>
+  <footer><br><p>@ Гынгазов Алексей Сергеевич, Фомин Иван Анатольевич</p></footer>
 
   <script>
     (function() {
       'use strict';
 
-      // Индикатор загрузки
       const loadingMsg = document.createElement('div');
       loadingMsg.id = 'loading-msg';
       loadingMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;background:rgba(0,0,0,0.8);padding:1em 2em;border-radius:12px;z-index:9999;font-size:18px;';
@@ -163,8 +888,8 @@
           finalPool: [],
           normalPool: [],
           listeners: [],
-          lastLogLength: 0,      // для инкрементального лога
-          tokenElements: {}      // хранит DOM-элементы токенов по playerId
+          lastLogLength: 0,
+          tokenElements: {}
         };
 
         // ===================== УПРАВЛЕНИЕ ПОДПИСКАМИ =====================
@@ -1152,7 +1877,6 @@
                 logDiv.insertAdjacentHTML('beforeend', `<div class="log-item">${entry}</div>`);
               });
               net.lastLogLength = currentLength;
-              // Прокрутка вниз
               logDiv.scrollTop = logDiv.scrollHeight;
             }
           }
@@ -1266,12 +1990,10 @@
 
             let token = existingTokens[id];
             if (token) {
-              // Обновляем позицию существующего токена (плавно)
               token.style.left = left;
               token.style.top = top;
               token.textContent = p.avatarIcon;
             } else {
-              // Создаём новый токен
               token = document.createElement('div');
               token.className = 'token';
               token.style.background = p.color || '#5DADE2';
@@ -1283,7 +2005,6 @@
             newTokenElements[id] = token;
           });
 
-          // Удаляем токены игроков, которых больше нет
           Object.keys(existingTokens).forEach(id => {
             if (!newTokenElements[id]) {
               existingTokens[id].remove();
