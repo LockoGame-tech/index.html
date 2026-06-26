@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    /* Стили без изменений (можно оставить прежние) */
+    /* (стили без изменений) */
     * { box-sizing: border-box; }
     :root {
       --bg1: #140e09; --bg2: #2b1c12; --bg3: #1a120b;
@@ -557,13 +557,15 @@
     // Обработка клетки (выполняется ведущим). Возвращает true, если был открыт вопрос, иначе false.
     async function networkProcessCell(playerId, player, pos){
       console.log(`Processing cell ${pos} for player ${playerId}`);
-      // Счастливые клетки Фибоначчи
+      
+      // Счастливые клетки Фибоначчи – добавляем лог и продолжаем обработку как обычной клетки
       if(FIBONACCI_CELLS.includes(pos)&&!player.stoppedOnFibonacci.includes(pos)){
         player.stoppedOnFibonacci.push(pos);
         await net.roomRef.child('players/'+playerId+'/stoppedOnFibonacci').set(player.stoppedOnFibonacci);
         let log=(await net.roomRef.child('log').once('value')).val()||[];
         log.push(player.name+' остановился на счастливой клетке '+pos+'!');
         await net.roomRef.child('log').set(log);
+        // Не возвращаем false, продолжаем обработку как обычной клетки
       }
 
       // Ловушка (клетки 16, 27, 34, 47)
@@ -578,16 +580,8 @@
         await net.roomRef.child('players/'+playerId+'/position').set(back);
         // После отката задаём случайный обычный вопрос
         let q=getRandomNormalQuestion();
-        if(q) {
-          console.log('Asking normal question after trap');
-          await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
-          return true;
-        } else {
-          let log2=(await net.roomRef.child('log').once('value')).val()||[];
-          log2.push('Обычные вопросы закончились.');
-          await net.roomRef.child('log').set(log2);
-          return false;
-        }
+        await networkOpenQuestion(q,'Случайный вопрос после ловушки','normal',playerId);
+        return true;
       }
 
       // Уникальное задание (клетки 8, 19, 30, 41) — из второго листа
@@ -615,26 +609,26 @@
         }
       }
 
-      // Обычная клетка
+      // Обычная клетка (включая клетки Фибоначчи, которые не попали в ловушку или специальные)
       if(pos>=1&&pos<FINAL_CELL){
-        console.log('Normal cell');
+        console.log('Normal cell (or Fibonacci)');
         let q=getRandomNormalQuestion();
-        if(q) {
-          await networkOpenQuestion(q,'Случайный вопрос','normal',playerId);
-          return true;
-        } else {
-          let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push('Обычные вопросы закончились.');
-          await net.roomRef.child('log').set(log);
-          return false;
-        }
+        await networkOpenQuestion(q,'Случайный вопрос','normal',playerId);
+        return true;
       }
       return false;
     }
 
     // Вспомогательные функции для вопросов с пулами
+    // Всегда возвращает вопрос (если пул пуст – заглушку)
     function getRandomNormalQuestion(){
-      if(!net.normalPool || net.normalPool.length===0) return null;
+      if(!net.normalPool || net.normalPool.length===0) {
+        return {
+          question: "Обычный вопрос (вопросы закончились)",
+          answer: "Ответ не загружен",
+          points: 1
+        };
+      }
       return net.normalPool.pop();
     }
     
