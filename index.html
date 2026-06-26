@@ -1147,20 +1147,30 @@
           addListener(net.roomRef.child('pendingQuestion'), 'value', sn => {
             let q = sn.val();
             if (q && q.question) {
+              // Если вопрос ещё не открыт или это новый вопрос (по timestamp), открываем
               if (!document.getElementById('questionModal').classList.contains('show') ||
                   net.questionData?.timestamp !== q.timestamp) {
                 net.questionData = q;
                 openQuestion(q, 'Вопрос для ' + q.playerName, q.context);
               } else {
-                // Если вопрос уже открыт, но изменился флаг showAnswer, обновляем UI
-                if (q.showAnswer && !document.getElementById('modalAnswer').style.display === 'block') {
-                  stopTimer();
-                  document.getElementById('modalAnswer').style.display = 'block';
-                  document.getElementById('showAnswerBtn').disabled = true;
-                  document.getElementById('answerCorrectBtn').disabled = false;
-                  document.getElementById('answerWrongBtn').disabled = false;
-                  document.getElementById('questionTimer').textContent = 'Ответ показан';
-                  document.getElementById('questionTimer').className = 'timer-box';
+                // Вопрос уже открыт, проверяем, не изменился ли showAnswer
+                if (q.showAnswer === true) {
+                  // Если ответ ещё не показан (проверяем по display блока)
+                  if (document.getElementById('modalAnswer').style.display !== 'block') {
+                    stopTimer();
+                    document.getElementById('modalAnswer').style.display = 'block';
+                    // Отключаем кнопку "Показать ответ" у ведущего, если она есть
+                    const showBtn = document.getElementById('showAnswerBtn');
+                    if (showBtn) {
+                      showBtn.disabled = true;
+                    }
+                    // У игроков кнопки правильности скрыты, но если они есть, то разблокируем? Нет, у игроков они скрыты.
+                    // Однако у ведущего они уже разблокированы или будут разблокированы после показа ответа.
+                    // Мы уже в openQuestion установили для ведущего правильные состояния.
+                    // Здесь просто обновляем таймер.
+                    document.getElementById('questionTimer').textContent = 'Ответ показан';
+                    document.getElementById('questionTimer').className = 'timer-box';
+                  }
                 }
               }
             } else {
@@ -2170,7 +2180,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.6 (исправлены дублирование токенов, моргание лога, синхронизация показа ответа)');
+        console.log('Игра готова! Версия 3.7 (исправлена синхронизация показа ответа)');
       }
 
       if (document.readyState === 'loading') {
