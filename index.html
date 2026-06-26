@@ -41,6 +41,7 @@
       padding: 20px;
       overflow-x: hidden;
       position: relative;
+      padding-bottom: 80px; /* отступ для фиксированной кнопки на мобильных */
     }
 
     /* Декоративные облака – мягкий пар */
@@ -146,6 +147,7 @@
       align-items: start;
     }
 
+    /* Адаптивность: на планшетах и телефонах переходим в одну колонку */
     @media (max-width: 1200px) {
       .layout-network {
         grid-template-columns: 1fr;
@@ -383,9 +385,6 @@
       overflow: hidden;
       border-radius: var(--radius);
       box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
-      /* Добавим возможность прокрутки для маленьких экранов */
-      overflow: auto;
-      max-height: 90vh;
     }
 
     .board {
@@ -427,6 +426,11 @@
       }
       .board-shell {
         padding: 10px;
+      }
+      /* На телефонах поле может быть меньше – разрешаем прокрутку */
+      .board-wrap {
+        max-height: 50vh;
+        overflow: auto;
       }
     }
 
@@ -629,6 +633,38 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05);
     }
 
+    /* ===================== КНОПКА БРОСИТЬ КУБИК (фиксированная на мобильных) ===================== */
+    @media (max-width: 900px) {
+      #rollDiceBtnNetwork {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        width: auto;
+        padding: 12px 30px;
+        font-size: 18px;
+        border-radius: 50px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+        background: linear-gradient(135deg, #5DADE2, #4A90D9);
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        margin: 0;
+      }
+      #rollDiceBtnNetwork:hover {
+        transform: translateX(-50%) translateY(-2px);
+        box-shadow: 0 6px 40px rgba(74, 144, 217, 0.5);
+      }
+      #rollDiceBtnNetwork:disabled {
+        opacity: 0.6;
+        transform: translateX(-50%);
+      }
+      /* Добавим отступ снизу для контента, чтобы кнопка не перекрывала */
+      .app {
+        padding-bottom: 80px;
+      }
+    }
+
     /* ===================== СПИСОК ИГРОКОВ ===================== */
     .players-list {
       display: grid;
@@ -814,6 +850,19 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
+    }
+
+    /* Кнопка "Показать ответ" – теперь контрастная */
+    #showAnswerBtn {
+      background: #1a3a5a;
+      color: #fff;
+      border: none;
+      font-weight: bold;
+      transition: var(--transition);
+    }
+    #showAnswerBtn:hover {
+      background: #2a5a7a;
+      transform: translateY(-2px);
     }
 
     /* ===================== РЕЗУЛЬТАТЫ ===================== */
@@ -1196,6 +1245,10 @@
       .board-shell {
         padding: 10px;
       }
+      .board-wrap {
+        max-height: 50vh;
+        overflow: auto;
+      }
       .panel-inner {
         padding: 14px;
       }
@@ -1383,14 +1436,15 @@
 
     <!-- Сетевая игра -->
     <div class="layout-network hidden" id="gameLayoutNetwork">
-      <div class="panel" style="grid-column:1;">
+      <!-- Первая панель: настройки и поле -->
+      <div class="panel">
         <div class="panel-inner">
           <div class="box" id="networkSetupBox"><h3 id="networkSetupTitle">Настройка сетевой игры</h3><div id="networkSetupContent"></div></div>
           <div class="box hidden" id="networkGameBox"><h3>Игровое поле</h3><div class="board-shell"><div class="board-wrap"><div class="board" id="boardNetwork"><svg class="path-layer" id="pathLayerNetwork" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="ornaments-layer" id="ornamentsLayerNetwork"></div><div class="cells-layer" id="cellsLayerNetwork"></div><div class="highlight-layer" id="highlightLayerNetwork"></div><div class="tokens-layer" id="tokensLayerNetwork"></div></div></div></div></div>
         </div>
       </div>
-      <!-- Правая панель скрыта до старта игры -->
-      <div class="panel hidden" style="grid-column:2;" id="networkRightPanelContainer">
+      <!-- Вторая панель: правый интерфейс (скрыта до старта игры) -->
+      <div class="panel hidden" id="networkRightPanelContainer">
         <div class="panel-inner">
           <div id="networkRightPanel"></div>
         </div>
