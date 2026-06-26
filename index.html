@@ -41,7 +41,7 @@
       padding: 20px;
       overflow-x: hidden;
       position: relative;
-      padding-bottom: 80px; /* отступ для фиксированной кнопки на мобильных */
+      padding-bottom: 80px; /* отступ для фиксированной кнопки */
     }
 
     /* Декоративные облака – мягкий пар */
@@ -427,7 +427,6 @@
       .board-shell {
         padding: 10px;
       }
-      /* На телефонах поле может быть меньше – разрешаем прокрутку */
       .board-wrap {
         max-height: 50vh;
         overflow: auto;
@@ -515,19 +514,38 @@
       border-color: rgba(26, 188, 156, 0.5);
     }
 
+    /* Убраны цифры на ячейках с символами */
     .cell-label {
       line-height: 1.05;
       font-size: clamp(10px, 1vw, 17px);
       color: #eaf2f8;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      text-align: center;
     }
 
     .cell-label .sub {
+      display: none; /* скрываем подписи (цифры) для всех ячеек, кроме старта и обычных */
+    }
+
+    /* Но для старта и обычных показываем подпись (если она есть) */
+    .cell.start .sub,
+    .cell.normal .sub {
       display: block;
       font-size: clamp(8px, 0.7vw, 10px);
       margin-top: 3px;
       opacity: 0.7;
     }
+
+    /* Для финиша показываем только "50" без "Финал" */
+    .cell.finish .cell-label {
+      font-size: clamp(14px, 1.4vw, 24px);
+    }
+    .cell.finish .sub {
+      display: none;
+    }
+
+    /* Для старта показываем "Старт" (уже есть) */
+    /* Для back и special оставляем только символы, подписи скрыты */
 
     /* Подсветка текущей клетки */
     .current-cell-highlight {
@@ -633,35 +651,54 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05);
     }
 
-    /* ===================== КНОПКА БРОСИТЬ КУБИК (фиксированная на мобильных) ===================== */
-    @media (max-width: 900px) {
-      #rollDiceBtnNetwork {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        width: auto;
-        padding: 12px 30px;
-        font-size: 18px;
-        border-radius: 50px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
-        background: linear-gradient(135deg, #5DADE2, #4A90D9);
-        color: #fff;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        margin: 0;
+    /* ===================== ФИКСИРОВАННАЯ КНОПКА "БРОСИТЬ КУБИК" ===================== */
+    #fixedRollBtn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      width: auto;
+      padding: 12px 30px;
+      font-size: 18px;
+      border-radius: 50px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(135deg, #5DADE2, #4A90D9);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      margin: 0;
+      display: none; /* скрыта по умолчанию */
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    #fixedRollBtn:hover {
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 6px 40px rgba(74, 144, 217, 0.5);
+    }
+
+    #fixedRollBtn:disabled {
+      opacity: 0.6;
+      transform: translateX(-50%);
+      cursor: not-allowed;
+    }
+
+    /* На десктопе также фиксирована, но можно немного сместить, чтобы не перекрывать панель */
+    @media (min-width: 1201px) {
+      #fixedRollBtn {
+        bottom: 30px;
+        right: 30px;
+        left: auto;
+        transform: none;
       }
-      #rollDiceBtnNetwork:hover {
-        transform: translateX(-50%) translateY(-2px);
-        box-shadow: 0 6px 40px rgba(74, 144, 217, 0.5);
+      #fixedRollBtn:hover {
+        transform: translateY(-2px);
       }
-      #rollDiceBtnNetwork:disabled {
-        opacity: 0.6;
-        transform: translateX(-50%);
-      }
-      /* Добавим отступ снизу для контента, чтобы кнопка не перекрывала */
-      .app {
-        padding-bottom: 80px;
+      #fixedRollBtn:disabled {
+        transform: none;
       }
     }
 
@@ -852,7 +889,7 @@
       gap: 12px;
     }
 
-    /* Кнопка "Показать ответ" – теперь контрастная */
+    /* Кнопка "Показать ответ" – контрастная */
     #showAnswerBtn {
       background: #1a3a5a;
       color: #fff;
@@ -1450,6 +1487,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Фиксированная кнопка "Бросить кубик" -->
+    <button id="fixedRollBtn" class="btn btn-primary" disabled>Бросить кубик</button>
   </div>
 
   <!-- Модальные окна -->
@@ -1500,11 +1540,11 @@
     }
 
     function cellText(i) {
-      if (i === 0) return { main: 'Старт' };
-      if (i === FINAL_CELL) return { main: '50', sub: 'Финал' };
-      if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: String(i) };
-      if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: String(i) };
-      return { main: String(i) };
+      if (i === 0) return { main: 'Старт', sub: '' };
+      if (i === FINAL_CELL) return { main: '50', sub: '' }; // только число, без "Финал"
+      if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: '' };
+      if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: '' };
+      return { main: String(i), sub: '' };
     }
 
     function genRoom() { return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36); }
@@ -1687,6 +1727,8 @@
         <div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`;
       // Скрываем правую панель, пока игра не началась
       document.getElementById('networkRightPanelContainer').classList.add('hidden');
+      // Скрываем фиксированную кнопку
+      document.getElementById('fixedRollBtn').style.display = 'none';
       net.roomRef = db.ref('rooms/' + rid);
       net.roomRef.on('value', snapshot => {
         let data = snapshot.val();
@@ -1771,11 +1813,16 @@
       document.getElementById('networkGameBox').classList.remove('hidden');
       // Показываем правую панель
       document.getElementById('networkRightPanelContainer').classList.remove('hidden');
+      // Показываем фиксированную кнопку
+      const fixedBtn = document.getElementById('fixedRollBtn');
+      fixedBtn.style.display = 'block';
+      fixedBtn.disabled = true; // по умолчанию заблокирована, будет разблокирована при обновлении состояния
+
       let isHost = net.role === 'host';
       document.getElementById('networkRightPanel').innerHTML = `
         <div class="box"><h3>Текущий игрок</h3><div class="current-player"><div class="avatar" id="currentPlayerAvatarNetwork">😀</div><div><div class="player-name" id="currentPlayerNameNetwork">Герой</div><div class="player-meta" id="currentPlayerMetaNetwork">Позиция: Старт</div></div></div></div>
         <div class="box"><h3>Кость судьбы</h3><div class="dice-result" id="diceResultNetwork">-</div>
-          <button class="btn btn-primary" id="rollDiceBtnNetwork" ${isHost?'disabled':''}>Бросить кубик</button>
+          <!-- Оригинальная кнопка скрыта, используется фиксированная -->
         </div>
         <div class="box"><h3>Отряд</h3><div class="players-list" id="playersListNetwork"></div></div>
         <div class="box"><h3>Легенда поля</h3><div class="legend"><div class="legend-item"><span class="legend-box" style="background:#5DADE2;"></span>Старт</div><div class="legend-item"><span class="legend-box" style="background:#4A6B8A;"></span>Обычная</div><div class="legend-item"><span class="legend-box" style="background:#8E44AD;"></span>Ловушка</div><div class="legend-item"><span class="legend-box" style="background:#3498DB;"></span>Уникальное</div><div class="legend-item"><span class="legend-box" style="background:#1ABC9C;"></span>Финал</div></div></div>
@@ -1785,8 +1832,9 @@
           <div class="box side-end-wrap"><button class="btn btn-danger" id="forceFinishBtnNetwork">Завершить игру</button></div>
         `:''}
       `;
+      // Если ведущий – скрываем кнопку броска (она ему не нужна)
       if (isHost) {
-        document.getElementById('rollDiceBtnNetwork').style.display = 'none';
+        fixedBtn.style.display = 'none';
       }
 
       // Пулы вопросов
@@ -1851,7 +1899,8 @@
         if (d) updateGameStateNetwork(d);
       });
 
-      document.getElementById('rollDiceBtnNetwork').addEventListener('click', function() {
+      // Обработчик клика на фиксированную кнопку
+      fixedBtn.addEventListener('click', function() {
         if (net.isRolling) return;
         if (document.getElementById('questionModal').classList.contains('show')) {
           console.warn('Cannot roll while question is open');
@@ -1859,7 +1908,7 @@
         }
         let actionRef = net.roomRef.child('actions').push();
         actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
-        document.getElementById('rollDiceBtnNetwork').disabled = true;
+        fixedBtn.disabled = true;
       });
 
       if (isHost) {
@@ -2191,15 +2240,15 @@
         logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
       }
 
-      let btn = document.getElementById('rollDiceBtnNetwork');
-      if (btn) {
+      // Обновляем фиксированную кнопку
+      const fixedBtn = document.getElementById('fixedRollBtn');
+      if (fixedBtn) {
         if (net.role === 'host') {
-          btn.disabled = true;
-          btn.style.display = 'none';
+          fixedBtn.style.display = 'none';
         } else {
-          btn.style.display = 'block';
+          fixedBtn.style.display = 'block';
           let hasQuestion = document.getElementById('questionModal').classList.contains('show');
-          btn.disabled = (curId !== net.myId) || hasQuestion;
+          fixedBtn.disabled = (curId !== net.myId) || hasQuestion;
         }
       }
 
