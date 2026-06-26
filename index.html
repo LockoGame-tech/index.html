@@ -41,10 +41,10 @@
       padding: 20px;
       overflow-x: hidden;
       position: relative;
-      padding-bottom: 80px; /* отступ для фиксированной кнопки */
+      padding-bottom: 80px;
     }
 
-    /* Декоративные облака – мягкий пар */
+    /* Декоративные облака */
     .clouds-layer {
       position: fixed;
       inset: 0;
@@ -62,48 +62,15 @@
       animation: floatCloud linear infinite;
     }
 
-    .cloud1 {
-      width: 600px;
-      height: 200px;
-      top: 10%;
-      left: -15%;
-      animation-duration: 90s;
-    }
-    .cloud2 {
-      width: 800px;
-      height: 250px;
-      top: 40%;
-      left: -20%;
-      animation-duration: 120s;
-      animation-delay: 15s;
-    }
-    .cloud3 {
-      width: 500px;
-      height: 150px;
-      top: 70%;
-      left: -10%;
-      animation-duration: 70s;
-      animation-delay: 8s;
-    }
-    .cloud4 {
-      width: 700px;
-      height: 200px;
-      top: 85%;
-      left: -15%;
-      animation-duration: 100s;
-      animation-delay: 25s;
-    }
+    .cloud1 { width: 600px; height: 200px; top: 10%; left: -15%; animation-duration: 90s; }
+    .cloud2 { width: 800px; height: 250px; top: 40%; left: -20%; animation-duration: 120s; animation-delay: 15s; }
+    .cloud3 { width: 500px; height: 150px; top: 70%; left: -10%; animation-duration: 70s; animation-delay: 8s; }
+    .cloud4 { width: 700px; height: 200px; top: 85%; left: -15%; animation-duration: 100s; animation-delay: 25s; }
 
     @keyframes floatCloud {
-      0% {
-        transform: translateX(0) scale(1);
-      }
-      50% {
-        transform: translateX(40vw) scale(1.1);
-      }
-      100% {
-        transform: translateX(120vw) scale(1);
-      }
+      0% { transform: translateX(0) scale(1); }
+      50% { transform: translateX(40vw) scale(1.1); }
+      100% { transform: translateX(120vw) scale(1); }
     }
 
     /* ===================== СЕТКА И КОНТЕЙНЕРЫ ===================== */
@@ -147,11 +114,8 @@
       align-items: start;
     }
 
-    /* Адаптивность: на планшетах и телефонах переходим в одну колонку */
     @media (max-width: 1200px) {
-      .layout-network {
-        grid-template-columns: 1fr;
-      }
+      .layout-network { grid-template-columns: 1fr; }
     }
 
     /* ===================== ПАНЕЛИ И КАРТОЧКИ ===================== */
@@ -171,10 +135,7 @@
       box-shadow: var(--shadow-card), var(--border-glow);
     }
 
-    .panel-inner {
-      padding: 24px;
-    }
-
+    .panel-inner { padding: 24px; }
     .box {
       background: rgba(18, 28, 40, 0.6);
       backdrop-filter: blur(6px);
@@ -200,13 +161,10 @@
       text-shadow: 0 0 20px rgba(74, 144, 217, 0.2);
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     /* ===================== ФОРМЫ ===================== */
-    input,
-    select {
+    input, select {
       width: 100%;
       border: none;
       outline: none;
@@ -222,8 +180,7 @@
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    input:focus,
-    select:focus {
+    input:focus, select:focus {
       background: #ffffff;
       box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.3);
     }
@@ -236,11 +193,7 @@
       letter-spacing: 0.5px;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     /* ===================== КНОПКИ ===================== */
     .btn {
@@ -272,11 +225,7 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
+    .btn:active { transform: translateY(0); }
     .btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -288,30 +237,21 @@
       background: linear-gradient(135deg, #5DADE2, #4A90D9, #2a6b9e);
       box-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
     }
-
-    .btn-primary:hover {
-      box-shadow: 0 6px 30px rgba(74, 144, 217, 0.5);
-    }
+    .btn-primary:hover { box-shadow: 0 6px 30px rgba(74, 144, 217, 0.5); }
 
     .btn-success {
       color: #ffffff;
       background: linear-gradient(135deg, #48C9B0, #1ABC9C);
       box-shadow: 0 4px 20px rgba(26, 188, 156, 0.3);
     }
-
-    .btn-success:hover {
-      box-shadow: 0 6px 30px rgba(26, 188, 156, 0.5);
-    }
+    .btn-success:hover { box-shadow: 0 6px 30px rgba(26, 188, 156, 0.5); }
 
     .btn-danger {
       color: #ffffff;
       background: linear-gradient(135deg, #E74C3C, #C0392B);
       box-shadow: 0 4px 20px rgba(192, 57, 43, 0.3);
     }
-
-    .btn-danger:hover {
-      box-shadow: 0 6px 30px rgba(192, 57, 43, 0.5);
-    }
+    .btn-danger:hover { box-shadow: 0 6px 30px rgba(192, 57, 43, 0.5); }
 
     .btn-secondary {
       color: var(--text-primary);
@@ -319,11 +259,17 @@
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.2);
     }
+
+    .btn-warning {
+      color: #fff;
+      background: linear-gradient(135deg, #F39C12, #E67E22);
+      box-shadow: 0 4px 20px rgba(243, 156, 18, 0.3);
+    }
+    .btn-warning:hover { box-shadow: 0 6px 30px rgba(243, 156, 18, 0.5); }
 
     /* ===================== СООБЩЕНИЯ ===================== */
     .message {
@@ -333,42 +279,8 @@
       border-radius: 10px;
       background: rgba(0, 0, 0, 0.3);
     }
-
-    .message.success {
-      color: #b9ffb9;
-    }
-    .message.error {
-      color: #ffb3b3;
-    }
-
-    /* ===================== НАСТРОЙКА ИГРОКОВ ===================== */
-    .player-setup-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: var(--radius);
-      padding: 18px;
-      margin-bottom: 14px;
-      backdrop-filter: blur(4px);
-      transition: var(--transition);
-    }
-
-    .player-setup-card:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(74, 144, 217, 0.2);
-    }
-
-    .setup-avatar-preview {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(74, 144, 217, 0.1));
-      border: 2px solid rgba(74, 144, 217, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 38px;
-      box-shadow: 0 0 20px rgba(74, 144, 217, 0.1);
-    }
+    .message.success { color: #b9ffb9; }
+    .message.error { color: #ffb3b3; }
 
     /* ===================== ИГРОВОЕ ПОЛЕ ===================== */
     .board-shell {
@@ -413,52 +325,24 @@
       pointer-events: none;
     }
 
-    /* Адаптивность поля */
     @media (max-width: 900px) {
-      .board {
-        min-height: 360px;
-      }
+      .board { min-height: 360px; }
     }
     @media (max-width: 600px) {
-      .board {
-        min-height: 280px;
-        aspect-ratio: 11 / 9;
-      }
-      .board-shell {
-        padding: 10px;
-      }
-      .board-wrap {
-        max-height: 50vh;
-        overflow: auto;
-      }
+      .board { min-height: 280px; aspect-ratio: 11 / 9; }
+      .board-shell { padding: 10px; }
+      .board-wrap { max-height: 50vh; overflow: auto; }
     }
 
     /* Слои */
-    .path-layer,
-    .cells-layer,
-    .tokens-layer,
-    .highlight-layer,
-    .ornaments-layer {
-      position: absolute;
-      inset: 0;
+    .path-layer, .cells-layer, .tokens-layer, .highlight-layer, .ornaments-layer {
+      position: absolute; inset: 0;
     }
-
-    .path-layer {
-      z-index: 1;
-      pointer-events: none;
-    }
-    .ornaments-layer {
-      z-index: 1;
-    }
-    .cells-layer {
-      z-index: 2;
-    }
-    .highlight-layer {
-      z-index: 3;
-    }
-    .tokens-layer {
-      z-index: 8;
-    }
+    .path-layer { z-index: 1; pointer-events: none; }
+    .ornaments-layer { z-index: 1; }
+    .cells-layer { z-index: 2; }
+    .highlight-layer { z-index: 3; }
+    .tokens-layer { z-index: 8; }
 
     /* Орнаменты */
     .ornament {
@@ -489,32 +373,14 @@
       transition: var(--transition);
     }
 
-    .cell:hover {
-      transform: scale(1.04);
-      z-index: 10;
-    }
+    .cell:hover { transform: scale(1.04); z-index: 10; }
 
-    .cell.start {
-      background: linear-gradient(135deg, #5DADE2, #2E86C1);
-      border-color: rgba(74, 144, 217, 0.6);
-    }
-    .cell.normal {
-      background: linear-gradient(135deg, #4A6B8A, #2C4A6A);
-    }
-    .cell.back {
-      background: linear-gradient(135deg, #8E44AD, #6C3483);
-      border-color: rgba(142, 68, 173, 0.4);
-    }
-    .cell.special {
-      background: linear-gradient(135deg, #5DADE2, #3498DB);
-      border-color: rgba(52, 152, 219, 0.5);
-    }
-    .cell.finish {
-      background: linear-gradient(135deg, #1ABC9C, #148F77);
-      border-color: rgba(26, 188, 156, 0.5);
-    }
+    .cell.start { background: linear-gradient(135deg, #5DADE2, #2E86C1); border-color: rgba(74, 144, 217, 0.6); }
+    .cell.normal { background: linear-gradient(135deg, #4A6B8A, #2C4A6A); }
+    .cell.back { background: linear-gradient(135deg, #8E44AD, #6C3483); border-color: rgba(142, 68, 173, 0.4); }
+    .cell.special { background: linear-gradient(135deg, #5DADE2, #3498DB); border-color: rgba(52, 152, 219, 0.5); }
+    .cell.finish { background: linear-gradient(135deg, #1ABC9C, #148F77); border-color: rgba(26, 188, 156, 0.5); }
 
-    /* Убраны цифры на ячейках с символами */
     .cell-label {
       line-height: 1.05;
       font-size: clamp(10px, 1vw, 17px);
@@ -522,32 +388,12 @@
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
       text-align: center;
     }
+    .cell-label .sub { display: none; }
+    .cell.start .sub, .cell.normal .sub { display: block; font-size: clamp(8px, 0.7vw, 10px); margin-top: 3px; opacity: 0.7; }
+    .cell.finish .cell-label { font-size: clamp(14px, 1.4vw, 24px); }
+    .cell.finish .sub { display: none; }
 
-    .cell-label .sub {
-      display: none; /* скрываем подписи (цифры) для всех ячеек, кроме старта и обычных */
-    }
-
-    /* Но для старта и обычных показываем подпись (если она есть) */
-    .cell.start .sub,
-    .cell.normal .sub {
-      display: block;
-      font-size: clamp(8px, 0.7vw, 10px);
-      margin-top: 3px;
-      opacity: 0.7;
-    }
-
-    /* Для финиша показываем только "50" без "Финал" */
-    .cell.finish .cell-label {
-      font-size: clamp(14px, 1.4vw, 24px);
-    }
-    .cell.finish .sub {
-      display: none;
-    }
-
-    /* Для старта показываем "Старт" (уже есть) */
-    /* Для back и special оставляем только символы, подписи скрыты */
-
-    /* Подсветка текущей клетки */
+    /* Подсветка */
     .current-cell-highlight {
       position: absolute;
       width: 7.6%;
@@ -563,21 +409,12 @@
     }
 
     @keyframes pulseGlow {
-      0% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
-      50% {
-        transform: scale(1.04);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
     }
 
-    /* Фишки игроков */
+    /* Фишки */
     .token {
       position: absolute;
       width: 2.4%;
@@ -612,42 +449,25 @@
     }
 
     .avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
       font-size: 34px;
       background: linear-gradient(135deg, #5DADE2, #2E86C1);
       border: 2px solid rgba(74, 144, 217, 0.3);
       box-shadow: 0 0 20px rgba(74, 144, 217, 0.15);
     }
 
-    .player-name {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--text-primary);
-    }
-
-    .player-meta {
-      color: var(--text-secondary);
-      font-size: 15px;
-      margin-top: 4px;
-    }
+    .player-name { font-size: 24px; font-weight: bold; color: var(--text-primary); }
+    .player-meta { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
 
     .dice-result {
-      width: 100px;
-      height: 100px;
+      width: 100px; height: 100px;
       margin: 12px auto 16px;
       border-radius: 28px;
       background: linear-gradient(145deg, #2C4A6A, #1A2A3A);
       border: 2px solid rgba(74, 144, 217, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      color: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; color: var(--text-primary);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05);
     }
 
@@ -667,7 +487,7 @@
       color: #fff;
       border: 2px solid rgba(255, 255, 255, 0.2);
       margin: 0;
-      display: none; /* скрыта по умолчанию */
+      display: none;
       cursor: pointer;
       transition: var(--transition);
       text-transform: uppercase;
@@ -686,775 +506,201 @@
       cursor: not-allowed;
     }
 
-    /* На десктопе также фиксирована, но можно немного сместить, чтобы не перекрывать панель */
     @media (min-width: 1201px) {
       #fixedRollBtn {
-        bottom: 30px;
-        right: 30px;
-        left: auto;
-        transform: none;
+        bottom: 30px; right: 30px; left: auto; transform: none;
       }
-      #fixedRollBtn:hover {
-        transform: translateY(-2px);
-      }
-      #fixedRollBtn:disabled {
-        transform: none;
-      }
+      #fixedRollBtn:hover { transform: translateY(-2px); }
+      #fixedRollBtn:disabled { transform: none; }
     }
 
     /* ===================== СПИСОК ИГРОКОВ ===================== */
-    .players-list {
-      display: grid;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
+    .players-list { display: grid; gap: 10px; margin-top: 8px; }
     .player-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: var(--transition);
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      border-radius: 16px; background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06); transition: var(--transition);
     }
-
     .player-row.active {
       background: rgba(74, 144, 217, 0.12);
       border-color: rgba(74, 144, 217, 0.3);
       box-shadow: 0 0 20px rgba(74, 144, 217, 0.05);
     }
-
     .mini-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
       background: linear-gradient(135deg, #5DADE2, #2E86C1);
       border: 1px solid rgba(74, 144, 217, 0.2);
-      font-size: 22px;
-      flex-shrink: 0;
+      font-size: 22px; flex-shrink: 0;
     }
 
     /* ===================== ЛЕГЕНДА ===================== */
-    .legend {
-      display: grid;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
+    .legend { display: grid; gap: 10px; margin-top: 10px; }
     .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-secondary);
-      font-size: 15px;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-secondary); font-size: 15px;
     }
-
-    .legend-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    .legend-box { width: 20px; height: 20px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.1); }
 
     /* ===================== ЛОГ ===================== */
     .log {
-      display: grid;
-      gap: 8px;
-      max-height: 340px;
-      overflow: auto;
-      margin-top: 10px;
-      padding-right: 4px;
+      display: grid; gap: 8px; max-height: 340px; overflow: auto; margin-top: 10px; padding-right: 4px;
     }
-
-    .log::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .log::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-    }
-
-    .log::-webkit-scrollbar-thumb {
-      background: rgba(74, 144, 217, 0.3);
-      border-radius: 10px;
-    }
-
+    .log::-webkit-scrollbar { width: 6px; }
+    .log::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    .log::-webkit-scrollbar-thumb { background: rgba(74, 144, 217, 0.3); border-radius: 10px; }
     .log-item {
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-      font-size: 15px;
-      line-height: 1.5;
-      animation: fadeInUp 0.3s ease;
+      padding: 12px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-primary);
+      font-size: 15px; line-height: 1.5; animation: fadeInUp 0.3s ease;
     }
 
     /* ===================== МОДАЛЬНЫЕ ОКНА ===================== */
     .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 1000;
-      animation: fadeIn 0.2s ease;
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
+      padding: 20px; z-index: 1000; animation: fadeIn 0.2s ease;
     }
-
-    .modal.show {
-      display: flex;
-    }
+    .modal.show { display: flex; }
 
     .modal-box {
-      width: 100%;
-      max-width: 740px;
+      width: 100%; max-width: 740px;
       background:
         radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1), transparent 50%),
         linear-gradient(145deg, #d4e6f1, #a9cce3);
       border: 2px solid rgba(74, 144, 217, 0.3);
-      border-radius: 24px;
-      padding: 32px 36px;
-      color: #1a2a3a;
+      border-radius: 24px; padding: 32px 36px; color: #1a2a3a;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 60px rgba(74, 144, 217, 0.1);
-      position: relative;
-      animation: zoomIn 0.25s ease;
+      position: relative; animation: zoomIn 0.25s ease;
     }
 
-    .modal-box h3 {
-      margin-top: 0;
-      color: #1a3a5a;
-      font-size: 30px;
-      text-align: center;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-
-    .modal-text {
-      color: #1a2a3a;
-      line-height: 1.7;
-      font-size: 19px;
-      margin-bottom: 20px;
-      white-space: pre-line;
-      text-align: center;
-    }
-
-    .modal-image {
-      max-width: 100%;
-      max-height: 300px;
-      display: block;
-      margin: 10px auto;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .timer-box {
-      margin: 12px 0;
-      text-align: center;
-      font-weight: bold;
-      color: #1a3a5a;
-      font-size: 20px;
-      letter-spacing: 1px;
-    }
-
-    .timer-box.danger {
-      color: #a93226;
-    }
-
+    .modal-box h3 { margin-top: 0; color: #1a3a5a; font-size: 30px; text-align: center; font-weight: 700; letter-spacing: 1px; }
+    .modal-text { color: #1a2a3a; line-height: 1.7; font-size: 19px; margin-bottom: 20px; white-space: pre-line; text-align: center; }
+    .modal-image { max-width: 100%; max-height: 300px; display: block; margin: 10px auto; border-radius: 14px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
+    .timer-box { margin: 12px 0; text-align: center; font-weight: bold; color: #1a3a5a; font-size: 20px; letter-spacing: 1px; }
+    .timer-box.danger { color: #a93226; }
     .answer-box {
-      margin: 14px 0 18px;
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(4px);
-      color: #1a2a3a;
-      font-weight: bold;
-      display: none;
-      border: 1px solid rgba(26, 42, 58, 0.15);
-      font-size: 17px;
+      margin: 14px 0 18px; padding: 14px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(4px);
+      color: #1a2a3a; font-weight: bold; display: none;
+      border: 1px solid rgba(26, 42, 58, 0.15); font-size: 17px;
     }
-
-    .modal-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* Кнопка "Показать ответ" – контрастная */
-    #showAnswerBtn {
-      background: #1a3a5a;
-      color: #fff;
-      border: none;
-      font-weight: bold;
-      transition: var(--transition);
-    }
-    #showAnswerBtn:hover {
-      background: #2a5a7a;
-      transform: translateY(-2px);
-    }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    #showAnswerBtn { background: #1a3a5a; color: #fff; border: none; font-weight: bold; transition: var(--transition); }
+    #showAnswerBtn:hover { background: #2a5a7a; transform: translateY(-2px); }
 
     /* ===================== РЕЗУЛЬТАТЫ ===================== */
-    .results-celebration {
-      position: relative;
-      overflow: hidden;
-      min-height: 700px;
-    }
+    .results-celebration { position: relative; overflow: hidden; min-height: 700px; }
+    .results-title-fantasy { text-align: center; font-size: 40px; color: var(--blue-soft); margin-bottom: 10px; animation: fadeInDown 0.6s ease; text-shadow: 0 0 40px rgba(74, 144, 217, 0.3); }
+    .results-subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 28px; animation: fadeInUp 0.6s ease; }
 
-    .results-title-fantasy {
-      text-align: center;
-      font-size: 40px;
-      color: var(--blue-soft);
-      margin-bottom: 10px;
-      animation: fadeInDown 0.6s ease;
-      text-shadow: 0 0 40px rgba(74, 144, 217, 0.3);
-    }
+    .podium-wrap { margin-top: 30px; display: flex; align-items: flex-end; justify-content: center; gap: 28px; min-height: 380px; flex-wrap: wrap; }
+    .podium-place { width: 220px; display: flex; flex-direction: column; align-items: center; gap: 16px; animation: riseUp 0.8s ease; }
+    .podium-card { width: 100%; text-align: center; padding: 20px 18px; border-radius: 24px; background: rgba(12, 20, 30, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(74, 144, 217, 0.2); box-shadow: var(--shadow-card), 0 0 30px rgba(74, 144, 217, 0.05); animation: floatWinner 4s ease-in-out infinite; }
+    .podium-avatar { font-size: 60px; margin-bottom: 10px; position: relative; }
+    .crown { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); font-size: 34px; animation: crownBounce 2s infinite ease-in-out; }
+    .podium-name { font-size: 26px; color: var(--text-primary); font-weight: bold; }
+    .podium-score { margin-top: 6px; color: var(--text-secondary); font-size: 16px; }
+    .pedestal { width: 100%; border-radius: 18px 18px 10px 10px; display: flex; align-items: center; justify-content: center; color: #0a0f14; font-size: 28px; font-weight: bold; box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.1), 0 12px 30px rgba(0, 0, 0, 0.4); }
+    .podium-place.first .pedestal { height: 200px; background: linear-gradient(180deg, #5DADE2, #4A90D9, #2a6b9e); }
+    .podium-place.second .pedestal { height: 155px; background: linear-gradient(180deg, #d8dde6, #9da8b8); }
+    .podium-place.third .pedestal { height: 120px; background: linear-gradient(180deg, #d9aa7c, #a96c3c); }
 
-    .results-subtitle {
-      text-align: center;
-      color: var(--text-secondary);
-      margin-bottom: 28px;
-      animation: fadeInUp 0.6s ease;
-    }
-
-    .podium-wrap {
-      margin-top: 30px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 28px;
-      min-height: 380px;
-      flex-wrap: wrap;
-    }
-
-    .podium-place {
-      width: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      animation: riseUp 0.8s ease;
-    }
-
-    .podium-card {
-      width: 100%;
-      text-align: center;
-      padding: 20px 18px;
-      border-radius: 24px;
-      background: rgba(12, 20, 30, 0.9);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(74, 144, 217, 0.2);
-      box-shadow: var(--shadow-card), 0 0 30px rgba(74, 144, 217, 0.05);
-      animation: floatWinner 4s ease-in-out infinite;
-    }
-
-    .podium-avatar {
-      font-size: 60px;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .crown {
-      position: absolute;
-      top: -28px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 34px;
-      animation: crownBounce 2s infinite ease-in-out;
-    }
-
-    .podium-name {
-      font-size: 26px;
-      color: var(--text-primary);
-      font-weight: bold;
-    }
-
-    .podium-score {
-      margin-top: 6px;
-      color: var(--text-secondary);
-      font-size: 16px;
-    }
-
-    .pedestal {
-      width: 100%;
-      border-radius: 18px 18px 10px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #0a0f14;
-      font-size: 28px;
-      font-weight: bold;
-      box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.1), 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .podium-place.first .pedestal {
-      height: 200px;
-      background: linear-gradient(180deg, #5DADE2, #4A90D9, #2a6b9e);
-    }
-    .podium-place.second .pedestal {
-      height: 155px;
-      background: linear-gradient(180deg, #d8dde6, #9da8b8);
-    }
-    .podium-place.third .pedestal {
-      height: 120px;
-      background: linear-gradient(180deg, #d9aa7c, #a96c3c);
-    }
-
-    .results-cards {
-      margin-top: 36px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
-    }
-
-    .result-card {
-      border-radius: 22px;
-      padding: 20px;
-      background: rgba(12, 20, 30, 0.9);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: var(--shadow-card);
-      animation: fadeInUp 0.5s ease;
-    }
-
-    .result-card-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .result-card-avatar {
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 34px;
-      background: linear-gradient(135deg, #5DADE2, #2E86C1);
-      border: 2px solid rgba(74, 144, 217, 0.2);
-    }
-
-    .result-card-name {
-      font-weight: bold;
-      color: var(--text-primary);
-      font-size: 20px;
-    }
-
-    .result-card-rank {
-      color: var(--text-secondary);
-      font-size: 15px;
-      margin-top: 4px;
-    }
-
-    .result-stats {
-      display: grid;
-      gap: 8px;
-      color: var(--text-secondary);
-      font-size: 15px;
-    }
+    .results-cards { margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .result-card { border-radius: 22px; padding: 20px; background: rgba(12, 20, 30, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); box-shadow: var(--shadow-card); animation: fadeInUp 0.5s ease; }
+    .result-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .result-card-avatar { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; background: linear-gradient(135deg, #5DADE2, #2E86C1); border: 2px solid rgba(74, 144, 217, 0.2); }
+    .result-card-name { font-weight: bold; color: var(--text-primary); font-size: 20px; }
+    .result-card-rank { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+    .result-stats { display: grid; gap: 8px; color: var(--text-secondary); font-size: 15px; }
 
     /* ===================== ТАБЛИЦА ===================== */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); text-align: left; font-size: 15px; }
+    th { background: rgba(255, 255, 255, 0.06); color: var(--blue-soft); font-weight: 600; }
 
-    th,
-    td {
-      padding: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      text-align: left;
-      font-size: 15px;
-    }
-
-    th {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--blue-soft);
-      font-weight: 600;
-    }
-
-    /* ===================== ДОБАВЛЕНИЕ ОЧКОВ ===================== */
-    .add-points-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-
-    .add-points-row select {
-      flex: 1;
-      min-width: 120px;
-      margin: 0;
-      padding: 10px 12px;
-      font-size: 15px;
-    }
-
-    .add-points-row input {
-      width: 80px;
-      margin: 0;
-      padding: 10px 12px;
-      font-size: 15px;
-      text-align: center;
-    }
-
-    .add-points-row .btn {
-      margin: 0;
-      padding: 10px 20px;
-      width: auto;
-      font-size: 14px;
-    }
+    /* ===================== ДОБАВЛЕНИЕ/ВЫЧИТАНИЕ ОЧКОВ ===================== */
+    .add-points-row { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .add-points-row select { flex: 1; min-width: 120px; margin: 0; padding: 10px 12px; font-size: 15px; }
+    .add-points-row input { width: 80px; margin: 0; padding: 10px 12px; font-size: 15px; text-align: center; }
+    .add-points-row .btn { margin: 0; padding: 10px 20px; width: auto; font-size: 14px; }
 
     /* ===================== МЕНЮ ===================== */
-    .main-menu {
-      text-align: center;
-      padding: 50px 20px;
-    }
+    .main-menu { text-align: center; padding: 50px 20px; }
+    .main-menu h1 { font-size: 60px; color: var(--blue-soft); text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(74, 144, 217, 0.1); margin-bottom: 12px; }
+    .main-menu p { font-size: 22px; color: var(--text-secondary); margin-bottom: 36px; }
+    .main-menu .menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 440px; margin: 0 auto; }
+    .main-menu .menu-buttons .btn { font-size: 22px; padding: 20px 28px; }
 
-    .main-menu h1 {
-      font-size: 60px;
-      color: var(--blue-soft);
-      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 60px rgba(74, 144, 217, 0.1);
-      margin-bottom: 12px;
-    }
-
-    .main-menu p {
-      font-size: 22px;
-      color: var(--text-secondary);
-      margin-bottom: 36px;
-    }
-
-    .main-menu .menu-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-      max-width: 440px;
-      margin: 0 auto;
-    }
-
-    .main-menu .menu-buttons .btn {
-      font-size: 22px;
-      padding: 20px 28px;
-    }
+    /* ===================== ИСТОРИЯ ИГР ===================== */
+    #historyList { margin-top: 20px; text-align: left; }
+    .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .history-item .date { font-size: 14px; color: var(--text-secondary); }
+    .history-item .winner { font-weight: bold; color: var(--blue-soft); }
+    .history-item .players-count { font-size: 14px; }
 
     /* ===================== АНИМАЦИИ ===================== */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes zoomIn {
-      from {
-        opacity: 0;
-        transform: scale(0.92);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes riseUp {
-      from {
-        opacity: 0;
-        transform: translateY(60px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes floatWinner {
-      0% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-6px);
-      }
-      100% {
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes crownBounce {
-      0% {
-        transform: translateX(-50%) translateY(0);
-      }
-      50% {
-        transform: translateX(-50%) translateY(-8px);
-      }
-      100% {
-        transform: translateX(-50%) translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @keyframes riseUp { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes floatWinner { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
+    @keyframes crownBounce { 0% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } 100% { transform: translateX(-50%) translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     /* ===================== АДАПТИВНОСТЬ ===================== */
-    @media (max-width: 1200px) {
-      .layout-network {
-        grid-template-columns: 1fr;
-      }
-    }
-
+    @media (max-width: 1200px) { .layout-network { grid-template-columns: 1fr; } }
     @media (max-width: 900px) {
-      .board {
-        min-height: 360px;
-      }
-      .modal-actions {
-        grid-template-columns: 1fr;
-      }
-      .btn {
-        padding: 18px 22px;
-        font-size: 18px;
-      }
-      input,
-      select {
-        font-size: 18px;
-        padding: 16px;
-      }
-      .box h3 {
-        font-size: 22px;
-      }
-      .hero h1 {
-        font-size: 34px;
-      }
-      .dice-result {
-        width: 80px;
-        height: 80px;
-        font-size: 34px;
-      }
-      .current-player .avatar {
-        width: 52px;
-        height: 52px;
-        font-size: 28px;
-      }
-      .player-name {
-        font-size: 20px;
-      }
+      .board { min-height: 360px; }
+      .modal-actions { grid-template-columns: 1fr; }
+      .btn { padding: 18px 22px; font-size: 18px; }
+      input, select { font-size: 18px; padding: 16px; }
+      .box h3 { font-size: 22px; }
+      .hero h1 { font-size: 34px; }
+      .dice-result { width: 80px; height: 80px; font-size: 34px; }
+      .current-player .avatar { width: 52px; height: 52px; font-size: 28px; }
+      .player-name { font-size: 20px; }
     }
-
     @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-      .board {
-        min-height: 280px;
-        aspect-ratio: 11 / 9;
-      }
-      .board-shell {
-        padding: 10px;
-      }
-      .board-wrap {
-        max-height: 50vh;
-        overflow: auto;
-      }
-      .panel-inner {
-        padding: 14px;
-      }
-      .box {
-        padding: 14px;
-      }
-      .btn {
-        padding: 14px 18px;
-        font-size: 16px;
-      }
-      input,
-      select {
-        font-size: 16px;
-        padding: 12px;
-      }
-      .hero h1 {
-        font-size: 28px;
-      }
-      .dice-result {
-        width: 64px;
-        height: 64px;
-        font-size: 28px;
-      }
-      .current-player .avatar {
-        width: 44px;
-        height: 44px;
-        font-size: 22px;
-      }
-      .player-name {
-        font-size: 18px;
-      }
-      .modal-box {
-        padding: 24px;
-      }
-      .podium-place {
-        width: 160px;
-      }
+      body { padding: 10px; }
+      .board { min-height: 280px; aspect-ratio: 11 / 9; }
+      .board-shell { padding: 10px; }
+      .board-wrap { max-height: 50vh; overflow: auto; }
+      .panel-inner { padding: 14px; }
+      .box { padding: 14px; }
+      .btn { padding: 14px 18px; font-size: 16px; }
+      input, select { font-size: 16px; padding: 12px; }
+      .hero h1 { font-size: 28px; }
+      .dice-result { width: 64px; height: 64px; font-size: 28px; }
+      .current-player .avatar { width: 44px; height: 44px; font-size: 22px; }
+      .player-name { font-size: 18px; }
+      .modal-box { padding: 24px; }
+      .podium-place { width: 160px; }
     }
 
     /* ===================== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===================== */
-    .achievement-icon {
-      display: inline-block;
-      position: relative;
-      cursor: help;
-      margin: 0 2px;
-    }
+    .achievement-icon { display: inline-block; position: relative; cursor: help; margin: 0 2px; }
+    .achievement-icon .tooltip-text { visibility: hidden; width: 200px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 10; bottom: 125%; left: 50%; transform: translateX(-50%); font-size: 13px; line-height: 1.4; opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 1px solid rgba(255, 255, 255, 0.08); }
+    .achievement-icon .tooltip-text::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent; }
+    .achievement-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
 
-    .achievement-icon .tooltip-text {
-      visibility: hidden;
-      width: 200px;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      text-align: center;
-      border-radius: 8px;
-      padding: 8px 12px;
-      position: absolute;
-      z-index: 10;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 13px;
-      line-height: 1.4;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .achievement-icon .tooltip-text::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
-    }
-
-    .achievement-icon:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    /* Стили для сетевого лобби */
-    .network-setup {
-      text-align: center;
-    }
-
-    .network-setup input {
-      width: 100%;
-      max-width: 320px;
-      margin: 10px auto;
-    }
-
-    .network-setup .btn {
-      max-width: 320px;
-      margin: 6px auto;
-    }
-
-    .room-info {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(4px);
-      padding: 14px;
-      border-radius: 14px;
-      margin: 12px 0;
-      word-break: break-all;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .player-ready-list {
-      display: grid;
-      gap: 10px;
-      margin: 12px 0;
-    }
-
-    .player-ready-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .player-ready-item .avatar-mini {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      background: linear-gradient(135deg, #5DADE2, #2E86C1);
-    }
-
-    .player-ready-item .ready-badge {
-      margin-left: auto;
-      color: #1ABC9C;
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .host-controls {
-      margin-top: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .host-controls .btn {
-      max-width: 320px;
-      margin: 0 auto;
-    }
-
-    /* Витрина достижений */
-    .achievement-icon {
-      font-size: 18px;
-    }
+    /* Сетевые лобби */
+    .network-setup { text-align: center; }
+    .network-setup input { width: 100%; max-width: 320px; margin: 10px auto; }
+    .network-setup .btn { max-width: 320px; margin: 6px auto; }
+    .room-info { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(4px); padding: 14px; border-radius: 14px; margin: 12px 0; word-break: break-all; border: 1px solid rgba(255, 255, 255, 0.06); }
+    .player-ready-list { display: grid; gap: 10px; margin: 12px 0; }
+    .player-ready-item { display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.06); }
+    .player-ready-item .avatar-mini { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: linear-gradient(135deg, #5DADE2, #2E86C1); }
+    .player-ready-item .ready-badge { margin-left: auto; color: #1ABC9C; font-size: 15px; font-weight: 600; }
+    .host-controls { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .host-controls .btn { max-width: 320px; margin: 0 auto; }
   </style>
 </head>
 <body>
   <div class="clouds-layer">
-    <div class="cloud cloud1"></div>
-    <div class="cloud cloud2"></div>
-    <div class="cloud cloud3"></div>
-    <div class="cloud cloud4"></div>
+    <div class="cloud cloud1"></div><div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div><div class="cloud cloud4"></div>
   </div>
   <div class="app">
     <div class="hero"><h1>Хроники Локолевства</h1><p>Викторина разработанная амбассадорами Локо</p></div>
@@ -1466,21 +712,21 @@
         <div class="menu-buttons">
           <button class="btn btn-success" id="menuHostBtn">👑 Создать игру (ведущий)</button>
           <button class="btn btn-secondary" id="menuJoinBtn">🔗 Присоединиться к игре</button>
+          <button class="btn btn-secondary" id="menuHistoryBtn">📜 История игр</button>
         </div>
         <div class="message" id="menuMessage"></div>
+        <div id="historyList" class="hidden"></div>
       </div>
     </div>
 
     <!-- Сетевая игра -->
     <div class="layout-network hidden" id="gameLayoutNetwork">
-      <!-- Первая панель: настройки и поле -->
       <div class="panel">
         <div class="panel-inner">
           <div class="box" id="networkSetupBox"><h3 id="networkSetupTitle">Настройка сетевой игры</h3><div id="networkSetupContent"></div></div>
           <div class="box hidden" id="networkGameBox"><h3>Игровое поле</h3><div class="board-shell"><div class="board-wrap"><div class="board" id="boardNetwork"><svg class="path-layer" id="pathLayerNetwork" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="ornaments-layer" id="ornamentsLayerNetwork"></div><div class="cells-layer" id="cellsLayerNetwork"></div><div class="highlight-layer" id="highlightLayerNetwork"></div><div class="tokens-layer" id="tokensLayerNetwork"></div></div></div></div></div>
         </div>
       </div>
-      <!-- Вторая панель: правый интерфейс (скрыта до старта игры) -->
       <div class="panel hidden" id="networkRightPanelContainer">
         <div class="panel-inner">
           <div id="networkRightPanel"></div>
@@ -1517,36 +763,14 @@
     // ===================== КОНСТАНТЫ =====================
     const SPECIAL_BACK_CELLS = { 16: 14, 27: 25, 34: 32, 47: 45 };
     const SPECIAL_TASK_CELLS = [8, 19, 30, 41];
-    const FINAL_CELL = 50,
-      MAX_POSITION = 50,
-      FINAL_QUESTION_POINTS = 3,
-      FINAL_SUCCESS_BONUS = 10;
+    const FINAL_CELL = 50, MAX_POSITION = 50, FINAL_QUESTION_POINTS = 3, FINAL_SUCCESS_BONUS = 10;
 
     // ===================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====================
-    function shuffle(a) { let c = [...a]; for (let i = c.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1));
-        [c[i], c[j]] = [c[j], c[i]]; } return c; }
-
+    function shuffle(a) { let c = [...a]; for (let i = c.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [c[i], c[j]] = [c[j], c[i]]; } return c; }
     function getAvatarById(id) { return AVATARS.find(a => a.id === id) || AVATARS[0]; }
-
-    function fmt(s) { let m = String(Math.floor(s / 60)).padStart(2, '0'),
-        sec = String(s % 60).padStart(2, '0'); return m + ':' + sec; }
-
-    function cellType(i) {
-      if (i === 0) return 'start';
-      if (i === FINAL_CELL) return 'finish';
-      if (SPECIAL_TASK_CELLS.includes(i)) return 'special';
-      if (SPECIAL_BACK_CELLS[i]) return 'back';
-      return 'normal';
-    }
-
-    function cellText(i) {
-      if (i === 0) return { main: 'Старт', sub: '' };
-      if (i === FINAL_CELL) return { main: '50', sub: '' }; // только число, без "Финал"
-      if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: '' };
-      if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: '' };
-      return { main: String(i), sub: '' };
-    }
-
+    function fmt(s) { let m = String(Math.floor(s / 60)).padStart(2, '0'), sec = String(s % 60).padStart(2, '0'); return m + ':' + sec; }
+    function cellType(i) { if (i === 0) return 'start'; if (i === FINAL_CELL) return 'finish'; if (SPECIAL_TASK_CELLS.includes(i)) return 'special'; if (SPECIAL_BACK_CELLS[i]) return 'back'; return 'normal'; }
+    function cellText(i) { if (i === 0) return { main: 'Старт', sub: '' }; if (i === FINAL_CELL) return { main: '50', sub: '' }; if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: '' }; if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: '' }; return { main: String(i), sub: '' }; }
     function genRoom() { return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36); }
 
     // ===================== АВАТАРЫ =====================
@@ -1564,11 +788,7 @@
     ];
 
     // ===================== ОБЩИЕ ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА =====================
-    let timerSec = 60,
-      timerRem = 0,
-      timerInterval = null,
-      timerExpired = false,
-      pendingQuestion = null;
+    let timerSec = 60, timerRem = 0, timerInterval = null, timerExpired = false, pendingQuestion = null;
 
     function openQuestion(q, title, context) {
       pendingQuestion = { ...q, context };
@@ -1577,8 +797,7 @@
       document.getElementById('modalQuestion').textContent = q.question;
       document.getElementById('modalAnswer').textContent = 'Правильный ответ: ' + q.answer + ' • Баллы: ' + q.points;
       document.getElementById('modalAnswer').style.display = 'none';
-      if (q.imageUrl) { document.getElementById('modalImage').src = q.imageUrl;
-        document.getElementById('modalImage').style.display = 'block'; } else document.getElementById('modalImage').style.display = 'none';
+      if (q.imageUrl) { document.getElementById('modalImage').src = q.imageUrl; document.getElementById('modalImage').style.display = 'block'; } else document.getElementById('modalImage').style.display = 'none';
 
       const showBtn = document.getElementById('showAnswerBtn');
       const correctBtn = document.getElementById('answerCorrectBtn');
@@ -1599,42 +818,41 @@
       startTimer();
     }
 
-    function startTimer() {
-      stopTimer();
-      timerExpired = false;
-      timerRem = timerSec;
-      updateTimerUI();
-      timerInterval = setInterval(() => {
-        timerRem--;
-        if (timerRem < 0) timerRem = 0;
-        updateTimerUI();
-        if (timerRem === 0) {
-          stopTimer();
-          timerExpired = true;
-          document.getElementById('questionTimer').textContent = 'Время вышло';
-          document.getElementById('questionTimer').className = 'timer-box danger';
-          document.getElementById('modalAnswer').style.display = 'block';
-          document.getElementById('showAnswerBtn').disabled = true;
-          document.getElementById('answerCorrectBtn').disabled = false;
-          document.getElementById('answerWrongBtn').disabled = false;
-        }
-      }, 1000);
-    }
-
-    function stopTimer() {
-      if (timerInterval) { clearInterval(timerInterval);
-        timerInterval = null; }
-    }
-
-    function updateTimerUI() {
-      if (timerExpired) return;
-      document.getElementById('questionTimer').textContent = fmt(timerRem);
-      document.getElementById('questionTimer').className = 'timer-box' + (timerRem <= 10 ? ' danger' : '');
-    }
+    function startTimer() { stopTimer(); timerExpired = false; timerRem = timerSec; updateTimerUI(); timerInterval = setInterval(() => { timerRem--; if (timerRem < 0) timerRem = 0; updateTimerUI(); if (timerRem === 0) { stopTimer(); timerExpired = true; document.getElementById('questionTimer').textContent = 'Время вышло'; document.getElementById('questionTimer').className = 'timer-box danger'; document.getElementById('modalAnswer').style.display = 'block'; document.getElementById('showAnswerBtn').disabled = true; document.getElementById('answerCorrectBtn').disabled = false; document.getElementById('answerWrongBtn').disabled = false; } }, 1000); }
+    function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+    function updateTimerUI() { if (timerExpired) return; document.getElementById('questionTimer').textContent = fmt(timerRem); document.getElementById('questionTimer').className = 'timer-box' + (timerRem <= 10 ? ' danger' : ''); }
 
     // ===================== СЕТЕВАЯ ИГРА =====================
-    let net = { role: null, roomId: null, myId: null, roomRef: null, isRolling: false, cells: [], normalQs: [], specialQs: [],
-      finalPool: [], normalPool: [] };
+    let net = { role: null, roomId: null, myId: null, roomRef: null, isRolling: false, cells: [], normalQs: [], specialQs: [], finalPool: [], normalPool: [] };
+
+    // Сохранение сессии в localStorage
+    function saveSession() {
+      if (net.roomId && net.myId) {
+        localStorage.setItem('lastRoomId', net.roomId);
+        localStorage.setItem('lastPlayerId', net.myId);
+        localStorage.setItem('lastRole', net.role);
+      }
+    }
+
+    function clearSession() {
+      localStorage.removeItem('lastRoomId');
+      localStorage.removeItem('lastPlayerId');
+      localStorage.removeItem('lastRole');
+    }
+
+    // Восстановление сессии при загрузке
+    function tryRestoreSession() {
+      const roomId = localStorage.getItem('lastRoomId');
+      const playerId = localStorage.getItem('lastPlayerId');
+      const role = localStorage.getItem('lastRole');
+      if (roomId && playerId && role) {
+        net.roomId = roomId;
+        net.myId = playerId;
+        net.role = role;
+        return true;
+      }
+      return false;
+    }
 
     function createRoom(hostName, qs, sp, time) {
       if (!db) { console.error('Firebase not initialized'); return null; }
@@ -1649,12 +867,16 @@
         currentPlayerId: null,
         gameStarted: false,
         gameFinished: false,
+        paused: false,
         firstFinalWinnerId: null,
         finishCounter: 0,
         questionTime: time,
         log: []
       };
       net.roomRef.set(data);
+      net.myId = 'host';
+      net.role = 'host';
+      saveSession();
       return net.roomId;
     }
 
@@ -1686,10 +908,65 @@
         ready: false
       };
       r.child('players/' + pid).set(p);
+      net.myId = pid;
+      net.role = 'player';
+      saveSession();
       return { playerId: pid, playerData: p };
     }
 
     // ===================== UI ХЕЛПЕРЫ =====================
+    function showHistory() {
+      document.getElementById('menuMessage').textContent = '';
+      const historyDiv = document.getElementById('historyList');
+      historyDiv.classList.remove('hidden');
+      // Загружаем историю из Firebase
+      db.ref('history').limitToLast(10).once('value').then(snap => {
+        const data = snap.val();
+        if (!data) {
+          historyDiv.innerHTML = '<p style="color:var(--text-secondary);">История пуста.</p>';
+          return;
+        }
+        let html = '<h4>Последние 10 игр</h4><div style="max-height:400px;overflow:auto;">';
+        // Перебираем записи в обратном порядке (последние сверху)
+        const keys = Object.keys(data).reverse();
+        keys.forEach(key => {
+          const game = data[key];
+          const date = new Date(game.timestamp).toLocaleString('ru-RU');
+          html += `<div class="history-item">
+            <span class="date">${date}</span>
+            <span class="winner">🏆 ${game.winner || '—'}</span>
+            <span class="players-count">👥 ${game.playerCount || 0}</span>
+          </div>`;
+        });
+        html += '</div>';
+        // Кнопка экспорта истории
+        html += `<button class="btn btn-secondary" id="exportHistoryBtn" style="margin-top:10px;">📤 Экспорт истории в Excel</button>`;
+        historyDiv.innerHTML = html;
+        document.getElementById('exportHistoryBtn').addEventListener('click', exportHistory);
+      }).catch(err => {
+        console.error('Error loading history:', err);
+        historyDiv.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки истории.</p>';
+      });
+    }
+
+    function exportHistory() {
+      db.ref('history').limitToLast(10).once('value').then(snap => {
+        const data = snap.val();
+        if (!data) { alert('История пуста.'); return; }
+        const rows = [['Дата', 'Победитель', 'Количество игроков']];
+        const keys = Object.keys(data);
+        keys.forEach(key => {
+          const game = data[key];
+          const date = new Date(game.timestamp).toLocaleString('ru-RU');
+          rows.push([date, game.winner || '—', game.playerCount || 0]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'История');
+        XLSX.writeFile(wb, 'history.xlsx');
+      }).catch(err => { alert('Ошибка экспорта: ' + err.message); });
+    }
+
     function showHostSetup() {
       document.getElementById('networkSetupTitle').textContent = 'Создать игру';
       document.getElementById('networkSetupContent').innerHTML = `
@@ -1701,10 +978,7 @@
         <button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button>
         <div class="message" id="hostCreateMessage"></div></div>`;
 
-      document.getElementById('hostExcelFile').addEventListener('change', function(e) {
-        if (e.target.files[0]) networkParseExcel(e.target.files[0]);
-      });
-
+      document.getElementById('hostExcelFile').addEventListener('change', function(e) { if (e.target.files[0]) networkParseExcel(e.target.files[0]); });
       document.getElementById('hostCreateBtn').addEventListener('click', function() {
         let name = document.getElementById('hostName').value.trim();
         if (!name) { document.getElementById('hostCreateMessage').textContent = 'Введите имя.'; return; }
@@ -1725,9 +999,7 @@
       let link = window.location.origin + window.location.pathname + '?room=' + rid;
       document.getElementById('networkSetupContent').innerHTML = `
         <div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`;
-      // Скрываем правую панель, пока игра не началась
       document.getElementById('networkRightPanelContainer').classList.add('hidden');
-      // Скрываем фиксированную кнопку
       document.getElementById('fixedRollBtn').style.display = 'none';
       net.roomRef = db.ref('rooms/' + rid);
       net.roomRef.on('value', snapshot => {
@@ -1737,36 +1009,16 @@
         let ids = Object.keys(players);
         let list = document.getElementById('playersReadyList');
         list.innerHTML = '';
-        ids.forEach(id => {
-          let p = players[id];
-          list.innerHTML +=
-            `<div class="player-ready-item"><div class="avatar-mini">${p.avatarIcon}</div><span>${p.name}</span><span class="ready-badge">${p.ready?'✅ Готов':'⏳ Ожидает'}</span></div>`;
-        });
+        ids.forEach(id => { let p = players[id]; list.innerHTML += `<div class="player-ready-item"><div class="avatar-mini">${p.avatarIcon}</div><span>${p.name}</span><span class="ready-badge">${p.ready?'✅ Готов':'⏳ Ожидает'}</span></div>`; });
         let allReady = ids.every(id => players[id].ready === true);
         let btn = document.getElementById('hostStartGameBtn');
-        if (allReady && ids.length >= 1) btn.disabled = false;
-        else btn.disabled = true;
+        if (allReady && ids.length >= 1) btn.disabled = false; else btn.disabled = true;
         if (data.gameStarted) startGameNetwork(data);
       });
       document.getElementById('hostStartGameBtn').addEventListener('click', function() {
-        net.roomRef.once('value').then(s => {
-          let d = s.val();
-          if (d) {
-            let ids = Object.keys(d.players || {});
-            if (ids.length > 0) {
-              net.roomRef.child('currentPlayerId').set(ids[0]);
-              net.roomRef.child('gameStarted').set(true);
-            }
-          }
-        });
+        net.roomRef.once('value').then(s => { let d = s.val(); if (d) { let ids = Object.keys(d.players || {}); if (ids.length > 0) { net.roomRef.child('currentPlayerId').set(ids[0]); net.roomRef.child('gameStarted').set(true); } } });
       });
-      document.getElementById('hostCancelBtn').addEventListener('click', function() {
-        net.roomRef.remove();
-        net.role = null;
-        net.roomId = null;
-        document.getElementById('gameLayoutNetwork').classList.add('hidden');
-        document.getElementById('mainMenu').classList.remove('hidden');
-      });
+      document.getElementById('hostCancelBtn').addEventListener('click', function() { net.roomRef.remove(); net.role = null; net.roomId = null; clearSession(); document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); });
     }
 
     function showJoinSetup() {
@@ -1776,33 +1028,17 @@
       document.getElementById('joinConnectBtn').addEventListener('click', function() {
         let rid = document.getElementById('joinRoomId').value.trim();
         if (!rid) { document.getElementById('joinMessage').textContent = 'Введите ID.'; return; }
-        db.ref('rooms/' + rid).once('value').then(s => {
-          let d = s.val();
-          if (!d) { document.getElementById('joinMessage').textContent = 'Комната не найдена.'; return; }
-          net.roomId = rid;
-          net.role = 'player';
-          document.getElementById('joinMessage').textContent = 'Подключено! Выберите имя и аватар.';
-          document.getElementById('joinPlayerSetup').classList.remove('hidden');
-          document.getElementById('joinConnectBtn').disabled = true;
-        });
+        db.ref('rooms/' + rid).once('value').then(s => { let d = s.val(); if (!d) { document.getElementById('joinMessage').textContent = 'Комната не найдена.'; return; } net.roomId = rid; net.role = 'player'; document.getElementById('joinMessage').textContent = 'Подключено! Выберите имя и аватар.'; document.getElementById('joinPlayerSetup').classList.remove('hidden'); document.getElementById('joinConnectBtn').disabled = true; });
       });
       document.getElementById('joinReadyBtn').addEventListener('click', function() {
-        let name = document.getElementById('joinPlayerName').value.trim();
-        let avId = document.getElementById('joinAvatarSelect').value;
+        let name = document.getElementById('joinPlayerName').value.trim(); let avId = document.getElementById('joinAvatarSelect').value;
         if (!name) { document.getElementById('joinMessage').textContent = 'Введите имя.'; return; }
         let res = joinRoom(net.roomId, name, avId);
         net.myId = res.playerId;
         net.roomRef = db.ref('rooms/' + net.roomId);
         net.roomRef.on('value', s => { let d = s.val(); if (d && d.gameStarted) startGameNetwork(d); });
-        document.getElementById('networkSetupContent').innerHTML =
-          `<div class="network-setup"><h4>Вы готовы!</h4><p>Ожидайте старта.</p><p>Ваше имя: ${name}</p><button class="btn btn-secondary" id="joinCancelBtn">Отмена</button></div>`;
-        document.getElementById('joinCancelBtn').addEventListener('click', function() {
-          net.roomRef.child('players/' + net.myId).remove();
-          net.role = null;
-          net.roomId = null;
-          document.getElementById('gameLayoutNetwork').classList.add('hidden');
-          document.getElementById('mainMenu').classList.remove('hidden');
-        });
+        document.getElementById('networkSetupContent').innerHTML = `<div class="network-setup"><h4>Вы готовы!</h4><p>Ожидайте старта.</p><p>Ваше имя: ${name}</p><button class="btn btn-secondary" id="joinCancelBtn">Отмена</button></div>`;
+        document.getElementById('joinCancelBtn').addEventListener('click', function() { net.roomRef.child('players/' + net.myId).remove(); net.role = null; net.roomId = null; clearSession(); document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); });
         net.roomRef.child('players/' + net.myId + '/ready').set(true);
       });
     }
@@ -1811,31 +1047,24 @@
     function startGameNetwork(data) {
       document.getElementById('networkSetupBox').classList.add('hidden');
       document.getElementById('networkGameBox').classList.remove('hidden');
-      // Показываем правую панель
       document.getElementById('networkRightPanelContainer').classList.remove('hidden');
-      // Показываем фиксированную кнопку
       const fixedBtn = document.getElementById('fixedRollBtn');
       fixedBtn.style.display = 'block';
-      fixedBtn.disabled = true; // по умолчанию заблокирована, будет разблокирована при обновлении состояния
+      fixedBtn.disabled = true;
 
       let isHost = net.role === 'host';
       document.getElementById('networkRightPanel').innerHTML = `
         <div class="box"><h3>Текущий игрок</h3><div class="current-player"><div class="avatar" id="currentPlayerAvatarNetwork">😀</div><div><div class="player-name" id="currentPlayerNameNetwork">Герой</div><div class="player-meta" id="currentPlayerMetaNetwork">Позиция: Старт</div></div></div></div>
-        <div class="box"><h3>Кость судьбы</h3><div class="dice-result" id="diceResultNetwork">-</div>
-          <!-- Оригинальная кнопка скрыта, используется фиксированная -->
-        </div>
+        <div class="box"><h3>Кость судьбы</h3><div class="dice-result" id="diceResultNetwork">-</div></div>
         <div class="box"><h3>Отряд</h3><div class="players-list" id="playersListNetwork"></div></div>
         <div class="box"><h3>Легенда поля</h3><div class="legend"><div class="legend-item"><span class="legend-box" style="background:#5DADE2;"></span>Старт</div><div class="legend-item"><span class="legend-box" style="background:#4A6B8A;"></span>Обычная</div><div class="legend-item"><span class="legend-box" style="background:#8E44AD;"></span>Ловушка</div><div class="legend-item"><span class="legend-box" style="background:#3498DB;"></span>Уникальное</div><div class="legend-item"><span class="legend-box" style="background:#1ABC9C;"></span>Финал</div></div></div>
         <div class="box"><h3>Летопись событий</h3><div class="log" id="eventLogNetwork"></div></div>
         ${isHost?`
-          <div class="box"><h3>✏️ Добавить очки</h3><div class="add-points-row"><select id="addPointsPlayerSelectNetwork"><option value="">-- выберите --</option></select><input type="number" id="addPointsInputNetwork" value="1" min="1" max="100" /><button class="btn btn-success" id="addPointsBtnNetwork">Добавить</button></div></div>
-          <div class="box side-end-wrap"><button class="btn btn-danger" id="forceFinishBtnNetwork">Завершить игру</button></div>
+          <div class="box"><h3>✏️ Очки</h3><div class="add-points-row"><select id="addPointsPlayerSelectNetwork"><option value="">-- выберите --</option></select><input type="number" id="addPointsInputNetwork" value="1" min="1" max="100" /><button class="btn btn-success" id="addPointsBtnNetwork">+ Добавить</button><button class="btn btn-danger" id="subtractPointsBtnNetwork">- Вычесть</button></div></div>
+          <div class="box side-end-wrap"><button class="btn btn-warning" id="pauseGameBtnNetwork">⏸ Пауза</button><button class="btn btn-danger" id="forceFinishBtnNetwork">Завершить игру</button></div>
         `:''}
       `;
-      // Если ведущий – скрываем кнопку броска (она ему не нужна)
-      if (isHost) {
-        fixedBtn.style.display = 'none';
-      }
+      if (isHost) { fixedBtn.style.display = 'none'; }
 
       // Пулы вопросов
       net.normalPool = shuffle([...data.questions]);
@@ -1844,16 +1073,13 @@
       net.normalPool = net.normalPool.filter(q => !finalIds.has(q.question));
       net.specialQs = shuffle([...data.specialQuestions]);
 
-      buildCellsNetwork();
-      renderOrnamentsNetwork();
-      renderCellsNetwork();
+      buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
 
       // Подписка на вопросы
       net.roomRef.child('pendingQuestion').on('value', sn => {
         let q = sn.val();
         if (q && q.question) {
-          if (!document.getElementById('questionModal').classList.contains('show') ||
-            window._lastQuestionTimestamp !== q.timestamp) {
+          if (!document.getElementById('questionModal').classList.contains('show') || window._lastQuestionTimestamp !== q.timestamp) {
             window._lastQuestionTimestamp = q.timestamp;
             timerSec = data.questionTime || 60;
             openQuestion(q, 'Вопрос для ' + q.playerName, q.context);
@@ -1864,7 +1090,7 @@
         }
       });
 
-      // Подписка на бросок кубика
+      // Подписка на бросок кубика (мгновенно, без анимации)
       let lastDiceKey = null;
       net.roomRef.child('diceRolls').on('child_added', async (sn) => {
         let key = sn.key;
@@ -1872,12 +1098,21 @@
         lastDiceKey = key;
         let dice = sn.val();
         if (dice !== null && typeof dice === 'number') {
-          let el = document.getElementById('diceResultNetwork');
-          for (let i = 0; i < 10; i++) {
-            el.textContent = String(Math.floor(Math.random() * 6) + 1);
-            await new Promise(r => setTimeout(r, 80));
+          document.getElementById('diceResultNetwork').textContent = String(dice);
+        }
+      });
+
+      // Подписка на паузу
+      net.roomRef.child('paused').on('value', sn => {
+        const paused = sn.val();
+        if (paused === true) {
+          fixedBtn.disabled = true;
+          document.getElementById('pauseGameBtnNetwork').textContent = '▶️ Возобновить';
+        } else {
+          if (net.role !== 'host') {
+            // кнопка будет разблокирована при обновлении состояния
           }
-          el.textContent = String(dice);
+          if (isHost) document.getElementById('pauseGameBtnNetwork').textContent = '⏸ Пауза';
         }
       });
 
@@ -1889,15 +1124,29 @@
           if (isNaN(pts) || pts < 1) return;
           net.roomRef.child('players/' + id + '/points').transaction(c => (c || 0) + pts);
         });
+        document.getElementById('subtractPointsBtnNetwork').addEventListener('click', function() {
+          let id = document.getElementById('addPointsPlayerSelectNetwork').value;
+          if (!id) return;
+          let pts = parseInt(document.getElementById('addPointsInputNetwork').value);
+          if (isNaN(pts) || pts < 1) return;
+          net.roomRef.child('players/' + id + '/points').transaction(c => Math.max(0, (c || 0) - pts));
+        });
+        document.getElementById('pauseGameBtnNetwork').addEventListener('click', function() {
+          net.roomRef.child('paused').transaction(paused => !paused);
+        });
         document.getElementById('forceFinishBtnNetwork').addEventListener('click', function() {
-          if (confirm('Завершить?')) net.roomRef.child('gameFinished').set(true);
+          document.getElementById('confirmFinishModal').classList.add('show');
+        });
+        document.getElementById('confirmFinishBtn').addEventListener('click', function() {
+          net.roomRef.child('gameFinished').set(true);
+          document.getElementById('confirmFinishModal').classList.remove('show');
+        });
+        document.getElementById('cancelFinishBtn').addEventListener('click', function() {
+          document.getElementById('confirmFinishModal').classList.remove('show');
         });
       }
 
-      net.roomRef.on('value', sn => {
-        let d = sn.val();
-        if (d) updateGameStateNetwork(d);
-      });
+      net.roomRef.on('value', sn => { let d = sn.val(); if (d) updateGameStateNetwork(d); });
 
       // Обработчик клика на фиксированную кнопку
       fixedBtn.addEventListener('click', function() {
@@ -1906,9 +1155,16 @@
           console.warn('Cannot roll while question is open');
           return;
         }
-        let actionRef = net.roomRef.child('actions').push();
-        actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
-        fixedBtn.disabled = true;
+        // Проверяем, не на паузе ли
+        net.roomRef.child('paused').once('value').then(sn => {
+          if (sn.val() === true) {
+            alert('Игра приостановлена. Дождитесь возобновления.');
+            return;
+          }
+          let actionRef = net.roomRef.child('actions').push();
+          actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
+          fixedBtn.disabled = true;
+        });
       });
 
       if (isHost) {
@@ -1929,6 +1185,8 @@
         let snap = await net.roomRef.once('value');
         let d = snap.val();
         if (!d) { net.isRolling = false; return; }
+        // Проверяем паузу
+        if (d.paused === true) { net.isRolling = false; return; }
         let players = d.players || {};
         let p = players[playerId];
         if (!p || p.finished) { net.isRolling = false; return; }
@@ -1938,10 +1196,7 @@
         await diceRef.set(dice);
 
         let playerRef = net.roomRef.child('players/' + playerId + '/position');
-        await playerRef.transaction(current => {
-          let target = Math.min((current || 0) + dice, MAX_POSITION);
-          return target;
-        });
+        await playerRef.transaction(current => { let target = Math.min((current || 0) + dice, MAX_POSITION); return target; });
 
         let log = d.log || [];
         log.push(p.name + ' бросает кость: выпало ' + dice + '.');
@@ -1966,7 +1221,6 @@
 
     // ===================== ОБРАБОТКА КЛЕТКИ =====================
     async function networkProcessCell(playerId, player, pos) {
-      // Ловушки (16, 27, 34, 47)
       if (SPECIAL_BACK_CELLS[pos]) {
         let back = SPECIAL_BACK_CELLS[pos];
         player.trapHits++;
@@ -1979,8 +1233,6 @@
         await networkOpenQuestion(q, 'Случайный вопрос после ловушки', 'normal', playerId);
         return true;
       }
-
-      // Уникальные задания
       if (SPECIAL_TASK_CELLS.includes(pos)) {
         if (!player.visitedSpecialCells) player.visitedSpecialCells = [];
         player.visitedSpecialCells.push(pos);
@@ -1989,19 +1241,10 @@
         await networkOpenQuestion(task, 'Уникальное задание на клетке ' + pos, 'special', playerId);
         return true;
       }
-
-      // Финал
       if (pos === FINAL_CELL) {
         let final = getRandomFinalQuestion();
-        if (final) {
-          await networkOpenQuestion(final, 'Финальный вопрос', 'final50', playerId);
-          return true;
-        } else {
-          return false;
-        }
+        if (final) { await networkOpenQuestion(final, 'Финальный вопрос', 'final50', playerId); return true; } else return false;
       }
-
-      // Обычная клетка
       if (pos >= 1 && pos < FINAL_CELL) {
         let q = getRandomNormalQuestion();
         await networkOpenQuestion(q, 'Случайный вопрос', 'normal', playerId);
@@ -2012,30 +1255,17 @@
 
     // ===================== ПУЛЫ ВОПРОСОВ =====================
     function getRandomNormalQuestion() {
-      if (!net.normalPool || net.normalPool.length === 0) {
-        return { question: "Обычный вопрос (вопросы закончились)", answer: "Ответ не загружен", points: 1 };
-      }
+      if (!net.normalPool || net.normalPool.length === 0) { return { question: "Обычный вопрос (вопросы закончились)", answer: "Ответ не загружен", points: 1 }; }
       return net.normalPool.pop();
     }
-
     function getRandomSpecialQuestion() {
-      if (!net.specialQs || net.specialQs.length === 0) {
-        return { question: "Уникальное задание (нет загруженных заданий)", answer: "Ответ не загружен", points: 1 };
-      }
+      if (!net.specialQs || net.specialQs.length === 0) { return { question: "Уникальное задание (нет загруженных заданий)", answer: "Ответ не загружен", points: 1 }; }
       return net.specialQs.pop();
     }
-
     function getRandomFinalQuestion() {
-      if (net.finalPool && net.finalPool.length > 0) {
-        return net.finalPool.pop();
-      }
-      if (net.normalPool && net.normalPool.length > 0) {
-        let q = net.normalPool.pop();
-        q.points = FINAL_QUESTION_POINTS;
-        return q;
-      }
-      return { question: "Финальный вопрос для 50-й клетки", answer: "Ответ не загружен", points: FINAL_QUESTION_POINTS,
-        fallback: true };
+      if (net.finalPool && net.finalPool.length > 0) return net.finalPool.pop();
+      if (net.normalPool && net.normalPool.length > 0) { let q = net.normalPool.pop(); q.points = FINAL_QUESTION_POINTS; return q; }
+      return { question: "Финальный вопрос для 50-й клетки", answer: "Ответ не загружен", points: FINAL_QUESTION_POINTS, fallback: true };
     }
 
     async function networkOpenQuestion(q, title, context, playerId) {
@@ -2059,9 +1289,7 @@
         let snap = await net.roomRef.child('pendingQuestion').once('value');
         let q = snap.val();
         if (!q) return;
-        let pid = q.playerId,
-          ctx = q.context,
-          pts = Number(q.points) || 0;
+        let pid = q.playerId, ctx = q.context, pts = Number(q.points) || 0;
         let pRef = net.roomRef.child('players/' + pid);
         let pSnap = await pRef.once('value');
         let p = pSnap.val();
@@ -2079,8 +1307,7 @@
           p.points = (p.points || 0) + pts;
           if (ctx === 'final50') {
             let fw = (await net.roomRef.child('firstFinalWinnerId').once('value')).val();
-            if (!fw) { await net.roomRef.child('firstFinalWinnerId').set(pid);
-              p.points += FINAL_SUCCESS_BONUS; }
+            if (!fw) { await net.roomRef.child('firstFinalWinnerId').set(pid); p.points += FINAL_SUCCESS_BONUS; }
             p.finished = true;
             let fc = (await net.roomRef.child('finishCounter').once('value')).val() || 0;
             await net.roomRef.child('finishCounter').set(fc + 1);
@@ -2101,11 +1328,7 @@
             log.push(p.name + ' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
             await net.roomRef.child('log').set(log);
             let final = getRandomFinalQuestion();
-            if (final) {
-              await networkOpenQuestion(final, 'Финальный вопрос (новая попытка)', 'final50', pid);
-            } else {
-              await net.roomRef.child('gameFinished').set(true);
-            }
+            if (final) { await networkOpenQuestion(final, 'Финальный вопрос (новая попытка)', 'final50', pid); } else { await net.roomRef.child('gameFinished').set(true); }
             await pRef.update(p);
             await net.roomRef.child('pendingQuestion').remove();
             return;
@@ -2128,15 +1351,9 @@
         if (ctx !== 'final50' || correct) {
           let all = (await net.roomRef.child('players').once('value')).val();
           let finishedAll = Object.values(all || {}).every(p => p.finished === true);
-          if (finishedAll) {
-            await net.roomRef.child('gameFinished').set(true);
-          } else {
-            await networkNextTurn();
-          }
+          if (finishedAll) { await net.roomRef.child('gameFinished').set(true); } else { await networkNextTurn(); }
         }
-      } catch (error) {
-        console.error('Error in networkAnswerQuestion:', error);
-      }
+      } catch (error) { console.error('Error in networkAnswerQuestion:', error); }
     }
 
     // ===================== ПЕРЕХОД ХОДА =====================
@@ -2149,40 +1366,26 @@
         let total = Object.keys(players).length;
         if (total === 0) return;
         let activeIds = Object.keys(players).filter(id => !players[id].finished);
-        if (activeIds.length === 0) {
-          await net.roomRef.child('gameFinished').set(true);
-          return;
-        }
+        if (activeIds.length === 0) { await net.roomRef.child('gameFinished').set(true); return; }
 
         let currentIdx = d.currentPlayerIndex || 0;
         let nextIdx = (currentIdx + 1) % total;
         let safety = 0;
         while (safety < total + 2) {
           let candidateId = Object.keys(players)[nextIdx];
-          if (!players[candidateId].finished) {
-            break;
-          }
+          if (!players[candidateId].finished) break;
           nextIdx = (nextIdx + 1) % total;
           safety++;
         }
-
         if (safety < total + 2) {
           let nextId = Object.keys(players)[nextIdx];
-          await net.roomRef.update({
-            currentPlayerIndex: nextIdx,
-            currentPlayerId: nextId
-          });
+          await net.roomRef.update({ currentPlayerIndex: nextIdx, currentPlayerId: nextId });
         } else {
           let firstActive = activeIds[0];
           let firstIdx = Object.keys(players).indexOf(firstActive);
-          await net.roomRef.update({
-            currentPlayerIndex: firstIdx,
-            currentPlayerId: firstActive
-          });
+          await net.roomRef.update({ currentPlayerIndex: firstIdx, currentPlayerId: firstActive });
         }
-      } catch (error) {
-        console.error('Error in networkNextTurn:', error);
-      }
+      } catch (error) { console.error('Error in networkNextTurn:', error); }
     }
 
     // ===================== ОБНОВЛЕНИЕ СОСТОЯНИЯ =====================
@@ -2195,37 +1398,15 @@
       let playerIds = Object.keys(players);
       let existingRows = list.querySelectorAll('.player-row');
       let existingMap = {};
-      existingRows.forEach(row => {
-        let id = row.dataset.playerId;
-        if (id) existingMap[id] = row;
-      });
+      existingRows.forEach(row => { let id = row.dataset.playerId; if (id) existingMap[id] = row; });
 
       playerIds.forEach(id => {
         let p = players[id];
         let row = existingMap[id];
-        let html =
-          `<div class="mini-avatar">${p.avatarIcon}</div>
-                    <div>
-                      <div><strong>${p.name}</strong></div>
-                      <div style="color:#b0c7dd;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div>
-                    </div>`;
-        if (row) {
-          row.innerHTML = html;
-          row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
-          row.dataset.playerId = id;
-        } else {
-          let newRow = document.createElement('div');
-          newRow.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
-          newRow.dataset.playerId = id;
-          newRow.innerHTML = html;
-          list.appendChild(newRow);
-        }
+        let html = `<div class="mini-avatar">${p.avatarIcon}</div><div><div><strong>${p.name}</strong></div><div style="color:#b0c7dd;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div></div>`;
+        if (row) { row.innerHTML = html; row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : ''); row.dataset.playerId = id; } else { let newRow = document.createElement('div'); newRow.className = 'player-row' + (id === data.currentPlayerId ? ' active' : ''); newRow.dataset.playerId = id; newRow.innerHTML = html; list.appendChild(newRow); }
       });
-
-      existingRows.forEach(row => {
-        let id = row.dataset.playerId;
-        if (!playerIds.includes(id)) row.remove();
-      });
+      existingRows.forEach(row => { let id = row.dataset.playerId; if (!playerIds.includes(id)) row.remove(); });
 
       let curId = data.currentPlayerId;
       let cur = players[curId];
@@ -2236,19 +1417,15 @@
       }
 
       let logDiv = document.getElementById('eventLogNetwork');
-      if (logDiv && data.log && Array.isArray(data.log)) {
-        logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
-      }
+      if (logDiv && data.log && Array.isArray(data.log)) { logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join(''); }
 
-      // Обновляем фиксированную кнопку
       const fixedBtn = document.getElementById('fixedRollBtn');
       if (fixedBtn) {
-        if (net.role === 'host') {
-          fixedBtn.style.display = 'none';
-        } else {
+        if (net.role === 'host') { fixedBtn.style.display = 'none'; } else {
           fixedBtn.style.display = 'block';
           let hasQuestion = document.getElementById('questionModal').classList.contains('show');
-          fixedBtn.disabled = (curId !== net.myId) || hasQuestion;
+          let paused = data.paused === true;
+          fixedBtn.disabled = (curId !== net.myId) || hasQuestion || paused;
         }
       }
 
@@ -2256,96 +1433,42 @@
       if (sel) {
         let val = sel.value;
         sel.innerHTML = '<option value="">-- выберите --</option>';
-        playerIds.forEach(id => {
-          let p = players[id];
-          let opt = document.createElement('option');
-          opt.value = id;
-          opt.textContent = `${p.avatarIcon} ${p.name} (${p.points} очков)`;
-          sel.appendChild(opt);
-        });
+        playerIds.forEach(id => { let p = players[id]; let opt = document.createElement('option'); opt.value = id; opt.textContent = `${p.avatarIcon} ${p.name} (${p.points} очков)`; sel.appendChild(opt); });
         if (playerIds.includes(val)) sel.value = val;
       }
     }
 
     // ===================== ОТРИСОВКА ДОСКИ =====================
     function buildCellsNetwork() {
-      let rows = [
-        [0, 1, 2, 3, 4, 5, 6],
-        [13, 12, 11, 10, 9, 8, 7],
-        [14, 15, 16, 17, 18, 19, 20],
-        [27, 26, 25, 24, 23, 22, 21],
-        [28, 29, 30, 31, 32, 33, 34],
-        [41, 40, 39, 38, 37, 36, 35],
-        [42, 43, 44, 45, 46, 47, 48],
-        [49, 50]
-      ];
+      let rows = [[0,1,2,3,4,5,6],[13,12,11,10,9,8,7],[14,15,16,17,18,19,20],[27,26,25,24,23,22,21],[28,29,30,31,32,33,34],[41,40,39,38,37,36,35],[42,43,44,45,46,47,48],[49,50]];
       let custom = { 49: { x: 84.3, y: 84.1 }, 50: { x: 71.5, y: 84.1 } };
-      let sx = 7.5,
-        sy = 8.5,
-        gx = 12.8,
-        gy = 10.8;
+      let sx = 7.5, sy = 8.5, gx = 12.8, gy = 10.8;
       net.cells = [];
-      rows.forEach((r, ri) => r.forEach((ci, cix) => {
-        net.cells[ci] = custom[ci] ? { index: ci, x: custom[ci].x, y: custom[ci].y } : { index: ci, x: sx + cix * gx,
-          y: sy + ri * gy };
-      }));
+      rows.forEach((r, ri) => r.forEach((ci, cix) => { net.cells[ci] = custom[ci] ? { index: ci, x: custom[ci].x, y: custom[ci].y } : { index: ci, x: sx + cix * gx, y: sy + ri * gy }; }));
     }
 
     function renderOrnamentsNetwork() {
-      let layer = document.getElementById('ornamentsLayerNetwork');
-      layer.innerHTML = '';
-      let items = [
-        { x: "2.5%", y: "2%", text: "✦" }, { x: "94%", y: "2%", text: "✦" },
-        { x: "3%", y: "92%", text: "✦" }, { x: "93%", y: "92%", text: "✦" },
-        { x: "47%", y: "44%", text: "⚔" }, { x: "51%", y: "44%", text: "🛡" },
-        { x: "10%", y: "10%", text: "◈" }, { x: "85%", y: "10%", text: "◈" },
-        { x: "10%", y: "85%", text: "◈" }, { x: "85%", y: "85%", text: "◈" },
-        { x: "25%", y: "5%", text: "⋆" }, { x: "70%", y: "5%", text: "⋆" },
-        { x: "25%", y: "90%", text: "⋆" }, { x: "70%", y: "90%", text: "⋆" },
-        { x: "35%", y: "50%", text: "☯" }, { x: "60%", y: "50%", text: "☯" }
-      ];
-      items.forEach(it => {
-        let d = document.createElement('div');
-        d.className = 'ornament';
-        d.style.left = it.x;
-        d.style.top = it.y;
-        d.textContent = it.text;
-        layer.appendChild(d);
-      });
+      let layer = document.getElementById('ornamentsLayerNetwork'); layer.innerHTML = '';
+      let items = [{x:"2.5%",y:"2%",text:"✦"},{x:"94%",y:"2%",text:"✦"},{x:"3%",y:"92%",text:"✦"},{x:"93%",y:"92%",text:"✦"},{x:"47%",y:"44%",text:"⚔"},{x:"51%",y:"44%",text:"🛡"},{x:"10%",y:"10%",text:"◈"},{x:"85%",y:"10%",text:"◈"},{x:"10%",y:"85%",text:"◈"},{x:"85%",y:"85%",text:"◈"},{x:"25%",y:"5%",text:"⋆"},{x:"70%",y:"5%",text:"⋆"},{x:"25%",y:"90%",text:"⋆"},{x:"70%",y:"90%",text:"⋆"},{x:"35%",y:"50%",text:"☯"},{x:"60%",y:"50%",text:"☯"}];
+      items.forEach(it => { let d = document.createElement('div'); d.className = 'ornament'; d.style.left = it.x; d.style.top = it.y; d.textContent = it.text; layer.appendChild(d); });
     }
 
     function renderCellsNetwork() {
-      let layer = document.getElementById('cellsLayerNetwork');
-      layer.innerHTML = '';
-      net.cells.forEach(c => {
-        if (!c) return;
-        let t = cellType(c.index),
-          txt = cellText(c.index);
-        let d = document.createElement('div');
-        d.className = 'cell ' + t;
-        d.style.left = c.x + '%';
-        d.style.top = c.y + '%';
-        d.innerHTML = `<div class="cell-label">${txt.main}${txt.sub?`<span class="sub">${txt.sub}</span>`:''}</div>`;
-        layer.appendChild(d);
-      });
+      let layer = document.getElementById('cellsLayerNetwork'); layer.innerHTML = '';
+      net.cells.forEach(c => { if (!c) return; let t = cellType(c.index), txt = cellText(c.index); let d = document.createElement('div'); d.className = 'cell ' + t; d.style.left = c.x + '%'; d.style.top = c.y + '%'; d.innerHTML = `<div class="cell-label">${txt.main}${txt.sub?`<span class="sub">${txt.sub}</span>`:''}</div>`; layer.appendChild(d); });
     }
 
     function renderTokensNetwork(playersData) {
-      let layer = document.getElementById('tokensLayerNetwork');
-      layer.innerHTML = '';
+      let layer = document.getElementById('tokensLayerNetwork'); layer.innerHTML = '';
       let ids = Object.keys(playersData);
       ids.forEach((id, idx) => {
         let p = playersData[id];
         let pos = p.finished ? FINAL_CELL : p.position;
         let c = net.cells[pos];
         if (!c) return;
-        let t = document.createElement('div');
-        t.className = 'token';
-        t.style.background = p.color || '#5DADE2';
-        let ox = (idx % 3) * 1.15 - 1.15,
-          oy = Math.floor(idx / 3) * 1.1 - 0.3;
-        t.style.left = (c.x + 1.8 + ox) + '%';
-        t.style.top = (c.y + 1.8 + oy) + '%';
+        let t = document.createElement('div'); t.className = 'token'; t.style.background = p.color || '#5DADE2';
+        let ox = (idx % 3) * 1.15 - 1.15, oy = Math.floor(idx / 3) * 1.1 - 0.3;
+        t.style.left = (c.x + 1.8 + ox) + '%'; t.style.top = (c.y + 1.8 + oy) + '%';
         t.textContent = p.avatarIcon;
         layer.appendChild(t);
       });
@@ -2357,47 +1480,46 @@
       reader.onload = function(e) {
         try {
           if (typeof XLSX === 'undefined') { document.getElementById('hostUploadMessage').textContent = 'XLSX не загружен.'; return; }
-          let data = new Uint8Array(e.target.result);
-          let wb = XLSX.read(data, { type: 'array' });
+          let data = new Uint8Array(e.target.result); let wb = XLSX.read(data, { type: 'array' });
           let qs = wb.Sheets['Вопросы'] || wb.Sheets['questions'] || wb.Sheets[wb.SheetNames[0]];
           let ts = wb.Sheets['Задания'] || wb.Sheets['tasks'] || wb.Sheets[wb.SheetNames[1]];
           if (!qs) { document.getElementById('hostUploadMessage').textContent = 'Не найден лист с вопросами.'; return; }
           let qRows = XLSX.utils.sheet_to_json(qs, { header: 1 });
-          let parsed = qRows.filter(r => Array.isArray(r) && r.length >= 2).map(r => ({
-            question: String(r[0] ?? '').trim(),
-            answer: String(r[1] ?? '').trim(),
-            points: Number(r[2] ?? 0),
-            imageUrl: r[3] ? String(r[3]).trim() : null
-          })).filter(r => r.question && r.answer && r.points >= 0);
-          if (parsed.length > 0) {
-            let first = parsed[0];
-            let ql = first.question.toLowerCase(),
-              al = first.answer.toLowerCase();
-            if (['вопрос', 'question', 'вопросы', 'questions'].includes(ql) && ['ответ', 'answer', 'answers'].includes(al))
-              parsed = parsed.slice(1);
-          }
-          let tasks = [];
-          if (ts) {
-            let tRows = XLSX.utils.sheet_to_json(ts, { header: 1 });
-            tasks = tRows.filter(r => Array.isArray(r) && r.length >= 3).map(r => ({
-              question: String(r[0] ?? '').trim(),
-              answer: String(r[1] ?? '').trim(),
-              points: Number(r[2] ?? 0)
-            })).filter(r => r.question && r.answer);
-            if (tasks.length > 0) {
-              let ft = tasks[0];
-              let tl = ft.question.toLowerCase();
-              if (['задание', 'task', 'вопрос', 'question'].includes(tl)) tasks = tasks.slice(1);
-            }
-          }
+          let parsed = qRows.filter(r => Array.isArray(r) && r.length >= 2).map(r => ({ question: String(r[0] ?? '').trim(), answer: String(r[1] ?? '').trim(), points: Number(r[2] ?? 0), imageUrl: r[3] ? String(r[3]).trim() : null })).filter(r => r.question && r.answer && r.points >= 0);
+          if (parsed.length > 0) { let first = parsed[0]; let ql = first.question.toLowerCase(), al = first.answer.toLowerCase(); if (['вопрос', 'question', 'вопросы', 'questions'].includes(ql) && ['ответ', 'answer', 'answers'].includes(al)) parsed = parsed.slice(1); }
+          let tasks = []; if (ts) { let tRows = XLSX.utils.sheet_to_json(ts, { header: 1 }); tasks = tRows.filter(r => Array.isArray(r) && r.length >= 3).map(r => ({ question: String(r[0] ?? '').trim(), answer: String(r[1] ?? '').trim(), points: Number(r[2] ?? 0) })).filter(r => r.question && r.answer); if (tasks.length > 0) { let ft = tasks[0]; let tl = ft.question.toLowerCase(); if (['задание', 'task', 'вопрос', 'question'].includes(tl)) tasks = tasks.slice(1); } }
           if (!parsed.length) { document.getElementById('hostUploadMessage').textContent = 'Лист с вопросами пуст.'; return; }
-          window.normalQuestions = parsed;
-          window.specialQuestions = tasks;
+          window.normalQuestions = parsed; window.specialQuestions = tasks;
           document.getElementById('hostUploadMessage').textContent = `Загружено вопросов: ${parsed.length}, заданий: ${tasks.length}.`;
         } catch (err) { document.getElementById('hostUploadMessage').textContent = 'Ошибка чтения: ' + err.message; }
       };
-      try { reader.readAsArrayBuffer(file); } catch (e) { try { reader.readAsBinaryString(file); } catch (e2) { document
-            .getElementById('hostUploadMessage').textContent = 'Не поддерживается.'; } }
+      try { reader.readAsArrayBuffer(file); } catch (e) { try { reader.readAsBinaryString(file); } catch (e2) { document.getElementById('hostUploadMessage').textContent = 'Не поддерживается.'; } }
+    }
+
+    // ===================== ЗАВЕРШЕНИЕ ИГРЫ =====================
+    async function finishGame(data) {
+      // Сохраняем историю
+      const players = data.players || {};
+      const playerIds = Object.keys(players);
+      let winner = null;
+      let maxPoints = -1;
+      playerIds.forEach(id => {
+        if (players[id].points > maxPoints) { maxPoints = players[id].points; winner = players[id].name; }
+      });
+      const historyEntry = {
+        timestamp: Date.now(),
+        winner: winner || '—',
+        playerCount: playerIds.length
+      };
+      // Сохраняем в Firebase
+      await db.ref('history').push(historyEntry);
+      // Отображаем результаты
+      // ... (здесь можно вызвать функцию отображения результатов, но она уже есть в коде)
+      // Переходим в главное меню и показываем историю
+      document.getElementById('gameLayoutNetwork').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      showHistory();
+      clearSession();
     }
 
     // ===================== ОБРАБОТЧИКИ МЕНЮ =====================
@@ -2413,18 +1535,47 @@
       showJoinSetup();
     });
 
-    // Авто-подключение по URL
-    let urlParams = new URLSearchParams(window.location.search);
-    let roomParam = urlParams.get('room');
-    if (roomParam) {
-      document.getElementById('mainMenu').classList.add('hidden');
-      document.getElementById('gameLayoutNetwork').classList.remove('hidden');
-      showJoinSetup();
-      document.getElementById('joinRoomId').value = roomParam;
-      document.getElementById('joinConnectBtn').click();
+    document.getElementById('menuHistoryBtn').addEventListener('click', showHistory);
+
+    // ===================== ВОССТАНОВЛЕНИЕ СЕССИИ =====================
+    // При загрузке страницы пытаемся восстановить сессию
+    if (tryRestoreSession()) {
+      // Проверяем, существует ли комната
+      db.ref('rooms/' + net.roomId).once('value').then(snap => {
+        const data = snap.val();
+        if (data && data.gameStarted) {
+          // Подключаемся к игре
+          net.roomRef = db.ref('rooms/' + net.roomId);
+          net.role = net.role;
+          document.getElementById('mainMenu').classList.add('hidden');
+          document.getElementById('gameLayoutNetwork').classList.remove('hidden');
+          // Если игра уже началась, стартуем интерфейс
+          if (data.gameStarted) {
+            startGameNetwork(data);
+          } else {
+            // Иначе возвращаем в лобби (ведущий или игрок)
+            if (net.role === 'host') {
+              showHostLobby(net.roomId);
+            } else {
+              // Игрок, пытаемся присоединиться
+              showJoinSetup();
+              document.getElementById('joinRoomId').value = net.roomId;
+              document.getElementById('joinConnectBtn').click();
+            }
+          }
+        } else {
+          // Комната не существует или игра не началась – сбрасываем сессию
+          clearSession();
+          document.getElementById('mainMenu').classList.remove('hidden');
+        }
+      }).catch(err => {
+        console.error('Error restoring session:', err);
+        clearSession();
+        document.getElementById('mainMenu').classList.remove('hidden');
+      });
     }
 
-    // ===================== ОБРАБОТЧИКИ КНОПОК ОТВЕТА (только ведущий) =====================
+    // ===================== ОБРАБОТЧИКИ КНОПОК ОТВЕТА =====================
     document.getElementById('showAnswerBtn').addEventListener('click', function() {
       if (net.role === 'host') {
         stopTimer();
@@ -2454,6 +1605,18 @@
         stopTimer();
       }
     });
+
+    // ===================== АВТО-ПОДКЛЮЧЕНИЕ ПО URL =====================
+    let urlParams = new URLSearchParams(window.location.search);
+    let roomParam = urlParams.get('room');
+    if (roomParam) {
+      // Если уже есть сессия, она переопределит, но мы всё равно пытаемся
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('gameLayoutNetwork').classList.remove('hidden');
+      showJoinSetup();
+      document.getElementById('joinRoomId').value = roomParam;
+      document.getElementById('joinConnectBtn').click();
+    }
 
     console.log('Игра готова!');
   </script>
