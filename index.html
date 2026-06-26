@@ -270,19 +270,86 @@
       .dice-result { width: 64px; height: 64px; font-size: 28px; }
       .current-player .avatar { width: 44px; height: 44px; font-size: 22px; }
       .player-name { font-size: 18px; }
-      .modal-box { padding: 16px; }
+      .modal-box { padding: 12px; }
       .podium-place { width: 160px; }
 
-      /* Дополнительные оптимизации таблицы на мобильных */
+      /* Супер-компактная таблица результатов на мобильных */
+      .results-table-wrapper {
+        max-height: 30vh;
+      }
       .results-table-wrapper table {
-        font-size: 12px;
+        font-size: 10px;
+        table-layout: fixed;
       }
       .results-table-wrapper th,
       .results-table-wrapper td {
-        padding: 4px 6px;
+        padding: 2px 3px;
+        text-align: center;
       }
-      .results-table-wrapper {
-        max-height: 35vh;
+      /* Скрываем колонку "Задано вопросов" для экономии места */
+      .results-table-wrapper th:nth-child(3),
+      .results-table-wrapper td:nth-child(3) {
+        display: none;
+      }
+      /* Перераспределяем ширину оставшихся колонок */
+      .results-table-wrapper th:nth-child(1) { width: 8%; }
+      .results-table-wrapper th:nth-child(2) { width: 32%; }
+      .results-table-wrapper th:nth-child(4) { width: 20%; }
+      .results-table-wrapper th:nth-child(5) { width: 20%; }
+      .results-table-wrapper th:nth-child(6) { width: 20%; }
+
+      /* Уменьшаем размеры карточек результатов */
+      .results-cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .result-card {
+        padding: 12px;
+      }
+      .result-card-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+      }
+      .result-card-name {
+        font-size: 16px;
+      }
+      .result-card-rank {
+        font-size: 13px;
+      }
+      .result-stats {
+        font-size: 12px;
+      }
+      .podium-place {
+        width: 120px;
+      }
+      .podium-card {
+        padding: 12px 10px;
+      }
+      .podium-avatar {
+        font-size: 40px;
+      }
+      .podium-name {
+        font-size: 18px;
+      }
+      .podium-score {
+        font-size: 13px;
+      }
+      .pedestal {
+        font-size: 20px;
+      }
+      .podium-place.first .pedestal { height: 140px; }
+      .podium-place.second .pedestal { height: 110px; }
+      .podium-place.third .pedestal { height: 85px; }
+      .winner-banner {
+        font-size: 14px;
+        padding: 10px;
+      }
+      .results-title-fantasy {
+        font-size: 28px;
+      }
+      .results-subtitle {
+        font-size: 16px;
       }
     }
 
@@ -2260,7 +2327,7 @@
           document.getElementById('menuMessage').textContent = '';
         });
 
-        console.log('Игра готова! Версия 3.9 (улучшенная таблица результатов)');
+        console.log('Игра готова! Версия 4.0 (супер-компактная таблица на мобильных)');
       }
 
       if (document.readyState === 'loading') {
