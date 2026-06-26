@@ -679,12 +679,6 @@
     }
 
     /* ===================== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===================== */
-    .achievement-icon { display: inline-block; position: relative; cursor: help; margin: 0 2px; }
-    .achievement-icon .tooltip-text { visibility: hidden; width: 200px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); color: #fff; text-align: center; border-radius: 8px; padding: 8px 12px; position: absolute; z-index: 10; bottom: 125%; left: 50%; transform: translateX(-50%); font-size: 13px; line-height: 1.4; opacity: 0; transition: opacity 0.3s; pointer-events: none; border: 1px solid rgba(255, 255, 255, 0.08); }
-    .achievement-icon .tooltip-text::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent; }
-    .achievement-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
-
-    /* Сетевые лобби */
     .network-setup { text-align: center; }
     .network-setup input { width: 100%; max-width: 320px; margin: 10px auto; }
     .network-setup .btn { max-width: 320px; margin: 6px auto; }
@@ -703,7 +697,7 @@
     <div class="cloud cloud3"></div><div class="cloud cloud4"></div>
   </div>
   <div class="app">
-    <div class="hero"><h1>Хроники Локолевства</h1><p>Викторина разработанная амбассадорами Локо</p></div>
+    <div class="hero"><h1>Хроники Королевства</h1><p>Викторина разработанная амбассадорами Локо</p></div>
 
     <div class="main-menu panel" id="mainMenu">
       <div class="panel-inner">
@@ -748,375 +742,767 @@
   <footer><br><p>@ Гынгазов Алексей Сергеевич, Фомин Иван Анатольевич</p></footer>
 
   <script>
-    // ===================== FIREBASE =====================
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPfldaE2tz9Pw_Ievzc2a5dbIpHUfb_ck",
-      authDomain: "mygame-cd8fb.firebaseapp.com",
-      databaseURL: "https://mygame-cd8fb-default-rtdb.firebaseio.com",
-      projectId: "mygame-cd8fb",
-      storageBucket: "mygame-cd8fb.firebasestorage.app",
-      messagingSenderId: "934509725275",
-      appId: "1:934509725275:web:e533c68456b1f654fba17e"
-    };
-    if (typeof firebase !== 'undefined') { firebase.initializeApp(firebaseConfig); var db = firebase.database(); } else { var db = null; }
+    (function() {
+      'use strict';
 
-    // ===================== КОНСТАНТЫ =====================
-    const SPECIAL_BACK_CELLS = { 16: 14, 27: 25, 34: 32, 47: 45 };
-    const SPECIAL_TASK_CELLS = [8, 19, 30, 41];
-    const FINAL_CELL = 50, MAX_POSITION = 50, FINAL_QUESTION_POINTS = 3, FINAL_SUCCESS_BONUS = 10;
+      // ===================== FIREBASE =====================
+      const firebaseConfig = {
+        apiKey: "AIzaSyAPfldaE2tz9Pw_Ievzc2a5dbIpHUfb_ck",
+        authDomain: "mygame-cd8fb.firebaseapp.com",
+        databaseURL: "https://mygame-cd8fb-default-rtdb.firebaseio.com",
+        projectId: "mygame-cd8fb",
+        storageBucket: "mygame-cd8fb.firebasestorage.app",
+        messagingSenderId: "934509725275",
+        appId: "1:934509725275:web:e533c68456b1f654fba17e"
+      };
 
-    // ===================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====================
-    function shuffle(a) { let c = [...a]; for (let i = c.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [c[i], c[j]] = [c[j], c[i]]; } return c; }
-    function getAvatarById(id) { return AVATARS.find(a => a.id === id) || AVATARS[0]; }
-    function fmt(s) { let m = String(Math.floor(s / 60)).padStart(2, '0'), sec = String(s % 60).padStart(2, '0'); return m + ':' + sec; }
-    function cellType(i) { if (i === 0) return 'start'; if (i === FINAL_CELL) return 'finish'; if (SPECIAL_TASK_CELLS.includes(i)) return 'special'; if (SPECIAL_BACK_CELLS[i]) return 'back'; return 'normal'; }
-    function cellText(i) { if (i === 0) return { main: 'Старт', sub: '' }; if (i === FINAL_CELL) return { main: '50', sub: '' }; if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: '' }; if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: '' }; return { main: String(i), sub: '' }; }
-    function genRoom() { return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36); }
-
-    // ===================== АВАТАРЫ =====================
-    const AVATARS = [
-      { id: "av1", icon: "😀", name: "Улыбка" }, { id: "av2", icon: "😎", name: "Крутой" }, { id: "av3", icon: "🤖", name: "Робот" },
-      { id: "av4", icon: "🦊", name: "Лис" }, { id: "av5", icon: "🐼", name: "Панда" }, { id: "av6", icon: "🐯", name: "Тигр" },
-      { id: "av7", icon: "🦁", name: "Лев" }, { id: "av8", icon: "🐸", name: "Лягушка" }, { id: "av9", icon: "🐵", name: "Обезьяна" },
-      { id: "av10", icon: "🐻", name: "Медведь" }, { id: "av11", icon: "🐨", name: "Коала" }, { id: "av12", icon: "🐶", name: "Пёс" },
-      { id: "av13", icon: "🐱", name: "Кот" }, { id: "av14", icon: "🐰", name: "Кролик" }, { id: "av15", icon: "🦄", name: "Единорог" },
-      { id: "av16", icon: "🐙", name: "Осьминог" }, { id: "av17", icon: "🐧", name: "Пингвин" }, { id: "av18", icon: "🦉", name: "Сова" },
-      { id: "av19", icon: "🐺", name: "Волк" }, { id: "av20", icon: "🦋", name: "Бабочка" }, { id: "av21", icon: "🐲", name: "Дракон" },
-      { id: "av22", icon: "🧠", name: "Мозг" }, { id: "av23", icon: "🔥", name: "Огонь" }, { id: "av24", icon: "⚡", name: "Молния" },
-      { id: "av25", icon: "🌟", name: "Звезда" }, { id: "av26", icon: "🎯", name: "Цель" }, { id: "av27", icon: "🎮", name: "Геймпад" },
-      { id: "av28", icon: "🚀", name: "Ракета" }, { id: "av29", icon: "🏆", name: "Кубок" }, { id: "av30", icon: "👑", name: "Корона" }
-    ];
-
-    // ===================== ОБЩИЕ ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА =====================
-    let timerSec = 60, timerRem = 0, timerInterval = null, timerExpired = false, pendingQuestion = null;
-
-    function openQuestion(q, title, context) {
-      pendingQuestion = { ...q, context };
-      timerExpired = false;
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalQuestion').textContent = q.question;
-      document.getElementById('modalAnswer').textContent = 'Правильный ответ: ' + q.answer + ' • Баллы: ' + q.points;
-      document.getElementById('modalAnswer').style.display = 'none';
-      if (q.imageUrl) { document.getElementById('modalImage').src = q.imageUrl; document.getElementById('modalImage').style.display = 'block'; } else document.getElementById('modalImage').style.display = 'none';
-
-      const showBtn = document.getElementById('showAnswerBtn');
-      const correctBtn = document.getElementById('answerCorrectBtn');
-      const wrongBtn = document.getElementById('answerWrongBtn');
-      if (net.role === 'host') {
-        showBtn.style.display = 'block';
-        correctBtn.style.display = 'block';
-        wrongBtn.style.display = 'block';
-        showBtn.disabled = false;
-        correctBtn.disabled = true;
-        wrongBtn.disabled = true;
+      let db = null;
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
       } else {
-        showBtn.style.display = 'none';
-        correctBtn.style.display = 'none';
-        wrongBtn.style.display = 'none';
+        console.error('Firebase SDK не загружен');
       }
-      document.getElementById('questionModal').classList.add('show');
-      startTimer();
-    }
 
-    function startTimer() { stopTimer(); timerExpired = false; timerRem = timerSec; updateTimerUI(); timerInterval = setInterval(() => { timerRem--; if (timerRem < 0) timerRem = 0; updateTimerUI(); if (timerRem === 0) { stopTimer(); timerExpired = true; document.getElementById('questionTimer').textContent = 'Время вышло'; document.getElementById('questionTimer').className = 'timer-box danger'; document.getElementById('modalAnswer').style.display = 'block'; document.getElementById('showAnswerBtn').disabled = true; document.getElementById('answerCorrectBtn').disabled = false; document.getElementById('answerWrongBtn').disabled = false; } }, 1000); }
-    function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
-    function updateTimerUI() { if (timerExpired) return; document.getElementById('questionTimer').textContent = fmt(timerRem); document.getElementById('questionTimer').className = 'timer-box' + (timerRem <= 10 ? ' danger' : ''); }
+      // ===================== КОНСТАНТЫ =====================
+      const SPECIAL_BACK_CELLS = { 16: 14, 27: 25, 34: 32, 47: 45 };
+      const SPECIAL_TASK_CELLS = [8, 19, 30, 41];
+      const FINAL_CELL = 50;
+      const MAX_POSITION = 50;
+      const FINAL_QUESTION_POINTS = 3;
+      const FINAL_SUCCESS_BONUS = 10;
 
-    // ===================== СЕТЕВАЯ ИГРА =====================
-    let net = { role: null, roomId: null, myId: null, roomRef: null, isRolling: false, cells: [], normalQs: [], specialQs: [], finalPool: [], normalPool: [] };
-
-    // Сохранение сессии в localStorage
-    function saveSession() {
-      if (net.roomId && net.myId) {
-        localStorage.setItem('lastRoomId', net.roomId);
-        localStorage.setItem('lastPlayerId', net.myId);
-        localStorage.setItem('lastRole', net.role);
+      // ===================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====================
+      function shuffle(a) {
+        let c = [...a];
+        for (let i = c.length - 1; i > 0; i--) {
+          let j = Math.floor(Math.random() * (i + 1));
+          [c[i], c[j]] = [c[j], c[i]];
+        }
+        return c;
       }
-    }
 
-    function clearSession() {
-      localStorage.removeItem('lastRoomId');
-      localStorage.removeItem('lastPlayerId');
-      localStorage.removeItem('lastRole');
-    }
-
-    // Восстановление сессии при загрузке
-    function tryRestoreSession() {
-      const roomId = localStorage.getItem('lastRoomId');
-      const playerId = localStorage.getItem('lastPlayerId');
-      const role = localStorage.getItem('lastRole');
-      if (roomId && playerId && role) {
-        net.roomId = roomId;
-        net.myId = playerId;
-        net.role = role;
-        return true;
+      function getAvatarById(id) {
+        return AVATARS.find(a => a.id === id) || AVATARS[0];
       }
-      return false;
-    }
 
-    function createRoom(hostName, qs, sp, time) {
-      if (!db) { console.error('Firebase not initialized'); return null; }
-      net.roomId = genRoom();
-      net.roomRef = db.ref('rooms/' + net.roomId);
-      let data = {
-        hostId: 'host',
-        players: {},
-        questions: qs,
-        specialQuestions: sp,
-        currentPlayerIndex: 0,
-        currentPlayerId: null,
-        gameStarted: false,
-        gameFinished: false,
-        paused: false,
-        firstFinalWinnerId: null,
-        finishCounter: 0,
-        questionTime: time,
-        log: []
+      function fmt(s) {
+        let m = String(Math.floor(s / 60)).padStart(2, '0');
+        let sec = String(s % 60).padStart(2, '0');
+        return m + ':' + sec;
+      }
+
+      function cellType(i) {
+        if (i === 0) return 'start';
+        if (i === FINAL_CELL) return 'finish';
+        if (SPECIAL_TASK_CELLS.includes(i)) return 'special';
+        if (SPECIAL_BACK_CELLS[i]) return 'back';
+        return 'normal';
+      }
+
+      function cellText(i) {
+        if (i === 0) return { main: 'Старт', sub: '' };
+        if (i === FINAL_CELL) return { main: '50', sub: '' };
+        if (SPECIAL_TASK_CELLS.includes(i)) return { main: '★', sub: '' };
+        if (SPECIAL_BACK_CELLS[i]) return { main: '↩', sub: '' };
+        return { main: String(i), sub: '' };
+      }
+
+      function genRoom() {
+        return Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
+      }
+
+      function saveSession(roomId, playerId, role) {
+        localStorage.setItem('lastRoomId', roomId);
+        localStorage.setItem('lastPlayerId', playerId);
+        localStorage.setItem('lastRole', role);
+      }
+
+      function clearSession() {
+        localStorage.removeItem('lastRoomId');
+        localStorage.removeItem('lastPlayerId');
+        localStorage.removeItem('lastRole');
+      }
+
+      function tryRestoreSession() {
+        const roomId = localStorage.getItem('lastRoomId');
+        const playerId = localStorage.getItem('lastPlayerId');
+        const role = localStorage.getItem('lastRole');
+        if (roomId && playerId && role) {
+          return { roomId, playerId, role };
+        }
+        return null;
+      }
+
+      // ===================== АВАТАРЫ =====================
+      const AVATARS = [
+        { id: "av1", icon: "😀", name: "Улыбка" }, { id: "av2", icon: "😎", name: "Крутой" }, { id: "av3", icon: "🤖", name: "Робот" },
+        { id: "av4", icon: "🦊", name: "Лис" }, { id: "av5", icon: "🐼", name: "Панда" }, { id: "av6", icon: "🐯", name: "Тигр" },
+        { id: "av7", icon: "🦁", name: "Лев" }, { id: "av8", icon: "🐸", name: "Лягушка" }, { id: "av9", icon: "🐵", name: "Обезьяна" },
+        { id: "av10", icon: "🐻", name: "Медведь" }, { id: "av11", icon: "🐨", name: "Коала" }, { id: "av12", icon: "🐶", name: "Пёс" },
+        { id: "av13", icon: "🐱", name: "Кот" }, { id: "av14", icon: "🐰", name: "Кролик" }, { id: "av15", icon: "🦄", name: "Единорог" },
+        { id: "av16", icon: "🐙", name: "Осьминог" }, { id: "av17", icon: "🐧", name: "Пингвин" }, { id: "av18", icon: "🦉", name: "Сова" },
+        { id: "av19", icon: "🐺", name: "Волк" }, { id: "av20", icon: "🦋", name: "Бабочка" }, { id: "av21", icon: "🐲", name: "Дракон" },
+        { id: "av22", icon: "🧠", name: "Мозг" }, { id: "av23", icon: "🔥", name: "Огонь" }, { id: "av24", icon: "⚡", name: "Молния" },
+        { id: "av25", icon: "🌟", name: "Звезда" }, { id: "av26", icon: "🎯", name: "Цель" }, { id: "av27", icon: "🎮", name: "Геймпад" },
+        { id: "av28", icon: "🚀", name: "Ракета" }, { id: "av29", icon: "🏆", name: "Кубок" }, { id: "av30", icon: "👑", name: "Корона" }
+      ];
+
+      // ===================== СОСТОЯНИЕ ИГРЫ =====================
+      let net = {
+        role: null,
+        roomId: null,
+        myId: null,
+        roomRef: null,
+        isRolling: false,
+        cells: [],
+        normalQs: [],
+        specialQs: [],
+        finalPool: [],
+        normalPool: [],
+        listeners: [] // Для отслеживания подписок Firebase
       };
-      net.roomRef.set(data);
-      net.myId = 'host';
-      net.role = 'host';
-      saveSession();
-      return net.roomId;
-    }
 
-    function joinRoom(rid, name, avId) {
-      let r = db.ref('rooms/' + rid);
-      let pid = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-      let av = getAvatarById(avId);
-      let p = {
-        id: pid,
-        name,
-        avatarIcon: av.icon,
-        avatarId: av.id,
-        color: '#5DADE2',
-        position: 0,
-        asked: 0,
-        correct: 0,
-        points: 0,
-        finished: false,
-        consecutiveCorrect: 0,
-        totalCorrect: 0,
-        totalIncorrect: 0,
-        rollCounts: { 1: 0, 4: 0, 6: 0 },
-        noOnes: true,
-        trapHits: 0,
-        visitedSpecialCells: [],
-        stoppedOnFibonacci: [],
-        movesCount: 0,
-        finishOrder: null,
-        ready: false
-      };
-      r.child('players/' + pid).set(p);
-      net.myId = pid;
-      net.role = 'player';
-      saveSession();
-      return { playerId: pid, playerData: p };
-    }
+      // ===================== УПРАВЛЕНИЕ ПОДПИСКАМИ =====================
+      function addListener(ref, event, callback) {
+        if (!ref) return;
+        ref.on(event, callback);
+        net.listeners.push({ ref, event, callback });
+      }
 
-    // ===================== UI ХЕЛПЕРЫ =====================
-    function showHistory() {
-      document.getElementById('menuMessage').textContent = '';
-      const historyDiv = document.getElementById('historyList');
-      historyDiv.classList.remove('hidden');
-      // Загружаем историю из Firebase
-      db.ref('history').limitToLast(10).once('value').then(snap => {
-        const data = snap.val();
-        if (!data) {
-          historyDiv.innerHTML = '<p style="color:var(--text-secondary);">История пуста.</p>';
+      function removeAllListeners() {
+        net.listeners.forEach(({ ref, event, callback }) => {
+          ref.off(event, callback);
+        });
+        net.listeners = [];
+      }
+
+      // ===================== МОДАЛЬНОЕ ОКНО ВОПРОСА =====================
+      let timerSec = 60;
+      let timerRem = 0;
+      let timerInterval = null;
+      let timerExpired = false;
+
+      function openQuestion(q, title, context) {
+        timerExpired = false;
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalQuestion').textContent = q.question;
+        document.getElementById('modalAnswer').textContent = 'Правильный ответ: ' + q.answer + ' • Баллы: ' + q.points;
+        document.getElementById('modalAnswer').style.display = 'none';
+
+        if (q.imageUrl) {
+          document.getElementById('modalImage').src = q.imageUrl;
+          document.getElementById('modalImage').style.display = 'block';
+        } else {
+          document.getElementById('modalImage').style.display = 'none';
+        }
+
+        const showBtn = document.getElementById('showAnswerBtn');
+        const correctBtn = document.getElementById('answerCorrectBtn');
+        const wrongBtn = document.getElementById('answerWrongBtn');
+
+        if (net.role === 'host') {
+          showBtn.style.display = 'block';
+          correctBtn.style.display = 'block';
+          wrongBtn.style.display = 'block';
+          showBtn.disabled = false;
+          correctBtn.disabled = true;
+          wrongBtn.disabled = true;
+        } else {
+          showBtn.style.display = 'none';
+          correctBtn.style.display = 'none';
+          wrongBtn.style.display = 'none';
+        }
+
+        document.getElementById('questionModal').classList.add('show');
+        startTimer();
+      }
+
+      function startTimer() {
+        stopTimer();
+        timerExpired = false;
+        timerRem = timerSec;
+        updateTimerUI();
+        timerInterval = setInterval(() => {
+          timerRem--;
+          if (timerRem < 0) timerRem = 0;
+          updateTimerUI();
+          if (timerRem === 0) {
+            stopTimer();
+            timerExpired = true;
+            document.getElementById('questionTimer').textContent = 'Время вышло';
+            document.getElementById('questionTimer').className = 'timer-box danger';
+            document.getElementById('modalAnswer').style.display = 'block';
+            document.getElementById('showAnswerBtn').disabled = true;
+            document.getElementById('answerCorrectBtn').disabled = false;
+            document.getElementById('answerWrongBtn').disabled = false;
+          }
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      }
+
+      function updateTimerUI() {
+        if (timerExpired) return;
+        document.getElementById('questionTimer').textContent = fmt(timerRem);
+        document.getElementById('questionTimer').className = 'timer-box' + (timerRem <= 10 ? ' danger' : '');
+      }
+
+      // ===================== ИСТОРИЯ ИГР =====================
+      function showHistory() {
+        if (!db) {
+          document.getElementById('menuMessage').textContent = 'База данных недоступна';
           return;
         }
-        let html = '<h4>Последние 10 игр</h4><div style="max-height:400px;overflow:auto;">';
-        // Перебираем записи в обратном порядке (последние сверху)
-        const keys = Object.keys(data).reverse();
-        keys.forEach(key => {
-          const game = data[key];
-          const date = new Date(game.timestamp).toLocaleString('ru-RU');
-          html += `<div class="history-item">
-            <span class="date">${date}</span>
-            <span class="winner">🏆 ${game.winner || '—'}</span>
-            <span class="players-count">👥 ${game.playerCount || 0}</span>
-          </div>`;
+        document.getElementById('menuMessage').textContent = '';
+        const historyDiv = document.getElementById('historyList');
+        historyDiv.classList.remove('hidden');
+
+        db.ref('history').limitToLast(10).once('value').then(snap => {
+          const data = snap.val();
+          if (!data) {
+            historyDiv.innerHTML = '<p style="color:var(--text-secondary);">История пуста.</p>';
+            return;
+          }
+          let html = '<h4>Последние 10 игр</h4><div style="max-height:400px;overflow:auto;">';
+          const keys = Object.keys(data).reverse();
+          keys.forEach(key => {
+            const game = data[key];
+            const date = new Date(game.timestamp).toLocaleString('ru-RU');
+            html += `<div class="history-item">
+              <span class="date">${date}</span>
+              <span class="winner">🏆 ${game.winner || '—'}</span>
+              <span class="players-count">👥 ${game.playerCount || 0}</span>
+            </div>`;
+          });
+          html += '</div>';
+          html += '<button class="btn btn-secondary" id="exportHistoryBtn" style="margin-top:10px;">📤 Экспорт истории в Excel</button>';
+          historyDiv.innerHTML = html;
+          document.getElementById('exportHistoryBtn')?.addEventListener('click', exportHistory);
+        }).catch(err => {
+          console.error('Error loading history:', err);
+          historyDiv.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки истории.</p>';
         });
-        html += '</div>';
-        // Кнопка экспорта истории
-        html += `<button class="btn btn-secondary" id="exportHistoryBtn" style="margin-top:10px;">📤 Экспорт истории в Excel</button>`;
-        historyDiv.innerHTML = html;
-        document.getElementById('exportHistoryBtn').addEventListener('click', exportHistory);
-      }).catch(err => {
-        console.error('Error loading history:', err);
-        historyDiv.innerHTML = '<p style="color:var(--text-secondary);">Ошибка загрузки истории.</p>';
-      });
-    }
+      }
 
-    function exportHistory() {
-      db.ref('history').limitToLast(10).once('value').then(snap => {
-        const data = snap.val();
-        if (!data) { alert('История пуста.'); return; }
-        const rows = [['Дата', 'Победитель', 'Количество игроков']];
-        const keys = Object.keys(data);
-        keys.forEach(key => {
-          const game = data[key];
-          const date = new Date(game.timestamp).toLocaleString('ru-RU');
-          rows.push([date, game.winner || '—', game.playerCount || 0]);
-        });
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'История');
-        XLSX.writeFile(wb, 'history.xlsx');
-      }).catch(err => { alert('Ошибка экспорта: ' + err.message); });
-    }
+      function exportHistory() {
+        if (!db) return;
+        db.ref('history').limitToLast(10).once('value').then(snap => {
+          const data = snap.val();
+          if (!data) { alert('История пуста.'); return; }
+          const rows = [['Дата', 'Победитель', 'Количество игроков']];
+          const keys = Object.keys(data);
+          keys.forEach(key => {
+            const game = data[key];
+            const date = new Date(game.timestamp).toLocaleString('ru-RU');
+            rows.push([date, game.winner || '—', game.playerCount || 0]);
+          });
+          const ws = XLSX.utils.aoa_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'История');
+          XLSX.writeFile(wb, 'history.xlsx');
+        }).catch(err => { alert('Ошибка экспорта: ' + err.message); });
+      }
 
-    function showHostSetup() {
-      document.getElementById('networkSetupTitle').textContent = 'Создать игру';
-      document.getElementById('networkSetupContent').innerHTML = `
-        <div class="network-setup"><p>Вы — ведущий. Загрузите Excel с вопросами.</p>
-        <label for="hostExcelFile">Выберите Excel-файл</label><input type="file" id="hostExcelFile" accept=".xlsx,.xls" />
-        <div class="message" id="hostUploadMessage"></div>
-        <label for="hostName">Ваше имя</label><input type="text" id="hostName" placeholder="Введите имя" value="Ведущий" />
-        <label for="hostQuestionTime">Время на вопрос (сек)</label><input type="number" id="hostQuestionTime" min="10" max="600" value="60" />
-        <button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button>
-        <div class="message" id="hostCreateMessage"></div></div>`;
+      // ===================== ПАРСИНГ EXCEL =====================
+      function parseExcelQuestions(rows) {
+        let parsed = rows
+          .filter(r => Array.isArray(r) && r.length >= 2)
+          .map(r => ({
+            question: String(r[0] ?? '').trim(),
+            answer: String(r[1] ?? '').trim(),
+            points: Number(r[2] ?? 0),
+            imageUrl: r[3] ? String(r[3]).trim() : null
+          }))
+          .filter(r => r.question && r.answer && r.points >= 0);
 
-      document.getElementById('hostExcelFile').addEventListener('change', function(e) { if (e.target.files[0]) networkParseExcel(e.target.files[0]); });
-      document.getElementById('hostCreateBtn').addEventListener('click', function() {
-        let name = document.getElementById('hostName').value.trim();
-        if (!name) { document.getElementById('hostCreateMessage').textContent = 'Введите имя.'; return; }
-        let time = parseInt(document.getElementById('hostQuestionTime').value);
-        if (!time || time < 10 || time > 600) { document.getElementById('hostCreateMessage').textContent = 'Время от 10 до 600.'; return; }
-        if (!window.normalQuestions || !window.normalQuestions.length) { document.getElementById('hostCreateMessage').textContent = 'Сначала загрузите Excel.'; return; }
-        if (!db) { document.getElementById('hostCreateMessage').textContent = 'Ошибка Firebase.'; return; }
-        let roomId = createRoom(name, window.normalQuestions, window.specialQuestions, time);
-        if (!roomId) { document.getElementById('hostCreateMessage').textContent = 'Ошибка создания комнаты.'; return; }
-        net.roomId = roomId;
-        net.role = 'host';
-        net.myId = 'host';
-        showHostLobby(roomId);
-      });
-    }
+        // Удаляем заголовок, если он есть
+        if (parsed.length > 0) {
+          let first = parsed[0];
+          let ql = first.question.toLowerCase();
+          let al = first.answer.toLowerCase();
+          if (['вопрос', 'question', 'вопросы', 'questions'].includes(ql) &&
+              ['ответ', 'answer', 'answers'].includes(al)) {
+            parsed = parsed.slice(1);
+          }
+        }
+        return parsed;
+      }
 
-    function showHostLobby(rid) {
-      let link = window.location.origin + window.location.pathname + '?room=' + rid;
-      document.getElementById('networkSetupContent').innerHTML = `
-        <div class="network-setup"><h4>Комната создана!</h4><div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br><input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div><p>Ожидаем игроков...</p><div id="playersReadyList" class="player-ready-list"></div><div class="host-controls"><button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button><button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button></div><div class="message" id="hostLobbyMessage"></div></div>`;
-      document.getElementById('networkRightPanelContainer').classList.add('hidden');
-      document.getElementById('fixedRollBtn').style.display = 'none';
-      net.roomRef = db.ref('rooms/' + rid);
-      net.roomRef.on('value', snapshot => {
-        let data = snapshot.val();
-        if (!data) return;
-        let players = data.players || {};
-        let ids = Object.keys(players);
-        let list = document.getElementById('playersReadyList');
-        list.innerHTML = '';
-        ids.forEach(id => { let p = players[id]; list.innerHTML += `<div class="player-ready-item"><div class="avatar-mini">${p.avatarIcon}</div><span>${p.name}</span><span class="ready-badge">${p.ready?'✅ Готов':'⏳ Ожидает'}</span></div>`; });
-        let allReady = ids.every(id => players[id].ready === true);
-        let btn = document.getElementById('hostStartGameBtn');
-        if (allReady && ids.length >= 1) btn.disabled = false; else btn.disabled = true;
-        if (data.gameStarted) startGameNetwork(data);
-      });
-      document.getElementById('hostStartGameBtn').addEventListener('click', function() {
-        net.roomRef.once('value').then(s => { let d = s.val(); if (d) { let ids = Object.keys(d.players || {}); if (ids.length > 0) { net.roomRef.child('currentPlayerId').set(ids[0]); net.roomRef.child('gameStarted').set(true); } } });
-      });
-      document.getElementById('hostCancelBtn').addEventListener('click', function() { net.roomRef.remove(); net.role = null; net.roomId = null; clearSession(); document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); });
-    }
+      function parseExcelTasks(rows) {
+        let tasks = rows
+          .filter(r => Array.isArray(r) && r.length >= 3)
+          .map(r => ({
+            question: String(r[0] ?? '').trim(),
+            answer: String(r[1] ?? '').trim(),
+            points: Number(r[2] ?? 0)
+          }))
+          .filter(r => r.question && r.answer);
 
-    function showJoinSetup() {
-      document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
-      document.getElementById('networkSetupContent').innerHTML = `
-        <div class="network-setup"><p>Введите ID комнаты.</p><label for="joinRoomId">ID комнаты</label><input type="text" id="joinRoomId" placeholder="например: abc123-..." /><button class="btn btn-primary" id="joinConnectBtn">Подключиться</button><div class="message" id="joinMessage"></div><div id="joinPlayerSetup" class="hidden"><label for="joinPlayerName">Ваше имя</label><input type="text" id="joinPlayerName" placeholder="Введите имя" value="Игрок" /><label for="joinAvatarSelect">Выберите аватар</label><select id="joinAvatarSelect">${AVATARS.map(a=>`<option value="${a.id}">${a.icon} ${a.name}</option>`).join('')}</select><button class="btn btn-success" id="joinReadyBtn">Готов к приключению</button></div></div>`;
-      document.getElementById('joinConnectBtn').addEventListener('click', function() {
-        let rid = document.getElementById('joinRoomId').value.trim();
-        if (!rid) { document.getElementById('joinMessage').textContent = 'Введите ID.'; return; }
-        db.ref('rooms/' + rid).once('value').then(s => { let d = s.val(); if (!d) { document.getElementById('joinMessage').textContent = 'Комната не найдена.'; return; } net.roomId = rid; net.role = 'player'; document.getElementById('joinMessage').textContent = 'Подключено! Выберите имя и аватар.'; document.getElementById('joinPlayerSetup').classList.remove('hidden'); document.getElementById('joinConnectBtn').disabled = true; });
-      });
-      document.getElementById('joinReadyBtn').addEventListener('click', function() {
-        let name = document.getElementById('joinPlayerName').value.trim(); let avId = document.getElementById('joinAvatarSelect').value;
-        if (!name) { document.getElementById('joinMessage').textContent = 'Введите имя.'; return; }
-        let res = joinRoom(net.roomId, name, avId);
-        net.myId = res.playerId;
+        if (tasks.length > 0) {
+          let ft = tasks[0];
+          let tl = ft.question.toLowerCase();
+          if (['задание', 'task', 'вопрос', 'question'].includes(tl)) {
+            tasks = tasks.slice(1);
+          }
+        }
+        return tasks;
+      }
+
+      function networkParseExcel(file) {
+        if (typeof XLSX === 'undefined') {
+          document.getElementById('hostUploadMessage').textContent = 'XLSX не загружен.';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            let data = new Uint8Array(e.target.result);
+            let wb = XLSX.read(data, { type: 'array' });
+
+            let qs = wb.Sheets['Вопросы'] || wb.Sheets['questions'] || wb.Sheets[wb.SheetNames[0]];
+            let ts = wb.Sheets['Задания'] || wb.Sheets['tasks'] || wb.Sheets[wb.SheetNames[1]];
+
+            if (!qs) {
+              document.getElementById('hostUploadMessage').textContent = 'Не найден лист с вопросами.';
+              return;
+            }
+
+            let qRows = XLSX.utils.sheet_to_json(qs, { header: 1 });
+            let parsed = parseExcelQuestions(qRows);
+
+            let tasks = [];
+            if (ts) {
+              let tRows = XLSX.utils.sheet_to_json(ts, { header: 1 });
+              tasks = parseExcelTasks(tRows);
+            }
+
+            if (!parsed.length) {
+              document.getElementById('hostUploadMessage').textContent = 'Лист с вопросами пуст.';
+              return;
+            }
+
+            window.normalQuestions = parsed;
+            window.specialQuestions = tasks;
+            document.getElementById('hostUploadMessage').textContent =
+              `Загружено вопросов: ${parsed.length}, заданий: ${tasks.length}.`;
+          } catch (err) {
+            document.getElementById('hostUploadMessage').textContent = 'Ошибка чтения: ' + err.message;
+          }
+        };
+
+        reader.onerror = function() {
+          document.getElementById('hostUploadMessage').textContent = 'Ошибка чтения файла.';
+        };
+
+        reader.readAsArrayBuffer(file);
+      }
+
+      // ===================== СЕТЕВАЯ ИГРА: КОМНАТЫ =====================
+      function createRoom(hostName, qs, sp, time) {
+        if (!db) {
+          console.error('Firebase not initialized');
+          return null;
+        }
+        net.roomId = genRoom();
         net.roomRef = db.ref('rooms/' + net.roomId);
-        net.roomRef.on('value', s => { let d = s.val(); if (d && d.gameStarted) startGameNetwork(d); });
-        document.getElementById('networkSetupContent').innerHTML = `<div class="network-setup"><h4>Вы готовы!</h4><p>Ожидайте старта.</p><p>Ваше имя: ${name}</p><button class="btn btn-secondary" id="joinCancelBtn">Отмена</button></div>`;
-        document.getElementById('joinCancelBtn').addEventListener('click', function() { net.roomRef.child('players/' + net.myId).remove(); net.role = null; net.roomId = null; clearSession(); document.getElementById('gameLayoutNetwork').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); });
-        net.roomRef.child('players/' + net.myId + '/ready').set(true);
-      });
-    }
+        let data = {
+          hostId: 'host',
+          players: {},
+          questions: qs,
+          specialQuestions: sp,
+          currentPlayerIndex: 0,
+          currentPlayerId: null,
+          gameStarted: false,
+          gameFinished: false,
+          paused: false,
+          firstFinalWinnerId: null,
+          finishCounter: 0,
+          questionTime: time,
+          log: []
+        };
+        net.roomRef.set(data);
+        net.myId = 'host';
+        net.role = 'host';
+        saveSession(net.roomId, net.myId, net.role);
+        return net.roomId;
+      }
 
-    // ===================== ЗАПУСК ИГРЫ =====================
-    function startGameNetwork(data) {
-      document.getElementById('networkSetupBox').classList.add('hidden');
-      document.getElementById('networkGameBox').classList.remove('hidden');
-      document.getElementById('networkRightPanelContainer').classList.remove('hidden');
-      const fixedBtn = document.getElementById('fixedRollBtn');
-      fixedBtn.style.display = 'block';
-      fixedBtn.disabled = true;
+      function joinRoom(rid, name, avId) {
+        let r = db.ref('rooms/' + rid);
+        let pid = 'player_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        let av = getAvatarById(avId);
+        let p = {
+          id: pid,
+          name,
+          avatarIcon: av.icon,
+          avatarId: av.id,
+          color: '#5DADE2',
+          position: 0,
+          asked: 0,
+          correct: 0,
+          points: 0,
+          finished: false,
+          consecutiveCorrect: 0,
+          totalCorrect: 0,
+          totalIncorrect: 0,
+          rollCounts: { 1: 0, 4: 0, 6: 0 },
+          noOnes: true,
+          trapHits: 0,
+          visitedSpecialCells: [],
+          stoppedOnFibonacci: [],
+          movesCount: 0,
+          finishOrder: null,
+          ready: false
+        };
+        r.child('players/' + pid).set(p);
+        net.myId = pid;
+        net.role = 'player';
+        saveSession(net.roomId, net.myId, net.role);
+        return { playerId: pid, playerData: p };
+      }
 
-      let isHost = net.role === 'host';
-      document.getElementById('networkRightPanel').innerHTML = `
-        <div class="box"><h3>Текущий игрок</h3><div class="current-player"><div class="avatar" id="currentPlayerAvatarNetwork">😀</div><div><div class="player-name" id="currentPlayerNameNetwork">Герой</div><div class="player-meta" id="currentPlayerMetaNetwork">Позиция: Старт</div></div></div></div>
-        <div class="box"><h3>Кость судьбы</h3><div class="dice-result" id="diceResultNetwork">-</div></div>
-        <div class="box"><h3>Отряд</h3><div class="players-list" id="playersListNetwork"></div></div>
-        <div class="box"><h3>Легенда поля</h3><div class="legend"><div class="legend-item"><span class="legend-box" style="background:#5DADE2;"></span>Старт</div><div class="legend-item"><span class="legend-box" style="background:#4A6B8A;"></span>Обычная</div><div class="legend-item"><span class="legend-box" style="background:#8E44AD;"></span>Ловушка</div><div class="legend-item"><span class="legend-box" style="background:#3498DB;"></span>Уникальное</div><div class="legend-item"><span class="legend-box" style="background:#1ABC9C;"></span>Финал</div></div></div>
-        <div class="box"><h3>Летопись событий</h3><div class="log" id="eventLogNetwork"></div></div>
-        ${isHost?`
-          <div class="box"><h3>✏️ Очки</h3><div class="add-points-row"><select id="addPointsPlayerSelectNetwork"><option value="">-- выберите --</option></select><input type="number" id="addPointsInputNetwork" value="1" min="1" max="100" /><button class="btn btn-success" id="addPointsBtnNetwork">+ Добавить</button><button class="btn btn-danger" id="subtractPointsBtnNetwork">- Вычесть</button></div></div>
-          <div class="box side-end-wrap"><button class="btn btn-warning" id="pauseGameBtnNetwork">⏸ Пауза</button><button class="btn btn-danger" id="forceFinishBtnNetwork">Завершить игру</button></div>
-        `:''}
-      `;
-      if (isHost) { fixedBtn.style.display = 'none'; }
+      // ===================== UI ХОСТА И ИГРОКА =====================
+      function showHostSetup() {
+        document.getElementById('networkSetupTitle').textContent = 'Создать игру';
+        document.getElementById('networkSetupContent').innerHTML = `
+          <div class="network-setup"><p>Вы — ведущий. Загрузите Excel с вопросами.</p>
+          <label for="hostExcelFile">Выберите Excel-файл</label><input type="file" id="hostExcelFile" accept=".xlsx,.xls" />
+          <div class="message" id="hostUploadMessage"></div>
+          <label for="hostName">Ваше имя</label><input type="text" id="hostName" placeholder="Введите имя" value="Ведущий" />
+          <label for="hostQuestionTime">Время на вопрос (сек)</label><input type="number" id="hostQuestionTime" min="10" max="600" value="60" />
+          <button class="btn btn-primary" id="hostCreateBtn">Создать комнату</button>
+          <div class="message" id="hostCreateMessage"></div></div>`;
 
-      // Пулы вопросов
-      net.normalPool = shuffle([...data.questions]);
-      net.finalPool = shuffle(net.normalPool.filter(q => Number(q.points) === FINAL_QUESTION_POINTS));
-      let finalIds = new Set(net.finalPool.map(q => q.question));
-      net.normalPool = net.normalPool.filter(q => !finalIds.has(q.question));
-      net.specialQs = shuffle([...data.specialQuestions]);
+        document.getElementById('hostExcelFile').addEventListener('change', function(e) {
+          if (e.target.files[0]) networkParseExcel(e.target.files[0]);
+        });
 
-      buildCellsNetwork(); renderOrnamentsNetwork(); renderCellsNetwork();
-
-      // Подписка на вопросы
-      net.roomRef.child('pendingQuestion').on('value', sn => {
-        let q = sn.val();
-        if (q && q.question) {
-          if (!document.getElementById('questionModal').classList.contains('show') || window._lastQuestionTimestamp !== q.timestamp) {
-            window._lastQuestionTimestamp = q.timestamp;
-            timerSec = data.questionTime || 60;
-            openQuestion(q, 'Вопрос для ' + q.playerName, q.context);
+        document.getElementById('hostCreateBtn').addEventListener('click', function() {
+          let name = document.getElementById('hostName').value.trim();
+          if (!name) {
+            document.getElementById('hostCreateMessage').textContent = 'Введите имя.';
+            return;
           }
-        } else {
-          document.getElementById('questionModal').classList.remove('show');
-          stopTimer();
-        }
-      });
+          let time = parseInt(document.getElementById('hostQuestionTime').value);
+          if (!time || time < 10 || time > 600) {
+            document.getElementById('hostCreateMessage').textContent = 'Время от 10 до 600.';
+            return;
+          }
+          if (!window.normalQuestions || !window.normalQuestions.length) {
+            document.getElementById('hostCreateMessage').textContent = 'Сначала загрузите Excel.';
+            return;
+          }
+          if (!db) {
+            document.getElementById('hostCreateMessage').textContent = 'Ошибка Firebase.';
+            return;
+          }
+          let roomId = createRoom(name, window.normalQuestions, window.specialQuestions, time);
+          if (!roomId) {
+            document.getElementById('hostCreateMessage').textContent = 'Ошибка создания комнаты.';
+            return;
+          }
+          showHostLobby(roomId);
+        });
+      }
 
-      // Подписка на бросок кубика (мгновенно, без анимации)
-      let lastDiceKey = null;
-      net.roomRef.child('diceRolls').on('child_added', async (sn) => {
-        let key = sn.key;
-        if (key === lastDiceKey) return;
-        lastDiceKey = key;
-        let dice = sn.val();
-        if (dice !== null && typeof dice === 'number') {
-          document.getElementById('diceResultNetwork').textContent = String(dice);
-        }
-      });
+      function showHostLobby(rid) {
+        let link = window.location.origin + window.location.pathname + '?room=' + rid;
+        document.getElementById('networkSetupContent').innerHTML = `
+          <div class="network-setup"><h4>Комната создана!</h4>
+          <div class="room-info"><strong>ID:</strong> ${rid}<br><strong>Ссылка:</strong><br>
+          <input type="text" value="${link}" readonly style="width:100%;margin:5px 0;" onclick="this.select();" /></div>
+          <p>Ожидаем игроков...</p>
+          <div id="playersReadyList" class="player-ready-list"></div>
+          <div class="host-controls">
+            <button class="btn btn-success" id="hostStartGameBtn" disabled>Начать приключение</button>
+            <button class="btn btn-secondary" id="hostCancelBtn">Отменить создание</button>
+          </div>
+          <div class="message" id="hostLobbyMessage"></div></div>`;
 
-      // Подписка на паузу
-      net.roomRef.child('paused').on('value', sn => {
-        const paused = sn.val();
-        if (paused === true) {
+        document.getElementById('networkRightPanelContainer').classList.add('hidden');
+        document.getElementById('fixedRollBtn').style.display = 'none';
+
+        net.roomRef = db.ref('rooms/' + rid);
+
+        addListener(net.roomRef, 'value', snapshot => {
+          let data = snapshot.val();
+          if (!data) return;
+          let players = data.players || {};
+          let ids = Object.keys(players);
+          let list = document.getElementById('playersReadyList');
+          if (!list) return;
+          list.innerHTML = '';
+          ids.forEach(id => {
+            let p = players[id];
+            list.innerHTML += `<div class="player-ready-item">
+              <div class="avatar-mini">${p.avatarIcon}</div>
+              <span>${p.name}</span>
+              <span class="ready-badge">${p.ready ? '✅ Готов' : '⏳ Ожидает'}</span>
+            </div>`;
+          });
+          let allReady = ids.length > 0 && ids.every(id => players[id].ready === true);
+          let btn = document.getElementById('hostStartGameBtn');
+          if (btn) btn.disabled = !allReady;
+          if (data.gameStarted) startGameNetwork(data);
+        });
+
+        document.getElementById('hostStartGameBtn').addEventListener('click', async function() {
+          let snap = await net.roomRef.once('value');
+          let d = snap.val();
+          if (d) {
+            let ids = Object.keys(d.players || {});
+            if (ids.length > 0) {
+              net.roomRef.child('currentPlayerId').set(ids[0]);
+              net.roomRef.child('gameStarted').set(true);
+            }
+          }
+        });
+
+        document.getElementById('hostCancelBtn').addEventListener('click', function() {
+          removeAllListeners();
+          net.roomRef.remove();
+          net.role = null;
+          net.roomId = null;
+          clearSession();
+          document.getElementById('gameLayoutNetwork').classList.add('hidden');
+          document.getElementById('mainMenu').classList.remove('hidden');
+        });
+      }
+
+      function showJoinSetup() {
+        document.getElementById('networkSetupTitle').textContent = 'Присоединиться к игре';
+        document.getElementById('networkSetupContent').innerHTML = `
+          <div class="network-setup"><p>Введите ID комнаты.</p>
+          <label for="joinRoomId">ID комнаты</label><input type="text" id="joinRoomId" placeholder="например: abc123-..." />
+          <button class="btn btn-primary" id="joinConnectBtn">Подключиться</button>
+          <div class="message" id="joinMessage"></div>
+          <div id="joinPlayerSetup" class="hidden">
+            <label for="joinPlayerName">Ваше имя</label><input type="text" id="joinPlayerName" placeholder="Введите имя" value="Игрок" />
+            <label for="joinAvatarSelect">Выберите аватар</label>
+            <select id="joinAvatarSelect">${AVATARS.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('')}</select>
+            <button class="btn btn-success" id="joinReadyBtn">Готов к приключению</button>
+          </div></div>`;
+
+        document.getElementById('joinConnectBtn').addEventListener('click', async function() {
+          let rid = document.getElementById('joinRoomId').value.trim();
+          if (!rid) {
+            document.getElementById('joinMessage').textContent = 'Введите ID.';
+            return;
+          }
+          try {
+            let s = await db.ref('rooms/' + rid).once('value');
+            let d = s.val();
+            if (!d) {
+              document.getElementById('joinMessage').textContent = 'Комната не найдена.';
+              return;
+            }
+            net.roomId = rid;
+            net.role = 'player';
+            document.getElementById('joinMessage').textContent = 'Подключено! Выберите имя и аватар.';
+            document.getElementById('joinPlayerSetup').classList.remove('hidden');
+            this.disabled = true;
+          } catch (err) {
+            document.getElementById('joinMessage').textContent = 'Ошибка подключения.';
+          }
+        });
+
+        document.getElementById('joinReadyBtn').addEventListener('click', function() {
+          let name = document.getElementById('joinPlayerName').value.trim();
+          let avId = document.getElementById('joinAvatarSelect').value;
+          if (!name) {
+            document.getElementById('joinMessage').textContent = 'Введите имя.';
+            return;
+          }
+          let res = joinRoom(net.roomId, name, avId);
+          net.myId = res.playerId;
+          net.roomRef = db.ref('rooms/' + net.roomId);
+
+          addListener(net.roomRef, 'value', s => {
+            let d = s.val();
+            if (d && d.gameStarted) startGameNetwork(d);
+          });
+
+          document.getElementById('networkSetupContent').innerHTML = `
+            <div class="network-setup"><h4>Вы готовы!</h4>
+            <p>Ожидайте старта.</p>
+            <p>Ваше имя: ${name}</p>
+            <button class="btn btn-secondary" id="joinCancelBtn">Отмена</button></div>`;
+
+          document.getElementById('joinCancelBtn').addEventListener('click', function() {
+            removeAllListeners();
+            net.roomRef.child('players/' + net.myId).remove();
+            net.role = null;
+            net.roomId = null;
+            clearSession();
+            document.getElementById('gameLayoutNetwork').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+          });
+
+          net.roomRef.child('players/' + net.myId + '/ready').set(true);
+        });
+      }
+
+      // ===================== ЗАПУСК ИГРЫ =====================
+      function startGameNetwork(data) {
+        document.getElementById('networkSetupBox').classList.add('hidden');
+        document.getElementById('networkGameBox').classList.remove('hidden');
+        document.getElementById('networkRightPanelContainer').classList.remove('hidden');
+        const fixedBtn = document.getElementById('fixedRollBtn');
+        fixedBtn.style.display = 'block';
+        fixedBtn.disabled = true;
+
+        let isHost = net.role === 'host';
+        timerSec = data.questionTime || 60;
+
+        document.getElementById('networkRightPanel').innerHTML = `
+          <div class="box"><h3>Текущий игрок</h3>
+            <div class="current-player">
+              <div class="avatar" id="currentPlayerAvatarNetwork">😀</div>
+              <div><div class="player-name" id="currentPlayerNameNetwork">Герой</div>
+              <div class="player-meta" id="currentPlayerMetaNetwork">Позиция: Старт</div></div>
+            </div>
+          </div>
+          <div class="box"><h3>Кость судьбы</h3><div class="dice-result" id="diceResultNetwork">-</div></div>
+          <div class="box"><h3>Отряд</h3><div class="players-list" id="playersListNetwork"></div></div>
+          <div class="box"><h3>Легенда поля</h3>
+            <div class="legend">
+              <div class="legend-item"><span class="legend-box" style="background:#5DADE2;"></span>Старт</div>
+              <div class="legend-item"><span class="legend-box" style="background:#4A6B8A;"></span>Обычная</div>
+              <div class="legend-item"><span class="legend-box" style="background:#8E44AD;"></span>Ловушка</div>
+              <div class="legend-item"><span class="legend-box" style="background:#3498DB;"></span>Уникальное</div>
+              <div class="legend-item"><span class="legend-box" style="background:#1ABC9C;"></span>Финал</div>
+            </div>
+          </div>
+          <div class="box"><h3>Летопись событий</h3><div class="log" id="eventLogNetwork"></div></div>
+          ${isHost ? `
+            <div class="box"><h3>✏️ Очки</h3>
+              <div class="add-points-row">
+                <select id="addPointsPlayerSelectNetwork"><option value="">-- выберите --</option></select>
+                <input type="number" id="addPointsInputNetwork" value="1" min="1" max="100" />
+                <button class="btn btn-success" id="addPointsBtnNetwork">+ Добавить</button>
+                <button class="btn btn-danger" id="subtractPointsBtnNetwork">- Вычесть</button>
+              </div>
+            </div>
+            <div class="box side-end-wrap">
+              <button class="btn btn-warning" id="pauseGameBtnNetwork">⏸ Пауза</button>
+              <button class="btn btn-danger" id="forceFinishBtnNetwork">Завершить игру</button>
+            </div>
+          ` : ''}
+        `;
+
+        if (isHost) {
+          fixedBtn.style.display = 'none';
+        }
+
+        // Инициализация пулов вопросов
+        net.normalPool = shuffle([...data.questions]);
+        net.finalPool = shuffle(net.normalPool.filter(q => Number(q.points) === FINAL_QUESTION_POINTS));
+        let finalIds = new Set(net.finalPool.map(q => q.question));
+        net.normalPool = net.normalPool.filter(q => !finalIds.has(q.question));
+        net.specialQs = shuffle([...(data.specialQuestions || [])]);
+
+        buildCellsNetwork();
+        renderOrnamentsNetwork();
+        renderCellsNetwork();
+
+        // Подписка на вопросы
+        addListener(net.roomRef.child('pendingQuestion'), 'value', sn => {
+          let q = sn.val();
+          if (q && q.question) {
+            if (!document.getElementById('questionModal').classList.contains('show') ||
+                window._lastQuestionTimestamp !== q.timestamp) {
+              window._lastQuestionTimestamp = q.timestamp;
+              openQuestion(q, 'Вопрос для ' + q.playerName, q.context);
+            }
+          } else {
+            document.getElementById('questionModal').classList.remove('show');
+            stopTimer();
+          }
+        });
+
+        // Подписка на бросок кубика
+        let lastDiceValue = null;
+        let lastDiceTimestamp = 0;
+        addListener(net.roomRef.child('diceRolls'), 'child_added', sn => {
+          let dice = sn.val();
+          let timestamp = sn.key ? parseInt(sn.key.split('_')[0] || '0') : 0;
+          // Используем временную метку вместо ключа для проверки дубликатов
+          if (dice !== null && typeof dice === 'number') {
+            if (dice !== lastDiceValue || timestamp > lastDiceTimestamp) {
+              lastDiceValue = dice;
+              lastDiceTimestamp = timestamp;
+              document.getElementById('diceResultNetwork').textContent = String(dice);
+            }
+          }
+        });
+
+        // Подписка на паузу
+        addListener(net.roomRef.child('paused'), 'value', sn => {
+          const paused = sn.val();
+          const pauseBtn = document.getElementById('pauseGameBtnNetwork');
+          if (paused === true) {
+            fixedBtn.disabled = true;
+            if (pauseBtn) pauseBtn.textContent = '▶️ Возобновить';
+          } else {
+            if (pauseBtn) pauseBtn.textContent = '⏸ Пауза';
+          }
+        });
+
+        // Подписка на завершение игры
+        addListener(net.roomRef.child('gameFinished'), 'value', sn => {
+          if (sn.val() === true) {
+            net.roomRef.once('value').then(s => {
+              showGameResults(s.val());
+            });
+          }
+        });
+
+        if (isHost) {
+          setupHostControls();
+        }
+
+        // Основная подписка на состояние
+        addListener(net.roomRef, 'value', sn => {
+          let d = sn.val();
+          if (d) updateGameStateNetwork(d);
+        });
+
+        // Обработчик кнопки броска
+        fixedBtn.onclick = async function() {
+          if (net.isRolling) return;
+          if (document.getElementById('questionModal').classList.contains('show')) {
+            console.warn('Cannot roll while question is open');
+            return;
+          }
+          let pauseSnap = await net.roomRef.child('paused').once('value');
+          if (pauseSnap.val() === true) {
+            alert('Игра приостановлена. Дождитесь возобновления.');
+            return;
+          }
+          let actionRef = net.roomRef.child('actions').push();
+          actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
           fixedBtn.disabled = true;
-          document.getElementById('pauseGameBtnNetwork').textContent = '▶️ Возобновить';
-        } else {
-          if (net.role !== 'host') {
-            // кнопка будет разблокирована при обновлении состояния
-          }
-          if (isHost) document.getElementById('pauseGameBtnNetwork').textContent = '⏸ Пауза';
-        }
-      });
+        };
 
-      if (isHost) {
+        // Обработчик действий (для хоста)
+        if (isHost) {
+          addListener(net.roomRef.child('actions'), 'child_added', async snapshot => {
+            let action = snapshot.val();
+            if (!action || action.type !== 'roll') return;
+            snapshot.ref.remove();
+            await hostPerformRoll(action.playerId);
+          });
+        }
+      }
+
+      function setupHostControls() {
         document.getElementById('addPointsBtnNetwork').addEventListener('click', function() {
           let id = document.getElementById('addPointsPlayerSelectNetwork').value;
           if (!id) return;
@@ -1124,6 +1510,7 @@
           if (isNaN(pts) || pts < 1) return;
           net.roomRef.child('players/' + id + '/points').transaction(c => (c || 0) + pts);
         });
+
         document.getElementById('subtractPointsBtnNetwork').addEventListener('click', function() {
           let id = document.getElementById('addPointsPlayerSelectNetwork').value;
           if (!id) return;
@@ -1131,494 +1518,607 @@
           if (isNaN(pts) || pts < 1) return;
           net.roomRef.child('players/' + id + '/points').transaction(c => Math.max(0, (c || 0) - pts));
         });
+
         document.getElementById('pauseGameBtnNetwork').addEventListener('click', function() {
           net.roomRef.child('paused').transaction(paused => !paused);
         });
+
         document.getElementById('forceFinishBtnNetwork').addEventListener('click', function() {
           document.getElementById('confirmFinishModal').classList.add('show');
         });
+
         document.getElementById('confirmFinishBtn').addEventListener('click', function() {
           net.roomRef.child('gameFinished').set(true);
           document.getElementById('confirmFinishModal').classList.remove('show');
         });
+
         document.getElementById('cancelFinishBtn').addEventListener('click', function() {
           document.getElementById('confirmFinishModal').classList.remove('show');
         });
       }
 
-      net.roomRef.on('value', sn => { let d = sn.val(); if (d) updateGameStateNetwork(d); });
-
-      // Обработчик клика на фиксированную кнопку
-      fixedBtn.addEventListener('click', function() {
+      // ===================== БРОСОК КУБИКА =====================
+      async function hostPerformRoll(playerId) {
         if (net.isRolling) return;
-        if (document.getElementById('questionModal').classList.contains('show')) {
-          console.warn('Cannot roll while question is open');
-          return;
-        }
-        // Проверяем, не на паузе ли
-        net.roomRef.child('paused').once('value').then(sn => {
-          if (sn.val() === true) {
-            alert('Игра приостановлена. Дождитесь возобновления.');
+        net.isRolling = true;
+        try {
+          let snap = await net.roomRef.once('value');
+          let d = snap.val();
+          if (!d || d.paused === true) {
+            net.isRolling = false;
             return;
           }
-          let actionRef = net.roomRef.child('actions').push();
-          actionRef.set({ type: 'roll', playerId: net.myId, timestamp: Date.now() });
-          fixedBtn.disabled = true;
-        });
-      });
 
-      if (isHost) {
-        net.roomRef.child('actions').on('child_added', async snapshot => {
-          let action = snapshot.val();
-          if (!action || action.type !== 'roll') return;
-          snapshot.ref.remove();
-          await hostPerformRoll(action.playerId);
-        });
-      }
-    }
-
-    // ===================== ВЕДУЩИЙ: БРОСОК =====================
-    async function hostPerformRoll(playerId) {
-      if (net.isRolling) return;
-      net.isRolling = true;
-      try {
-        let snap = await net.roomRef.once('value');
-        let d = snap.val();
-        if (!d) { net.isRolling = false; return; }
-        // Проверяем паузу
-        if (d.paused === true) { net.isRolling = false; return; }
-        let players = d.players || {};
-        let p = players[playerId];
-        if (!p || p.finished) { net.isRolling = false; return; }
-
-        let dice = Math.floor(Math.random() * 6) + 1;
-        let diceRef = net.roomRef.child('diceRolls').push();
-        await diceRef.set(dice);
-
-        let playerRef = net.roomRef.child('players/' + playerId + '/position');
-        await playerRef.transaction(current => { let target = Math.min((current || 0) + dice, MAX_POSITION); return target; });
-
-        let log = d.log || [];
-        log.push(p.name + ' бросает кость: выпало ' + dice + '.');
-        await net.roomRef.child('log').set(log);
-
-        let newPos = (await playerRef.once('value')).val();
-        if (newPos === null) newPos = 0;
-        let questionOpened = await networkProcessCell(playerId, p, newPos);
-
-        if (!questionOpened) {
-          let all = (await net.roomRef.child('players').once('value')).val();
-          let finishedAll = Object.values(all || {}).every(p => p.finished === true);
-          if (finishedAll) await net.roomRef.child('gameFinished').set(true);
-          else await networkNextTurn();
-        }
-      } catch (error) {
-        console.error('Error in hostPerformRoll:', error);
-      } finally {
-        net.isRolling = false;
-      }
-    }
-
-    // ===================== ОБРАБОТКА КЛЕТКИ =====================
-    async function networkProcessCell(playerId, player, pos) {
-      if (SPECIAL_BACK_CELLS[pos]) {
-        let back = SPECIAL_BACK_CELLS[pos];
-        player.trapHits++;
-        await net.roomRef.child('players/' + playerId + '/trapHits').set(player.trapHits);
-        let log = (await net.roomRef.child('log').once('value')).val() || [];
-        log.push(player.name + ' попал в ловушку, отступает на 2 клетки.');
-        await net.roomRef.child('log').set(log);
-        await net.roomRef.child('players/' + playerId + '/position').set(back);
-        let q = getRandomNormalQuestion();
-        await networkOpenQuestion(q, 'Случайный вопрос после ловушки', 'normal', playerId);
-        return true;
-      }
-      if (SPECIAL_TASK_CELLS.includes(pos)) {
-        if (!player.visitedSpecialCells) player.visitedSpecialCells = [];
-        player.visitedSpecialCells.push(pos);
-        await net.roomRef.child('players/' + playerId + '/visitedSpecialCells').set(player.visitedSpecialCells);
-        let task = getRandomSpecialQuestion();
-        await networkOpenQuestion(task, 'Уникальное задание на клетке ' + pos, 'special', playerId);
-        return true;
-      }
-      if (pos === FINAL_CELL) {
-        let final = getRandomFinalQuestion();
-        if (final) { await networkOpenQuestion(final, 'Финальный вопрос', 'final50', playerId); return true; } else return false;
-      }
-      if (pos >= 1 && pos < FINAL_CELL) {
-        let q = getRandomNormalQuestion();
-        await networkOpenQuestion(q, 'Случайный вопрос', 'normal', playerId);
-        return true;
-      }
-      return false;
-    }
-
-    // ===================== ПУЛЫ ВОПРОСОВ =====================
-    function getRandomNormalQuestion() {
-      if (!net.normalPool || net.normalPool.length === 0) { return { question: "Обычный вопрос (вопросы закончились)", answer: "Ответ не загружен", points: 1 }; }
-      return net.normalPool.pop();
-    }
-    function getRandomSpecialQuestion() {
-      if (!net.specialQs || net.specialQs.length === 0) { return { question: "Уникальное задание (нет загруженных заданий)", answer: "Ответ не загружен", points: 1 }; }
-      return net.specialQs.pop();
-    }
-    function getRandomFinalQuestion() {
-      if (net.finalPool && net.finalPool.length > 0) return net.finalPool.pop();
-      if (net.normalPool && net.normalPool.length > 0) { let q = net.normalPool.pop(); q.points = FINAL_QUESTION_POINTS; return q; }
-      return { question: "Финальный вопрос для 50-й клетки", answer: "Ответ не загружен", points: FINAL_QUESTION_POINTS, fallback: true };
-    }
-
-    async function networkOpenQuestion(q, title, context, playerId) {
-      let nameSnap = await net.roomRef.child('players/' + playerId + '/name').once('value');
-      let pName = nameSnap.val() || 'игрок';
-      await net.roomRef.child('pendingQuestion').set({
-        question: q.question,
-        answer: q.answer,
-        points: q.points,
-        imageUrl: q.imageUrl || null,
-        context,
-        playerId,
-        playerName: pName,
-        timestamp: Date.now()
-      });
-    }
-
-    // ===================== ОТВЕТ НА ВОПРОС =====================
-    async function networkAnswerQuestion(correct) {
-      try {
-        let snap = await net.roomRef.child('pendingQuestion').once('value');
-        let q = snap.val();
-        if (!q) return;
-        let pid = q.playerId, ctx = q.context, pts = Number(q.points) || 0;
-        let pRef = net.roomRef.child('players/' + pid);
-        let pSnap = await pRef.once('value');
-        let p = pSnap.val();
-        if (!p) return;
-
-        let posSnap = await net.roomRef.child('players/' + pid + '/position').once('value');
-        let currentPos = posSnap.val() || 0;
-
-        p.asked = (p.asked || 0) + 1;
-
-        if (correct) {
-          p.correct = (p.correct || 0) + 1;
-          p.totalCorrect = (p.totalCorrect || 0) + 1;
-          p.consecutiveCorrect = (p.consecutiveCorrect || 0) + 1;
-          p.points = (p.points || 0) + pts;
-          if (ctx === 'final50') {
-            let fw = (await net.roomRef.child('firstFinalWinnerId').once('value')).val();
-            if (!fw) { await net.roomRef.child('firstFinalWinnerId').set(pid); p.points += FINAL_SUCCESS_BONUS; }
-            p.finished = true;
-            let fc = (await net.roomRef.child('finishCounter').once('value')).val() || 0;
-            await net.roomRef.child('finishCounter').set(fc + 1);
-            p.finishOrder = fc + 1;
-            let log = (await net.roomRef.child('log').once('value')).val() || [];
-            log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
-            await net.roomRef.child('log').set(log);
-          } else {
-            let log = (await net.roomRef.child('log').once('value')).val() || [];
-            log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
-            await net.roomRef.child('log').set(log);
-          }
-        } else {
-          p.totalIncorrect = (p.totalIncorrect || 0) + 1;
-          p.consecutiveCorrect = 0;
-          if (ctx === 'final50') {
-            let log = (await net.roomRef.child('log').once('value')).val() || [];
-            log.push(p.name + ' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
-            await net.roomRef.child('log').set(log);
-            let final = getRandomFinalQuestion();
-            if (final) { await networkOpenQuestion(final, 'Финальный вопрос (новая попытка)', 'final50', pid); } else { await net.roomRef.child('gameFinished').set(true); }
-            await pRef.update(p);
-            await net.roomRef.child('pendingQuestion').remove();
+          let players = d.players || {};
+          let p = players[playerId];
+          if (!p || p.finished) {
+            net.isRolling = false;
             return;
-          } else if (ctx === 'normal' || ctx === 'special') {
-            let back = Math.max(0, currentPos - 2);
-            p.position = back;
-            let log = (await net.roomRef.child('log').once('value')).val() || [];
-            log.push(p.name + ' ответил неверно и отступает на 2 клетки (на ' + back + ').');
-            await net.roomRef.child('log').set(log);
-          } else {
-            let log = (await net.roomRef.child('log').once('value')).val() || [];
-            log.push(p.name + ' получил 0 баллов.');
-            await net.roomRef.child('log').set(log);
           }
+
+          let dice = Math.floor(Math.random() * 6) + 1;
+          // Добавляем временную метку в ключ для уникальности
+          let diceRef = net.roomRef.child('diceRolls/' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+          await diceRef.set(dice);
+
+          let playerRef = net.roomRef.child('players/' + playerId + '/position');
+          await playerRef.transaction(current => {
+            return Math.min((current || 0) + dice, MAX_POSITION);
+          });
+
+          let log = d.log || [];
+          log.push(p.name + ' бросает кость: выпало ' + dice + '.');
+          await net.roomRef.child('log').set(log);
+
+          let newPos = (await playerRef.once('value')).val() || 0;
+          let questionOpened = await networkProcessCell(playerId, p, newPos);
+
+          if (!questionOpened) {
+            let all = (await net.roomRef.child('players').once('value')).val();
+            let finishedAll = Object.values(all || {}).every(pl => pl.finished === true);
+            if (finishedAll) {
+              await net.roomRef.child('gameFinished').set(true);
+            } else {
+              await networkNextTurn();
+            }
+          }
+        } catch (error) {
+          console.error('Error in hostPerformRoll:', error);
+        } finally {
+          net.isRolling = false;
         }
-
-        await pRef.update(p);
-        await net.roomRef.child('pendingQuestion').remove();
-
-        if (ctx !== 'final50' || correct) {
-          let all = (await net.roomRef.child('players').once('value')).val();
-          let finishedAll = Object.values(all || {}).every(p => p.finished === true);
-          if (finishedAll) { await net.roomRef.child('gameFinished').set(true); } else { await networkNextTurn(); }
-        }
-      } catch (error) { console.error('Error in networkAnswerQuestion:', error); }
-    }
-
-    // ===================== ПЕРЕХОД ХОДА =====================
-    async function networkNextTurn() {
-      try {
-        let snap = await net.roomRef.once('value');
-        let d = snap.val();
-        if (!d) return;
-        let players = d.players || {};
-        let total = Object.keys(players).length;
-        if (total === 0) return;
-        let activeIds = Object.keys(players).filter(id => !players[id].finished);
-        if (activeIds.length === 0) { await net.roomRef.child('gameFinished').set(true); return; }
-
-        let currentIdx = d.currentPlayerIndex || 0;
-        let nextIdx = (currentIdx + 1) % total;
-        let safety = 0;
-        while (safety < total + 2) {
-          let candidateId = Object.keys(players)[nextIdx];
-          if (!players[candidateId].finished) break;
-          nextIdx = (nextIdx + 1) % total;
-          safety++;
-        }
-        if (safety < total + 2) {
-          let nextId = Object.keys(players)[nextIdx];
-          await net.roomRef.update({ currentPlayerIndex: nextIdx, currentPlayerId: nextId });
-        } else {
-          let firstActive = activeIds[0];
-          let firstIdx = Object.keys(players).indexOf(firstActive);
-          await net.roomRef.update({ currentPlayerIndex: firstIdx, currentPlayerId: firstActive });
-        }
-      } catch (error) { console.error('Error in networkNextTurn:', error); }
-    }
-
-    // ===================== ОБНОВЛЕНИЕ СОСТОЯНИЯ =====================
-    function updateGameStateNetwork(data) {
-      let players = data.players || {};
-      renderTokensNetwork(players);
-
-      let list = document.getElementById('playersListNetwork');
-      if (!list) return;
-      let playerIds = Object.keys(players);
-      let existingRows = list.querySelectorAll('.player-row');
-      let existingMap = {};
-      existingRows.forEach(row => { let id = row.dataset.playerId; if (id) existingMap[id] = row; });
-
-      playerIds.forEach(id => {
-        let p = players[id];
-        let row = existingMap[id];
-        let html = `<div class="mini-avatar">${p.avatarIcon}</div><div><div><strong>${p.name}</strong></div><div style="color:#b0c7dd;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div></div>`;
-        if (row) { row.innerHTML = html; row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : ''); row.dataset.playerId = id; } else { let newRow = document.createElement('div'); newRow.className = 'player-row' + (id === data.currentPlayerId ? ' active' : ''); newRow.dataset.playerId = id; newRow.innerHTML = html; list.appendChild(newRow); }
-      });
-      existingRows.forEach(row => { let id = row.dataset.playerId; if (!playerIds.includes(id)) row.remove(); });
-
-      let curId = data.currentPlayerId;
-      let cur = players[curId];
-      if (cur) {
-        document.getElementById('currentPlayerAvatarNetwork').textContent = cur.avatarIcon;
-        document.getElementById('currentPlayerNameNetwork').textContent = cur.name;
-        document.getElementById('currentPlayerMetaNetwork').textContent = 'Позиция: ' + cur.position + ' • Очки: ' + cur.points;
       }
 
-      let logDiv = document.getElementById('eventLogNetwork');
-      if (logDiv && data.log && Array.isArray(data.log)) { logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join(''); }
+      // ===================== ОБРАБОТКА КЛЕТКИ =====================
+      async function networkProcessCell(playerId, player, pos) {
+        if (SPECIAL_BACK_CELLS[pos]) {
+          let back = SPECIAL_BACK_CELLS[pos];
+          player.trapHits = (player.trapHits || 0) + 1;
+          await net.roomRef.child('players/' + playerId + '/trapHits').set(player.trapHits);
+          let log = (await net.roomRef.child('log').once('value')).val() || [];
+          log.push(player.name + ' попал в ловушку, отступает на 2 клетки.');
+          await net.roomRef.child('log').set(log);
+          await net.roomRef.child('players/' + playerId + '/position').set(back);
+          let q = getRandomNormalQuestion();
+          await networkOpenQuestion(q, 'Случайный вопрос после ловушки', 'normal', playerId);
+          return true;
+        }
 
-      const fixedBtn = document.getElementById('fixedRollBtn');
-      if (fixedBtn) {
-        if (net.role === 'host') { fixedBtn.style.display = 'none'; } else {
+        if (SPECIAL_TASK_CELLS.includes(pos)) {
+          if (!player.visitedSpecialCells) player.visitedSpecialCells = [];
+          player.visitedSpecialCells.push(pos);
+          await net.roomRef.child('players/' + playerId + '/visitedSpecialCells').set(player.visitedSpecialCells);
+          let task = getRandomSpecialQuestion();
+          await networkOpenQuestion(task, 'Уникальное задание на клетке ' + pos, 'special', playerId);
+          return true;
+        }
+
+        if (pos === FINAL_CELL) {
+          let final = getRandomFinalQuestion();
+          if (final) {
+            await networkOpenQuestion(final, 'Финальный вопрос', 'final50', playerId);
+            return true;
+          }
+          return false;
+        }
+
+        if (pos >= 1 && pos < FINAL_CELL) {
+          let q = getRandomNormalQuestion();
+          await networkOpenQuestion(q, 'Случайный вопрос', 'normal', playerId);
+          return true;
+        }
+
+        return false;
+      }
+
+      // ===================== ПУЛЫ ВОПРОСОВ =====================
+      function getRandomNormalQuestion() {
+        if (!net.normalPool || net.normalPool.length === 0) {
+          return {
+            question: "Обычный вопрос (вопросы закончились)",
+            answer: "Ответ не загружен",
+            points: 1
+          };
+        }
+        return net.normalPool.pop();
+      }
+
+      function getRandomSpecialQuestion() {
+        if (!net.specialQs || net.specialQs.length === 0) {
+          return {
+            question: "Уникальное задание (нет загруженных заданий)",
+            answer: "Ответ не загружен",
+            points: 1
+          };
+        }
+        return net.specialQs.pop();
+      }
+
+      function getRandomFinalQuestion() {
+        if (net.finalPool && net.finalPool.length > 0) return net.finalPool.pop();
+        if (net.normalPool && net.normalPool.length > 0) {
+          let q = net.normalPool.pop();
+          q.points = FINAL_QUESTION_POINTS;
+          return q;
+        }
+        return {
+          question: "Финальный вопрос для 50-й клетки",
+          answer: "Ответ не загружен",
+          points: FINAL_QUESTION_POINTS,
+          fallback: true
+        };
+      }
+
+      async function networkOpenQuestion(q, title, context, playerId) {
+        let nameSnap = await net.roomRef.child('players/' + playerId + '/name').once('value');
+        let pName = nameSnap.val() || 'игрок';
+        await net.roomRef.child('pendingQuestion').set({
+          question: q.question,
+          answer: q.answer,
+          points: q.points,
+          imageUrl: q.imageUrl || null,
+          context,
+          playerId,
+          playerName: pName,
+          timestamp: Date.now()
+        });
+      }
+
+      // ===================== ОТВЕТ НА ВОПРОС =====================
+      async function networkAnswerQuestion(correct) {
+        try {
+          let snap = await net.roomRef.child('pendingQuestion').once('value');
+          let q = snap.val();
+          if (!q) return;
+
+          let pid = q.playerId;
+          let ctx = q.context;
+          let pts = Number(q.points) || 0;
+
+          let pRef = net.roomRef.child('players/' + pid);
+          let pSnap = await pRef.once('value');
+          let p = pSnap.val();
+          if (!p) return;
+
+          let posSnap = await net.roomRef.child('players/' + pid + '/position').once('value');
+          let currentPos = posSnap.val() || 0;
+
+          p.asked = (p.asked || 0) + 1;
+          let log = (await net.roomRef.child('log').once('value')).val() || [];
+
+          if (correct) {
+            p.correct = (p.correct || 0) + 1;
+            p.totalCorrect = (p.totalCorrect || 0) + 1;
+            p.consecutiveCorrect = (p.consecutiveCorrect || 0) + 1;
+            p.points = (p.points || 0) + pts;
+
+            if (ctx === 'final50') {
+              let fw = (await net.roomRef.child('firstFinalWinnerId').once('value')).val();
+              if (!fw) {
+                await net.roomRef.child('firstFinalWinnerId').set(pid);
+                p.points += FINAL_SUCCESS_BONUS;
+              }
+              p.finished = true;
+              let fc = (await net.roomRef.child('finishCounter').once('value')).val() || 0;
+              await net.roomRef.child('finishCounter').set(fc + 1);
+              p.finishOrder = fc + 1;
+              log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
+            } else {
+              log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
+            }
+          } else {
+            p.totalIncorrect = (p.totalIncorrect || 0) + 1;
+            p.consecutiveCorrect = 0;
+
+            if (ctx === 'final50') {
+              log.push(p.name + ' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
+              await pRef.update(p);
+              await net.roomRef.child('pendingQuestion').remove();
+              let final = getRandomFinalQuestion();
+              if (final) {
+                await networkOpenQuestion(final, 'Финальный вопрос (новая попытка)', 'final50', pid);
+              } else {
+                await net.roomRef.child('gameFinished').set(true);
+              }
+              return;
+            } else if (ctx === 'normal' || ctx === 'special') {
+              let back = Math.max(0, currentPos - 2);
+              p.position = back;
+              log.push(p.name + ' ответил неверно и отступает на 2 клетки (на ' + back + ').');
+            } else {
+              log.push(p.name + ' получил 0 баллов.');
+            }
+          }
+
+          await pRef.update(p);
+          await net.roomRef.child('log').set(log);
+          await net.roomRef.child('pendingQuestion').remove();
+
+          if (ctx !== 'final50' || correct) {
+            let all = (await net.roomRef.child('players').once('value')).val();
+            let finishedAll = Object.values(all || {}).every(pl => pl.finished === true);
+            if (finishedAll) {
+              await net.roomRef.child('gameFinished').set(true);
+            } else {
+              await networkNextTurn();
+            }
+          }
+        } catch (error) {
+          console.error('Error in networkAnswerQuestion:', error);
+        }
+      }
+
+      // ===================== ПЕРЕХОД ХОДА =====================
+      async function networkNextTurn() {
+        try {
+          let snap = await net.roomRef.once('value');
+          let d = snap.val();
+          if (!d) return;
+
+          let players = d.players || {};
+          let allIds = Object.keys(players);
+          if (allIds.length === 0) return;
+
+          let activeIds = allIds.filter(id => !players[id].finished);
+          if (activeIds.length === 0) {
+            await net.roomRef.child('gameFinished').set(true);
+            return;
+          }
+
+          let currentIdx = d.currentPlayerIndex || 0;
+          let nextIdx = currentIdx;
+          let safety = 0;
+
+          do {
+            nextIdx = (nextIdx + 1) % allIds.length;
+            safety++;
+          } while (players[allIds[nextIdx]]?.finished && safety < allIds.length + 1);
+
+          if (safety < allIds.length + 1) {
+            let nextId = allIds[nextIdx];
+            await net.roomRef.update({
+              currentPlayerIndex: nextIdx,
+              currentPlayerId: nextId
+            });
+          } else {
+            let firstActive = activeIds[0];
+            let firstIdx = allIds.indexOf(firstActive);
+            await net.roomRef.update({
+              currentPlayerIndex: firstIdx >= 0 ? firstIdx : 0,
+              currentPlayerId: firstActive
+            });
+          }
+        } catch (error) {
+          console.error('Error in networkNextTurn:', error);
+        }
+      }
+
+      // ===================== ОБНОВЛЕНИЕ СОСТОЯНИЯ =====================
+      function updateGameStateNetwork(data) {
+        let players = data.players || {};
+        renderTokensNetwork(players);
+
+        let list = document.getElementById('playersListNetwork');
+        if (!list) return;
+
+        let playerIds = Object.keys(players);
+        let existingRows = list.querySelectorAll('.player-row');
+        let existingMap = {};
+        existingRows.forEach(row => {
+          let id = row.dataset.playerId;
+          if (id) existingMap[id] = row;
+        });
+
+        playerIds.forEach(id => {
+          let p = players[id];
+          let row = existingMap[id];
+          let html = `<div class="mini-avatar">${p.avatarIcon}</div>
+            <div><div><strong>${p.name}</strong></div>
+            <div style="color:#b0c7dd;font-size:13px;">Позиция: ${p.position} • Очки: ${p.points}</div></div>`;
+
+          if (row) {
+            row.innerHTML = html;
+            row.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
+            row.dataset.playerId = id;
+          } else {
+            let newRow = document.createElement('div');
+            newRow.className = 'player-row' + (id === data.currentPlayerId ? ' active' : '');
+            newRow.dataset.playerId = id;
+            newRow.innerHTML = html;
+            list.appendChild(newRow);
+          }
+        });
+
+        // Удаляем строки игроков, которых больше нет
+        existingRows.forEach(row => {
+          let id = row.dataset.playerId;
+          if (!playerIds.includes(id)) row.remove();
+        });
+
+        let curId = data.currentPlayerId;
+        let cur = players[curId];
+        if (cur) {
+          document.getElementById('currentPlayerAvatarNetwork').textContent = cur.avatarIcon;
+          document.getElementById('currentPlayerNameNetwork').textContent = cur.name;
+          document.getElementById('currentPlayerMetaNetwork').textContent =
+            'Позиция: ' + cur.position + ' • Очки: ' + cur.points;
+        }
+
+        let logDiv = document.getElementById('eventLogNetwork');
+        if (logDiv && data.log && Array.isArray(data.log)) {
+          logDiv.innerHTML = data.log.map(item => `<div class="log-item">${item}</div>`).join('');
+        }
+
+        const fixedBtn = document.getElementById('fixedRollBtn');
+        if (fixedBtn && net.role !== 'host') {
           fixedBtn.style.display = 'block';
           let hasQuestion = document.getElementById('questionModal').classList.contains('show');
           let paused = data.paused === true;
           fixedBtn.disabled = (curId !== net.myId) || hasQuestion || paused;
         }
+
+        let sel = document.getElementById('addPointsPlayerSelectNetwork');
+        if (sel) {
+          let val = sel.value;
+          sel.innerHTML = '<option value="">-- выберите --</option>';
+          playerIds.forEach(id => {
+            let p = players[id];
+            let opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = `${p.avatarIcon} ${p.name} (${p.points} очков)`;
+            sel.appendChild(opt);
+          });
+          if (playerIds.includes(val)) sel.value = val;
+        }
       }
 
-      let sel = document.getElementById('addPointsPlayerSelectNetwork');
-      if (sel) {
-        let val = sel.value;
-        sel.innerHTML = '<option value="">-- выберите --</option>';
-        playerIds.forEach(id => { let p = players[id]; let opt = document.createElement('option'); opt.value = id; opt.textContent = `${p.avatarIcon} ${p.name} (${p.points} очков)`; sel.appendChild(opt); });
-        if (playerIds.includes(val)) sel.value = val;
+      // ===================== ОТРИСОВКА ДОСКИ =====================
+      function buildCellsNetwork() {
+        let rows = [
+          [0,1,2,3,4,5,6],
+          [13,12,11,10,9,8,7],
+          [14,15,16,17,18,19,20],
+          [27,26,25,24,23,22,21],
+          [28,29,30,31,32,33,34],
+          [41,40,39,38,37,36,35],
+          [42,43,44,45,46,47,48],
+          [49,50]
+        ];
+        let custom = { 49: { x: 84.3, y: 84.1 }, 50: { x: 71.5, y: 84.1 } };
+        let sx = 7.5, sy = 8.5, gx = 12.8, gy = 10.8;
+        net.cells = [];
+        rows.forEach((r, ri) => {
+          r.forEach((ci, cix) => {
+            net.cells[ci] = custom[ci]
+              ? { index: ci, x: custom[ci].x, y: custom[ci].y }
+              : { index: ci, x: sx + cix * gx, y: sy + ri * gy };
+          });
+        });
       }
-    }
 
-    // ===================== ОТРИСОВКА ДОСКИ =====================
-    function buildCellsNetwork() {
-      let rows = [[0,1,2,3,4,5,6],[13,12,11,10,9,8,7],[14,15,16,17,18,19,20],[27,26,25,24,23,22,21],[28,29,30,31,32,33,34],[41,40,39,38,37,36,35],[42,43,44,45,46,47,48],[49,50]];
-      let custom = { 49: { x: 84.3, y: 84.1 }, 50: { x: 71.5, y: 84.1 } };
-      let sx = 7.5, sy = 8.5, gx = 12.8, gy = 10.8;
-      net.cells = [];
-      rows.forEach((r, ri) => r.forEach((ci, cix) => { net.cells[ci] = custom[ci] ? { index: ci, x: custom[ci].x, y: custom[ci].y } : { index: ci, x: sx + cix * gx, y: sy + ri * gy }; }));
-    }
+      function renderOrnamentsNetwork() {
+        let layer = document.getElementById('ornamentsLayerNetwork');
+        if (!layer) return;
+        layer.innerHTML = '';
+        let items = [
+          {x:"2.5%",y:"2%",text:"✦"},{x:"94%",y:"2%",text:"✦"},
+          {x:"3%",y:"92%",text:"✦"},{x:"93%",y:"92%",text:"✦"},
+          {x:"47%",y:"44%",text:"⚔"},{x:"51%",y:"44%",text:"🛡"},
+          {x:"10%",y:"10%",text:"◈"},{x:"85%",y:"10%",text:"◈"},
+          {x:"10%",y:"85%",text:"◈"},{x:"85%",y:"85%",text:"◈"},
+          {x:"25%",y:"5%",text:"⋆"},{x:"70%",y:"5%",text:"⋆"},
+          {x:"25%",y:"90%",text:"⋆"},{x:"70%",y:"90%",text:"⋆"},
+          {x:"35%",y:"50%",text:"☯"},{x:"60%",y:"50%",text:"☯"}
+        ];
+        items.forEach(it => {
+          let d = document.createElement('div');
+          d.className = 'ornament';
+          d.style.left = it.x;
+          d.style.top = it.y;
+          d.textContent = it.text;
+          layer.appendChild(d);
+        });
+      }
 
-    function renderOrnamentsNetwork() {
-      let layer = document.getElementById('ornamentsLayerNetwork'); layer.innerHTML = '';
-      let items = [{x:"2.5%",y:"2%",text:"✦"},{x:"94%",y:"2%",text:"✦"},{x:"3%",y:"92%",text:"✦"},{x:"93%",y:"92%",text:"✦"},{x:"47%",y:"44%",text:"⚔"},{x:"51%",y:"44%",text:"🛡"},{x:"10%",y:"10%",text:"◈"},{x:"85%",y:"10%",text:"◈"},{x:"10%",y:"85%",text:"◈"},{x:"85%",y:"85%",text:"◈"},{x:"25%",y:"5%",text:"⋆"},{x:"70%",y:"5%",text:"⋆"},{x:"25%",y:"90%",text:"⋆"},{x:"70%",y:"90%",text:"⋆"},{x:"35%",y:"50%",text:"☯"},{x:"60%",y:"50%",text:"☯"}];
-      items.forEach(it => { let d = document.createElement('div'); d.className = 'ornament'; d.style.left = it.x; d.style.top = it.y; d.textContent = it.text; layer.appendChild(d); });
-    }
+      function renderCellsNetwork() {
+        let layer = document.getElementById('cellsLayerNetwork');
+        if (!layer) return;
+        layer.innerHTML = '';
+        net.cells.forEach(c => {
+          if (!c) return;
+          let t = cellType(c.index);
+          let txt = cellText(c.index);
+          let d = document.createElement('div');
+          d.className = 'cell ' + t;
+          d.style.left = c.x + '%';
+          d.style.top = c.y + '%';
+          d.innerHTML = `<div class="cell-label">${txt.main}${txt.sub ? `<span class="sub">${txt.sub}</span>` : ''}</div>`;
+          layer.appendChild(d);
+        });
+      }
 
-    function renderCellsNetwork() {
-      let layer = document.getElementById('cellsLayerNetwork'); layer.innerHTML = '';
-      net.cells.forEach(c => { if (!c) return; let t = cellType(c.index), txt = cellText(c.index); let d = document.createElement('div'); d.className = 'cell ' + t; d.style.left = c.x + '%'; d.style.top = c.y + '%'; d.innerHTML = `<div class="cell-label">${txt.main}${txt.sub?`<span class="sub">${txt.sub}</span>`:''}</div>`; layer.appendChild(d); });
-    }
+      function renderTokensNetwork(playersData) {
+        let layer = document.getElementById('tokensLayerNetwork');
+        if (!layer) return;
+        layer.innerHTML = '';
+        let ids = Object.keys(playersData);
+        ids.forEach((id, idx) => {
+          let p = playersData[id];
+          let pos = p.finished ? FINAL_CELL : p.position;
+          let c = net.cells[pos];
+          if (!c) return;
+          let t = document.createElement('div');
+          t.className = 'token';
+          t.style.background = p.color || '#5DADE2';
+          let ox = (idx % 3) * 1.15 - 1.15;
+          let oy = Math.floor(idx / 3) * 1.1 - 0.3;
+          t.style.left = (c.x + 1.8 + ox) + '%';
+          t.style.top = (c.y + 1.8 + oy) + '%';
+          t.textContent = p.avatarIcon;
+          layer.appendChild(t);
+        });
+      }
 
-    function renderTokensNetwork(playersData) {
-      let layer = document.getElementById('tokensLayerNetwork'); layer.innerHTML = '';
-      let ids = Object.keys(playersData);
-      ids.forEach((id, idx) => {
-        let p = playersData[id];
-        let pos = p.finished ? FINAL_CELL : p.position;
-        let c = net.cells[pos];
-        if (!c) return;
-        let t = document.createElement('div'); t.className = 'token'; t.style.background = p.color || '#5DADE2';
-        let ox = (idx % 3) * 1.15 - 1.15, oy = Math.floor(idx / 3) * 1.1 - 0.3;
-        t.style.left = (c.x + 1.8 + ox) + '%'; t.style.top = (c.y + 1.8 + oy) + '%';
-        t.textContent = p.avatarIcon;
-        layer.appendChild(t);
+      // ===================== РЕЗУЛЬТАТЫ ИГРЫ =====================
+      async function showGameResults(data) {
+        removeAllListeners();
+        document.getElementById('questionModal').classList.remove('show');
+        stopTimer();
+        document.getElementById('fixedRollBtn').style.display = 'none';
+
+        const players = data.players || {};
+        const playerIds = Object.keys(players);
+
+        // Сохраняем в историю
+        let maxPoints = -1;
+        let winner = null;
+        playerIds.forEach(id => {
+          if (players[id].points > maxPoints) {
+            maxPoints = players[id].points;
+            winner = players[id].name;
+          }
+        });
+
+        if (db) {
+          await db.ref('history').push({
+            timestamp: Date.now(),
+            winner: winner || '—',
+            playerCount: playerIds.length
+          });
+        }
+
+        clearSession();
+        document.getElementById('gameLayoutNetwork').classList.add('hidden');
+        document.getElementById('mainMenu').classList.remove('hidden');
+        document.getElementById('menuMessage').textContent =
+          'Игра завершена! Победитель: ' + (winner || '—');
+        showHistory();
+      }
+
+      // ===================== ОБРАБОТЧИКИ МЕНЮ =====================
+      document.getElementById('menuHostBtn').addEventListener('click', function() {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('gameLayoutNetwork').classList.remove('hidden');
+        showHostSetup();
       });
-    }
 
-    // ===================== ПАРСИНГ EXCEL =====================
-    function networkParseExcel(file) {
-      let reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          if (typeof XLSX === 'undefined') { document.getElementById('hostUploadMessage').textContent = 'XLSX не загружен.'; return; }
-          let data = new Uint8Array(e.target.result); let wb = XLSX.read(data, { type: 'array' });
-          let qs = wb.Sheets['Вопросы'] || wb.Sheets['questions'] || wb.Sheets[wb.SheetNames[0]];
-          let ts = wb.Sheets['Задания'] || wb.Sheets['tasks'] || wb.Sheets[wb.SheetNames[1]];
-          if (!qs) { document.getElementById('hostUploadMessage').textContent = 'Не найден лист с вопросами.'; return; }
-          let qRows = XLSX.utils.sheet_to_json(qs, { header: 1 });
-          let parsed = qRows.filter(r => Array.isArray(r) && r.length >= 2).map(r => ({ question: String(r[0] ?? '').trim(), answer: String(r[1] ?? '').trim(), points: Number(r[2] ?? 0), imageUrl: r[3] ? String(r[3]).trim() : null })).filter(r => r.question && r.answer && r.points >= 0);
-          if (parsed.length > 0) { let first = parsed[0]; let ql = first.question.toLowerCase(), al = first.answer.toLowerCase(); if (['вопрос', 'question', 'вопросы', 'questions'].includes(ql) && ['ответ', 'answer', 'answers'].includes(al)) parsed = parsed.slice(1); }
-          let tasks = []; if (ts) { let tRows = XLSX.utils.sheet_to_json(ts, { header: 1 }); tasks = tRows.filter(r => Array.isArray(r) && r.length >= 3).map(r => ({ question: String(r[0] ?? '').trim(), answer: String(r[1] ?? '').trim(), points: Number(r[2] ?? 0) })).filter(r => r.question && r.answer); if (tasks.length > 0) { let ft = tasks[0]; let tl = ft.question.toLowerCase(); if (['задание', 'task', 'вопрос', 'question'].includes(tl)) tasks = tasks.slice(1); } }
-          if (!parsed.length) { document.getElementById('hostUploadMessage').textContent = 'Лист с вопросами пуст.'; return; }
-          window.normalQuestions = parsed; window.specialQuestions = tasks;
-          document.getElementById('hostUploadMessage').textContent = `Загружено вопросов: ${parsed.length}, заданий: ${tasks.length}.`;
-        } catch (err) { document.getElementById('hostUploadMessage').textContent = 'Ошибка чтения: ' + err.message; }
-      };
-      try { reader.readAsArrayBuffer(file); } catch (e) { try { reader.readAsBinaryString(file); } catch (e2) { document.getElementById('hostUploadMessage').textContent = 'Не поддерживается.'; } }
-    }
-
-    // ===================== ЗАВЕРШЕНИЕ ИГРЫ =====================
-    async function finishGame(data) {
-      // Сохраняем историю
-      const players = data.players || {};
-      const playerIds = Object.keys(players);
-      let winner = null;
-      let maxPoints = -1;
-      playerIds.forEach(id => {
-        if (players[id].points > maxPoints) { maxPoints = players[id].points; winner = players[id].name; }
+      document.getElementById('menuJoinBtn').addEventListener('click', function() {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('gameLayoutNetwork').classList.remove('hidden');
+        showJoinSetup();
       });
-      const historyEntry = {
-        timestamp: Date.now(),
-        winner: winner || '—',
-        playerCount: playerIds.length
-      };
-      // Сохраняем в Firebase
-      await db.ref('history').push(historyEntry);
-      // Отображаем результаты
-      // ... (здесь можно вызвать функцию отображения результатов, но она уже есть в коде)
-      // Переходим в главное меню и показываем историю
-      document.getElementById('gameLayoutNetwork').classList.add('hidden');
-      document.getElementById('mainMenu').classList.remove('hidden');
-      showHistory();
-      clearSession();
-    }
 
-    // ===================== ОБРАБОТЧИКИ МЕНЮ =====================
-    document.getElementById('menuHostBtn').addEventListener('click', function() {
-      document.getElementById('mainMenu').classList.add('hidden');
-      document.getElementById('gameLayoutNetwork').classList.remove('hidden');
-      showHostSetup();
-    });
+      document.getElementById('menuHistoryBtn').addEventListener('click', showHistory);
 
-    document.getElementById('menuJoinBtn').addEventListener('click', function() {
-      document.getElementById('mainMenu').classList.add('hidden');
-      document.getElementById('gameLayoutNetwork').classList.remove('hidden');
-      showJoinSetup();
-    });
+      // ===================== ОБРАБОТЧИКИ КНОПОК ОТВЕТА =====================
+      document.getElementById('showAnswerBtn').addEventListener('click', function() {
+        if (net.role === 'host') {
+          stopTimer();
+          document.getElementById('modalAnswer').style.display = 'block';
+          document.getElementById('showAnswerBtn').disabled = true;
+          document.getElementById('answerCorrectBtn').disabled = false;
+          document.getElementById('answerWrongBtn').disabled = false;
+          if (!timerExpired) {
+            document.getElementById('questionTimer').textContent = 'Таймер остановлен';
+            document.getElementById('questionTimer').className = 'timer-box';
+          }
+        }
+      });
 
-    document.getElementById('menuHistoryBtn').addEventListener('click', showHistory);
+      document.getElementById('answerCorrectBtn').addEventListener('click', async function() {
+        if (net.role === 'host') {
+          await networkAnswerQuestion(true);
+          document.getElementById('questionModal').classList.remove('show');
+          stopTimer();
+        }
+      });
 
-    // ===================== ВОССТАНОВЛЕНИЕ СЕССИИ =====================
-    // При загрузке страницы пытаемся восстановить сессию
-    if (tryRestoreSession()) {
-      // Проверяем, существует ли комната
-      db.ref('rooms/' + net.roomId).once('value').then(snap => {
-        const data = snap.val();
-        if (data && data.gameStarted) {
-          // Подключаемся к игре
+      document.getElementById('answerWrongBtn').addEventListener('click', async function() {
+        if (net.role === 'host') {
+          await networkAnswerQuestion(false);
+          document.getElementById('questionModal').classList.remove('show');
+          stopTimer();
+        }
+      });
+
+      // ===================== ВОССТАНОВЛЕНИЕ СЕССИИ =====================
+      function restoreSession() {
+        const session = tryRestoreSession();
+        if (!session || !db) return;
+
+        db.ref('rooms/' + session.roomId).once('value').then(snap => {
+          const data = snap.val();
+          if (!data) {
+            clearSession();
+            return;
+          }
+
+          net.roomId = session.roomId;
+          net.myId = session.playerId;
+          net.role = session.role;
           net.roomRef = db.ref('rooms/' + net.roomId);
-          net.role = net.role;
+
           document.getElementById('mainMenu').classList.add('hidden');
           document.getElementById('gameLayoutNetwork').classList.remove('hidden');
-          // Если игра уже началась, стартуем интерфейс
+
           if (data.gameStarted) {
             startGameNetwork(data);
+          } else if (net.role === 'host') {
+            showHostLobby(net.roomId);
           } else {
-            // Иначе возвращаем в лобби (ведущий или игрок)
-            if (net.role === 'host') {
-              showHostLobby(net.roomId);
-            } else {
-              // Игрок, пытаемся присоединиться
-              showJoinSetup();
-              document.getElementById('joinRoomId').value = net.roomId;
-              document.getElementById('joinConnectBtn').click();
-            }
+            showJoinSetup();
+            setTimeout(() => {
+              const joinInput = document.getElementById('joinRoomId');
+              if (joinInput) joinInput.value = net.roomId;
+              const joinBtn = document.getElementById('joinConnectBtn');
+              if (joinBtn) joinBtn.click();
+            }, 100);
           }
-        } else {
-          // Комната не существует или игра не началась – сбрасываем сессию
+        }).catch(err => {
+          console.error('Error restoring session:', err);
           clearSession();
-          document.getElementById('mainMenu').classList.remove('hidden');
-        }
-      }).catch(err => {
-        console.error('Error restoring session:', err);
-        clearSession();
-        document.getElementById('mainMenu').classList.remove('hidden');
-      });
-    }
-
-    // ===================== ОБРАБОТЧИКИ КНОПОК ОТВЕТА =====================
-    document.getElementById('showAnswerBtn').addEventListener('click', function() {
-      if (net.role === 'host') {
-        stopTimer();
-        document.getElementById('modalAnswer').style.display = 'block';
-        document.getElementById('showAnswerBtn').disabled = true;
-        document.getElementById('answerCorrectBtn').disabled = false;
-        document.getElementById('answerWrongBtn').disabled = false;
-        if (!timerExpired) {
-          document.getElementById('questionTimer').textContent = 'Таймер остановлен';
-          document.getElementById('questionTimer').className = 'timer-box';
-        }
+        });
       }
-    });
 
-    document.getElementById('answerCorrectBtn').addEventListener('click', async function() {
-      if (net.role === 'host') {
-        await networkAnswerQuestion(true);
-        document.getElementById('questionModal').classList.remove('show');
-        stopTimer();
+      // ===================== АВТО-ПОДКЛЮЧЕНИЕ ПО URL =====================
+      let urlParams = new URLSearchParams(window.location.search);
+      let roomParam = urlParams.get('room');
+      if (roomParam) {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('gameLayoutNetwork').classList.remove('hidden');
+        showJoinSetup();
+        setTimeout(() => {
+          const joinInput = document.getElementById('joinRoomId');
+          if (joinInput) joinInput.value = roomParam;
+          const joinBtn = document.getElementById('joinConnectBtn');
+          if (joinBtn) joinBtn.click();
+        }, 100);
+      } else {
+        restoreSession();
       }
-    });
 
-    document.getElementById('answerWrongBtn').addEventListener('click', async function() {
-      if (net.role === 'host') {
-        await networkAnswerQuestion(false);
-        document.getElementById('questionModal').classList.remove('show');
-        stopTimer();
-      }
-    });
-
-    // ===================== АВТО-ПОДКЛЮЧЕНИЕ ПО URL =====================
-    let urlParams = new URLSearchParams(window.location.search);
-    let roomParam = urlParams.get('room');
-    if (roomParam) {
-      // Если уже есть сессия, она переопределит, но мы всё равно пытаемся
-      document.getElementById('mainMenu').classList.add('hidden');
-      document.getElementById('gameLayoutNetwork').classList.remove('hidden');
-      showJoinSetup();
-      document.getElementById('joinRoomId').value = roomParam;
-      document.getElementById('joinConnectBtn').click();
-    }
-
-    console.log('Игра готова!');
+      console.log('Игра готова! Версия 2.0 (оптимизированная)');
+    })();
   </script>
 </body>
 </html>
