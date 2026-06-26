@@ -587,6 +587,7 @@
       // Уникальное задание (клетки 8, 19, 30, 41) — из второго листа
       if(SPECIAL_TASK_CELLS.includes(pos)){
         console.log('Special task cell!');
+        if (!player.visitedSpecialCells) player.visitedSpecialCells = [];
         player.visitedSpecialCells.push(pos);
         await net.roomRef.child('players/'+playerId+'/visitedSpecialCells').set(player.visitedSpecialCells);
         
@@ -680,60 +681,77 @@
       });
     }
 
-    async function networkAnswerQuestion(correct){
+    // ========== ИСПРАВЛЕННАЯ ФУНКЦИЯ ==========
+    async function networkAnswerQuestion(correct) {
       try {
-        let snap=await net.roomRef.child('pendingQuestion').once('value');
-        let q=snap.val();
-        if(!q) return;
-        let pid=q.playerId, ctx=q.context, pts=Number(q.points)||0;
-        let pRef=net.roomRef.child('players/'+pid);
-        let pSnap=await pRef.once('value');
-        let p=pSnap.val();
-        if(!p) return;
+        let snap = await net.roomRef.child('pendingQuestion').once('value');
+        let q = snap.val();
+        if (!q) return;
+        let pid = q.playerId, ctx = q.context, pts = Number(q.points) || 0;
+        let pRef = net.roomRef.child('players/' + pid);
+        let pSnap = await pRef.once('value');
+        let p = pSnap.val();
+        if (!p) return;
 
-        p.asked=(p.asked||0)+1;
+        // Получаем текущую позицию игрока
+        let posSnap = await net.roomRef.child('players/' + pid + '/position').once('value');
+        let currentPos = posSnap.val() || 0;
 
-        if(correct){
-          p.correct=(p.correct||0)+1;
-          p.totalCorrect=(p.totalCorrect||0)+1;
-          p.consecutiveCorrect=(p.consecutiveCorrect||0)+1;
-          p.points=(p.points||0)+pts;
-          if(ctx==='final50'){
-            let fw=(await net.roomRef.child('firstFinalWinnerId').once('value')).val();
-            if(!fw){ await net.roomRef.child('firstFinalWinnerId').set(pid); p.points+=FINAL_SUCCESS_BONUS; }
-            p.finished=true;
-            let fc=(await net.roomRef.child('finishCounter').once('value')).val()||0;
-            await net.roomRef.child('finishCounter').set(fc+1);
-            p.finishOrder=fc+1;
-          }
-          let log=(await net.roomRef.child('log').once('value')).val()||[];
-          log.push(p.name+' ответил правильно! +'+pts+' баллов.');
-          await net.roomRef.child('log').set(log);
-        }else{
-          p.totalIncorrect=(p.totalIncorrect||0)+1;
-          p.consecutiveCorrect=0;
-          if(ctx==='final50'){
-            // На финальной клетке игрок остаётся на месте, ход не переходит
-            let log=(await net.roomRef.child('log').once('value')).val()||[];
-            log.push(p.name+' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
+        p.asked = (p.asked || 0) + 1;
+
+        if (correct) {
+          p.correct = (p.correct || 0) + 1;
+          p.totalCorrect = (p.totalCorrect || 0) + 1;
+          p.consecutiveCorrect = (p.consecutiveCorrect || 0) + 1;
+          p.points = (p.points || 0) + pts;
+
+          if (ctx === 'final50') {
+            let fw = (await net.roomRef.child('firstFinalWinnerId').once('value')).val();
+            if (!fw) {
+              await net.roomRef.child('firstFinalWinnerId').set(pid);
+              p.points += FINAL_SUCCESS_BONUS;
+            }
+            p.finished = true;
+            let fc = (await net.roomRef.child('finishCounter').once('value')).val() || 0;
+            await net.roomRef.child('finishCounter').set(fc + 1);
+            p.finishOrder = fc + 1;
+            let log = (await net.roomRef.child('log').once('value')).val() || [];
+            log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
             await net.roomRef.child('log').set(log);
-            // Не переходим ход, даём новый финальный вопрос
-            let final=getRandomFinalQuestion();
-            if(final) await networkOpenQuestion(final,'Финальный вопрос (новая попытка)','final50',pid);
-            else await net.roomRef.child('gameFinished').set(true);
+          } else {
+            let log = (await net.roomRef.child('log').once('value')).val() || [];
+            log.push(p.name + ' ответил правильно! +' + pts + ' баллов.');
+            await net.roomRef.child('log').set(log);
+          }
+        } else {
+          p.totalIncorrect = (p.totalIncorrect || 0) + 1;
+          p.consecutiveCorrect = 0;
+
+          if (ctx === 'final50') {
+            // Ошибка на финале – остаётся на месте, даём новый финальный вопрос
+            let log = (await net.roomRef.child('log').once('value')).val() || [];
+            log.push(p.name + ' ошибся в финальном вопросе. Остаётся на месте, ждёт нового вопроса.');
+            await net.roomRef.child('log').set(log);
+            let final = getRandomFinalQuestion();
+            if (final) {
+              await networkOpenQuestion(final, 'Финальный вопрос (новая попытка)', 'final50', pid);
+            } else {
+              await net.roomRef.child('gameFinished').set(true);
+            }
             await pRef.update(p);
             await net.roomRef.child('pendingQuestion').remove();
             return;
-          }else if(ctx==='normal' || ctx==='special'){
-            // Обычный вопрос или задание – откат на 2 клетки
-            let back=Math.max(0,p.position-2);
-            p.position=back;
-            let log=(await net.roomRef.child('log').once('value')).val()||[];
-            log.push(p.name+' ответил неверно и отступает на 2 клетки.');
+          } else if (ctx === 'normal' || ctx === 'special') {
+            // Откат от актуальной позиции
+            let back = Math.max(0, currentPos - 2);
+            p.position = back;
+            let log = (await net.roomRef.child('log').once('value')).val() || [];
+            log.push(p.name + ' ответил неверно и отступает на 2 клетки (на ' + back + ').');
             await net.roomRef.child('log').set(log);
-          }else{
-            let log=(await net.roomRef.child('log').once('value')).val()||[];
-            log.push(p.name+' получил 0 баллов за задание.');
+          } else {
+            // Для других типов вопросов (например, если context не определён)
+            let log = (await net.roomRef.child('log').once('value')).val() || [];
+            log.push(p.name + ' получил 0 баллов.');
             await net.roomRef.child('log').set(log);
           }
         }
@@ -741,20 +759,24 @@
         await pRef.update(p);
         await net.roomRef.child('pendingQuestion').remove();
 
-        // После обычного вопроса или задания переходим к следующему ходу, если не финал
-        if(ctx!=='final50' || correct){
-          let all=(await net.roomRef.child('players').once('value')).val();
-          let finishedAll=Object.values(all||{}).every(p=>p.finished===true);
-          if(finishedAll) await net.roomRef.child('gameFinished').set(true);
-          else await networkNextTurn();
+        // Переход хода, если не финал или правильный финал
+        if (ctx !== 'final50' || correct) {
+          let all = (await net.roomRef.child('players').once('value')).val();
+          let finishedAll = Object.values(all || {}).every(p => p.finished === true);
+          if (finishedAll) {
+            await net.roomRef.child('gameFinished').set(true);
+          } else {
+            await networkNextTurn();
+          }
         }
-        // Для финала с ошибкой мы уже дали новый вопрос и не переходим ход
+        // Если финал с ошибкой – уже дали новый вопрос, ход не переходит
       } catch (error) {
         console.error('Error in networkAnswerQuestion:', error);
       }
     }
 
-    async function networkNextTurn(){
+    // ========== ИСПРАВЛЕННАЯ ФУНКЦИЯ ==========
+    async function networkNextTurn() {
       try {
         let snap = await net.roomRef.once('value');
         let d = snap.val();
@@ -767,60 +789,36 @@
           await net.roomRef.child('gameFinished').set(true);
           return;
         }
-        // Используем транзакцию для атомарного обновления индекса
-        const indexRef = net.roomRef.child('currentPlayerIndex');
-        const result = await indexRef.transaction(current => {
-          if (current === null) current = 0;
-          let next = (current + 1) % total;
-          let safety = 0;
-          while (safety < total + 2) {
-            const candidateId = Object.keys(players)[next];
-            if (!players[candidateId].finished) {
-              return next;
-            }
-            next = (next + 1) % total;
-            safety++;
+
+        let currentIdx = d.currentPlayerIndex || 0;
+        let nextIdx = (currentIdx + 1) % total;
+        let safety = 0;
+        while (safety < total + 2) {
+          let candidateId = Object.keys(players)[nextIdx];
+          if (!players[candidateId].finished) {
+            break;
           }
-          return current; // если не нашли, возвращаем текущий
-        });
-        // result.committed может быть false, если транзакция не удалась, но мы всё равно пробуем
-        if (result.committed === false) {
-          console.warn('Transaction for turn index was not committed, retrying...');
-          // Можно повторить, но для простоты выберем первого активного
-          const firstActive = activeIds[0];
-          const firstIndex = Object.keys(players).indexOf(firstActive);
+          nextIdx = (nextIdx + 1) % total;
+          safety++;
+        }
+
+        // Если нашли активного – обновляем
+        if (safety < total + 2) {
+          let nextId = Object.keys(players)[nextIdx];
           await net.roomRef.update({
-            currentPlayerIndex: firstIndex,
+            currentPlayerIndex: nextIdx,
+            currentPlayerId: nextId
+          });
+          console.log('Turn passed to:', nextId);
+        } else {
+          // fallback – первый активный
+          let firstActive = activeIds[0];
+          let firstIdx = Object.keys(players).indexOf(firstActive);
+          await net.roomRef.update({
+            currentPlayerIndex: firstIdx,
             currentPlayerId: firstActive
           });
           console.log('Turn passed to (fallback):', firstActive);
-          return;
-        }
-        const newIndex = result.snapshot.val();
-        if (newIndex === null) {
-          // если не получилось, берём первого активного
-          const firstActive = activeIds[0];
-          const firstIndex = Object.keys(players).indexOf(firstActive);
-          await net.roomRef.update({
-            currentPlayerIndex: firstIndex,
-            currentPlayerId: firstActive
-          });
-          console.log('Turn passed to (fallback 2):', firstActive);
-          return;
-        }
-        const newId = Object.keys(players)[newIndex];
-        if (newId && !players[newId].finished) {
-          await net.roomRef.child('currentPlayerId').set(newId);
-          console.log('Turn passed to:', newId);
-        } else {
-          // Если по какой-то причине новый ID невалиден, берём первого активного
-          const firstActive = activeIds[0];
-          const firstIndex = Object.keys(players).indexOf(firstActive);
-          await net.roomRef.update({
-            currentPlayerIndex: firstIndex,
-            currentPlayerId: firstActive
-          });
-          console.log('Turn passed to (fallback 3):', firstActive);
         }
       } catch (error) {
         console.error('Error in networkNextTurn:', error);
