@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
+    /* Стили без изменений (можно оставить прежние) */
     * { box-sizing: border-box; }
     :root {
       --bg1: #140e09; --bg2: #2b1c12; --bg3: #1a120b;
@@ -449,7 +450,10 @@
         if (dice !== null && typeof dice === 'number') {
           // Запускаем анимацию кубика на всех клиентах
           let el = document.getElementById('diceResultNetwork');
-          // Анимация убрана – просто показываем число
+          for (let i = 0; i < 10; i++) {
+            el.textContent = String(Math.floor(Math.random() * 6) + 1);
+            await new Promise(r => setTimeout(r, 80));
+          }
           el.textContent = String(dice);
         }
       });
@@ -591,22 +595,12 @@
         console.log('Special task cell!');
         player.visitedSpecialCells.push(pos);
         await net.roomRef.child('players/'+playerId+'/visitedSpecialCells').set(player.visitedSpecialCells);
-        let task=getRandomSpecialQuestion();
-        if(task) {
-          console.log('Asking special question:', task.question);
-          await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
-          return true;
-        } else {
-          // Если заданий нет, используем обычный вопрос
-          console.log('No special questions left, fallback to normal');
-          let q=getRandomNormalQuestion();
-          if(q) {
-            await networkOpenQuestion(q,'Уникальное задание (заменено на обычный вопрос)','normal',playerId);
-            return true;
-          } else {
-            return false;
-          }
-        }
+        
+        // Всегда возвращаем вопрос (заглушку, если нет заданий)
+        let task = getRandomSpecialQuestion();
+        console.log('Asking special question:', task.question);
+        await networkOpenQuestion(task,'Уникальное задание на клетке '+pos,'special',playerId);
+        return true;
       }
 
       // Финальная клетка
@@ -643,13 +637,38 @@
       if(!net.normalPool || net.normalPool.length===0) return null;
       return net.normalPool.pop();
     }
+    
+    // Возвращает вопрос из листа Задания. Если пул пуст, возвращает заглушку.
     function getRandomSpecialQuestion(){
-      if(!net.specialQs || net.specialQs.length===0) return null;
+      if(!net.specialQs || net.specialQs.length===0) {
+        return {
+          question: "Уникальное задание (нет загруженных заданий)",
+          answer: "Ответ не загружен",
+          points: 1
+        };
+      }
       return net.specialQs.pop();
     }
+    
+    // Возвращает финальный вопрос. Сначала ищет вопрос с баллами 3. Если нет, берёт любой и принудительно ставит 3.
     function getRandomFinalQuestion(){
-      if(!net.finalPool || net.finalPool.length===0) return null;
-      return net.finalPool.pop();
+      // Сначала ищем в финальном пуле
+      if(net.finalPool && net.finalPool.length>0) {
+        return net.finalPool.pop();
+      }
+      // Если финальный пул пуст, берём любой из нормального пула и ставим 3 балла
+      if(net.normalPool && net.normalPool.length>0) {
+        let q = net.normalPool.pop();
+        q.points = FINAL_QUESTION_POINTS;
+        return q;
+      }
+      // Полная заглушка
+      return {
+        question: "Финальный вопрос для 50-й клетки",
+        answer: "Ответ не загружен",
+        points: FINAL_QUESTION_POINTS,
+        fallback: true
+      };
     }
 
     async function networkOpenQuestion(q,title,context,playerId){
