@@ -558,14 +558,17 @@
     async function networkProcessCell(playerId, player, pos){
       console.log(`Processing cell ${pos} for player ${playerId}`);
       
-      // Счастливые клетки Фибоначчи – добавляем лог и продолжаем обработку как обычной клетки
+      // Счастливые клетки Фибоначчи – добавляем лог и сразу открываем вопрос
       if(FIBONACCI_CELLS.includes(pos)&&!player.stoppedOnFibonacci.includes(pos)){
         player.stoppedOnFibonacci.push(pos);
         await net.roomRef.child('players/'+playerId+'/stoppedOnFibonacci').set(player.stoppedOnFibonacci);
         let log=(await net.roomRef.child('log').once('value')).val()||[];
         log.push(player.name+' остановился на счастливой клетке '+pos+'!');
         await net.roomRef.child('log').set(log);
-        // Не возвращаем false, продолжаем обработку как обычной клетки
+        // Открываем обычный вопрос
+        let q = getRandomNormalQuestion();
+        await networkOpenQuestion(q, 'Случайный вопрос', 'normal', playerId);
+        return true;
       }
 
       // Ловушка (клетки 16, 27, 34, 47)
